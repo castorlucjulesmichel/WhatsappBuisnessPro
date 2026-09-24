@@ -148,3 +148,7 @@ html[data-theme="dark"] .waSubPage,html[data-theme="dark"] .waSettingsPage,html[
 /* Navigation touch safety */
 .bottomNav{z-index:1000!important;pointer-events:auto!important;touch-action:manipulation}
 .bottomNav button{pointer-events:auto!important;touch-action:manipulation;position:relative;z-index:1001}
+
+.waContactInviteRow{cursor:default}
+.waInviteBtn{background:transparent!important;color:#119b61!important;font-size:16px;font-weight:800;padding:10px 4px;border-radius:0}
+.waInviteBtn:hover{background:transparent!important;opacity:.78}
