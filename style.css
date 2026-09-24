@@ -170,3 +170,5 @@ html[data-theme="dark"] .waSubPage,html[data-theme="dark"] .waSettingsPage,html[
 .waImportContactsBlock .waBulkContactsBar button{font-size:14px}
 html[data-theme="dark"] .waImportContactsBlock{background:var(--card);border-color:#2c3733}
 @media(max-width:560px){.waImportContactsBlock .waBulkContactsBar{margin-left:0}}
+
+#selectAllContactsHint{display:block;color:#6d7370;font-size:12px;line-height:1.35;flex-basis:100%}
