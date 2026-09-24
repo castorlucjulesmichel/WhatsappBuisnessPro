@@ -356,40 +356,87 @@ async function inviteContact(name,phone){
     if(e?.name!=="AbortError")toast(window.WBP_T?.("Invitation link copied.")||"Invitation link copied.");
   }
 }
+async function waitForOwnUserDoc(maxMs=5000){
+  if(!user)return false;
+  const started=Date.now();
+  while(Date.now()-started<maxMs){
+    try{
+      const s=await getDoc(doc(db,"users",user.uid));
+      if(s.exists()&&s.data()?.blocked!==true)return true;
+    }catch(e){
+      if(e?.code!=="permission-denied")console.warn("own user readiness",e);
+    }
+    await new Promise(r=>setTimeout(r,250));
+  }
+  return false;
+}
+async function waitForChatOpener(maxMs=5000){
+  const started=Date.now();
+  while(Date.now()-started<maxMs){
+    if(typeof window.WBP_OPEN_CHAT==="function")return window.WBP_OPEN_CHAT;
+    await new Promise(r=>setTimeout(r,80));
+  }
+  return null;
+}
+async function ensureDirectChat(uid,name){
+  if(!user||!uid)throw new Error("chat/missing-user");
+  if(uid===user.uid)throw new Error("chat/self");
+  const ready=await waitForOwnUserDoc();
+  if(!ready){
+    const e=new Error("Kont lan poko pare. Eseye ankò.");
+    e.code="chat/account-not-ready";
+    throw e;
+  }
+  const me=await getDoc(doc(db,"publicProfiles",user.uid));
+  const ids=[user.uid,uid].sort();
+  const id=ids.join("__");
+  const myName=me.data()?.displayName||me.data()?.username||user.displayName||"User";
+  const contactName=name||"Contact";
+  const names={[user.uid]:myName,[uid]:contactName};
+  const chatRef=doc(db,"chats",id);
+
+  try{
+    await setDoc(chatRef,{
+      type:"direct",
+      participants:ids,
+      participantNames:names,
+      lastMessage:"",
+      updatedAt:serverTimestamp()
+    });
+  }catch(writeErr){
+    if(writeErr?.code!=="permission-denied"&&writeErr?.code!=="already-exists")throw writeErr;
+    let existing=null;
+    try{existing=await getDoc(chatRef)}catch(readErr){throw writeErr}
+    if(!existing?.exists())throw writeErr;
+    const p=existing.data()?.participants||[];
+    if(!p.includes(user.uid)||!p.includes(uid)){
+      const e=new Error("Chat la pa gen bon patisipan yo.");
+      e.code="chat/invalid-participants";
+      throw e;
+    }
+  }
+  return {id,contactName};
+}
+
 async function startChat(uid,name){
   if(!user||!uid)return;
   try{
-    const me=await getDoc(doc(db,"publicProfiles",user.uid));
-    const ids=[user.uid,uid].sort(),id=ids.join("__");
-    const myName=me.data()?.displayName||me.data()?.username||"User";
-    const contactName=name||"Contact";
-    const names={[user.uid]:myName,[uid]:contactName};
-    const chatRef=doc(db,"chats",id);
-    // Do not read a non-existent chat first: Firestore correctly denies that read.
-    // Try an idempotent create/merge. If it is an existing chat and metadata differs,
-    // the restricted update may be denied; in that case verify the existing chat is readable.
-    try{
-      await setDoc(chatRef,{type:"direct",participants:ids,participantNames:names},{merge:true});
-    }catch(writeErr){
-      if(writeErr?.code!=="permission-denied")throw writeErr;
-      const existingChat=await getDoc(chatRef);
-      if(!existingChat.exists())throw writeErr;
-    }
+    const {id,contactName}=await ensureDirectChat(uid,name);
 
     if(typeof window.WBP_ROUTE==="function")window.WBP_ROUTE("chat");
     else showPage("chat");
 
-    requestAnimationFrame(()=>{
-      if(typeof window.WBP_OPEN_CHAT==="function")window.WBP_OPEN_CHAT(id,contactName);
-      else{
-        const row=document.querySelector('[data-chat="'+id+'"]');
-        if(row)row.click();
-        else toast(window.WBP_T?.("Unable to open chat.")||"Unable to open chat.");
-      }
-    });
+    const opener=await waitForChatOpener();
+    if(!opener){
+      const e=new Error("Chat module not ready");
+      e.code="chat/module-not-ready";
+      throw e;
+    }
+    await opener(id,contactName);
   }catch(e){
     console.error("start contact chat",e);
-    toast(window.WBP_T?.("Unable to open chat.")||"Unable to open chat.");
+    const code=e?.code||"chat/open-failed";
+    toast((window.WBP_T?.("Unable to open chat.")||"Unable to open chat.")+" ("+code+")");
   }
 }
 function watchContacts(){
