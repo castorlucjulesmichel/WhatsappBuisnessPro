@@ -533,6 +533,22 @@ Object.assign(X,{
 "contacts_import_failed":["Não foi possível importar os contatos.","Kontakte konnten nicht importiert werden.","Impossibile importare i contatti.","تعذر استيراد جهات الاتصال.","无法导入联系人。","संपर्क आयात नहीं किए जा सके।","কন্ট্যাক্ট আমদানি করা যায়নি।","Не удалось импортировать контакты.","Kişiler içe aktarılamadı.","連絡先をインポートできませんでした。","연락처를 가져올 수 없습니다."]
 });
 
+
+Object.assign(D,{
+"select_all":["Chwazi tout","Tout sélectionner","Select all","Seleccionar todo"],
+"deselect_all":["Retire tout seleksyon","Tout désélectionner","Deselect all","Deseleccionar todo"],
+"invite_selected":["Envite sa yo chwazi","Inviter sélectionnés","Invite selected","Invitar seleccionados"],
+"selected":["chwazi","sélectionné","selected","seleccionado"],
+"share_invites_failed":["Pataj envitasyon yo echwe.","Impossible de partager les invitations.","Unable to share invitations.","No se pudieron compartir las invitaciones."]
+});
+Object.assign(X,{
+"select_all":["Selecionar tudo","Alle auswählen","Seleziona tutto","تحديد الكل","全选","सभी चुनें","সব নির্বাচন","Выбрать всё","Tümünü seç","すべて選択","전체 선택"],
+"deselect_all":["Desmarcar tudo","Auswahl aufheben","Deseleziona tutto","إلغاء تحديد الكل","取消全选","सभी का चयन हटाएँ","সব নির্বাচন বাতিল","Снять выделение","Tüm seçimi kaldır","すべて選択解除","전체 선택 해제"],
+"invite_selected":["Convidar selecionados","Ausgewählte einladen","Invita selezionati","دعوة المحددين","邀请已选","चयनित को आमंत्रित करें","নির্বাচিতদের আমন্ত্রণ","Пригласить выбранных","Seçilenleri davet et","選択した連絡先を招待","선택한 연락처 초대"],
+"selected":["selecionado","ausgewählt","selezionato","محدد","已选择","चयनित","নির্বাচিত","выбрано","seçili","選択済み","선택됨"],
+"share_invites_failed":["Não foi possível compartilhar os convites.","Einladungen konnten nicht geteilt werden.","Impossibile condividere gli inviti.","تعذر مشاركة الدعوات.","无法分享邀请。","आमंत्रण साझा नहीं किए जा सके।","আমন্ত্রণ শেয়ার করা যায়নি।","Не удалось поделиться приглашениями.","Davetler paylaşılamadı.","招待を共有できませんでした。","초대를 공유할 수 없습니다."]
+});
+
 const reverse=new Map();
 for(const [key,vals] of Object.entries(D)){
   vals.forEach(v=>{if(v)reverse.set(v.trim(),key)});
@@ -544,6 +560,11 @@ for(const [src,key] of Object.entries(extraAliases))reverse.set(src,key);
 reverse.set("Inviter","invite");
 reverse.set("Join me on Whatsapp Business Pro","join_invite");
 reverse.set("Invitation link copied.","invite_link_copied");
+reverse.set("Select all","select_all");
+reverse.set("Deselect all","deselect_all");
+reverse.set("Inviter sélectionnés","invite_selected");
+reverse.set("selected","selected");
+reverse.set("Unable to share invitations.","share_invites_failed");
 reverse.set("Pa gen discussion pou filtè sa a.","no_chats");
 reverse.set("No chats for this filter.","no_chats");
 
