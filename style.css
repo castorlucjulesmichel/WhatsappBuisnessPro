@@ -203,3 +203,6 @@ html[data-theme="dark"] .nativeContactFooter{background:var(--card);color:var(--
 html[data-theme="dark"] .nativeContactSearch input{background:#111a17;color:var(--text)}
 html[data-theme="dark"] .nativeContactRow{border-color:var(--line)}
 
+
+.waContactSelfRow{cursor:default}
+.waSelfBadge{justify-self:end;color:#119b61;font-weight:800;font-size:15px;padding:8px 4px}
