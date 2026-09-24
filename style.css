@@ -110,3 +110,6 @@ html[data-theme="dark"] .card,html[data-theme="dark"] .metrics>div,html[data-the
 html[data-theme="dark"] .waSearch,html[data-theme="dark"] .waNotice{background:#202a27}
 html[data-theme="dark"] .waFilter{color:var(--text);border-color:#44504c}
 @media(max-width:560px){.whatsappChatsPage,.whatsappCallsPage{padding:12px 14px 92px}.waChatsHead h1{font-size:29px}.waNotice{grid-template-columns:36px 1fr 26px}.whatsappChatsPage .chatItem{grid-template-columns:50px 1fr auto}.waChatAvatar{width:50px;height:50px}.bottomNav button span:last-child{font-size:10px}}
+
+.waMainTab header{display:none}
+.waMainTab .whatsappChatsPage,.waMainTab .whatsappCallsPage{min-height:100vh;padding-top:max(18px,env(safe-area-inset-top))}
