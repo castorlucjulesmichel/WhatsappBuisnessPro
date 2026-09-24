@@ -57,6 +57,28 @@ async function phoneDocId(phone){
   }catch{}
   return "phone_"+p.replace(/[^0-9]/g,"");
 }
+async function saveImportedContacts(items){
+  if(!user||!Array.isArray(items)||!items.length)return 0;
+  let imported=0;
+  for(const item of items){
+    const name=String(item?.name||"Contact").trim()||"Contact";
+    const phone=normalizePhone(item?.phone||"");
+    if(!phone)continue;
+    const existing=contacts.find(x=>normalizePhone(x.phone)===phone);
+    const id=existing?.id||await phoneDocId(phone);
+    await setDoc(doc(db,"users",user.uid,"contacts",id),{
+      contactUid:existing?.contactUid||"",
+      username:existing?.username||"",
+      displayName:name,
+      phone,
+      importedFromPhone:true,
+      updatedAt:serverTimestamp(),
+      createdAt:existing?.createdAt||serverTimestamp()
+    },{merge:true});
+    imported++;
+  }
+  return imported;
+}
 async function importPhoneContacts(){
   if(!user)return;
   if(!("contacts" in navigator)||typeof navigator.contacts?.select!=="function"){
@@ -66,31 +88,34 @@ async function importPhoneContacts(){
   try{
     const selected=await navigator.contacts.select(["name","tel"],{multiple:true});
     if(!selected?.length)return;
-    let imported=0;
+    const flat=[];
     for(const item of selected){
       const name=String(item.name?.[0]||"Contact").trim()||"Contact";
-      const numbers=(item.tel||[]).map(normalizePhone).filter(Boolean);
-      for(const phone of numbers){
-        const existing=contacts.find(x=>normalizePhone(x.phone)===phone);
-        const id=existing?.id||await phoneDocId(phone);
-        await setDoc(doc(db,"users",user.uid,"contacts",id),{
-          contactUid:existing?.contactUid||"",
-          username:existing?.username||"",
-          displayName:name,
-          phone,
-          importedFromPhone:true,
-          updatedAt:serverTimestamp(),
-          createdAt:existing?.createdAt||serverTimestamp()
-        },{merge:true});
-        imported++;
-      }
+      for(const phone of (item.tel||[]))flat.push({name,phone});
     }
+    const imported=await saveImportedContacts(flat);
     toast((window.WBP_T?.("Contacts imported")||"Contacts imported")+": "+imported);
   }catch(e){
     if(e?.name==="AbortError")return;
     console.warn("contact picker",e);
     toast(window.WBP_T?.("Unable to import phone contacts.")||"Unable to import phone contacts.");
   }
+}
+window.WBP_ANDROID_CONTACTS_IMPORTED=async raw=>{
+  try{
+    const list=Array.isArray(raw)?raw:JSON.parse(String(raw||"[]"));
+    const imported=await saveImportedContacts(list);
+    toast((window.WBP_T?.("Contacts imported")||"Contacts imported")+": "+imported);
+  }catch(e){
+    console.warn("native contact import",e);
+    toast(window.WBP_T?.("Unable to import phone contacts.")||"Unable to import phone contacts.");
+  }
+};
+window.WBP_ANDROID_CONTACTS_DENIED=()=>{
+  toast(window.WBP_T?.("Contacts permission was denied.")||"Contacts permission was denied.");
+};
+function nativeContactsAvailable(){
+  try{return !!window.AndroidContacts?.isAvailable?.()}catch{return false}
 }
 function render(){
   const q=($("#contactPickerSearch")?.value||"").trim().toLowerCase();
@@ -117,7 +142,12 @@ function render(){
   $$("[data-invite-name]").forEach(b=>b.onclick=()=>inviteContact(b.dataset.inviteName,b.dataset.invitePhone));
 }
 $("#selectAllContactsBtn")?.addEventListener("click",async()=>{
-  toast(window.WBP_T?.("Android will ask you to confirm the contacts to share.")||"Android will ask you to confirm the contacts to share.");
+  if(nativeContactsAvailable()){
+    toast(window.WBP_T?.("Android will ask for Contacts permission, then import all contacts.")||"Android will ask for Contacts permission, then import all contacts.");
+    window.AndroidContacts.importAllContacts();
+    return;
+  }
+  toast(window.WBP_T?.("On the web, Android requires you to choose the contacts to share.")||"On the web, Android requires you to choose the contacts to share.");
   await importPhoneContacts();
 });
 async function inviteContact(name,phone){
@@ -153,6 +183,15 @@ function watchContacts(){
 $("#newChatBtn")?.addEventListener("click",async e=>{e.preventDefault();showPage("contactPicker");if(!contacts.length)await importPhoneContacts();});
 $("#pickerNewContactBtn")?.addEventListener("click",()=>showPage("newContact"));
 $("#importPhoneContactsBtn")?.addEventListener("click",importPhoneContacts);
+function updateAndroidImportHint(){
+  const hint=$("#selectAllContactsHint");
+  if(!hint)return;
+  hint.textContent=nativeContactsAvailable()
+    ? (window.WBP_T?.("Select all will import all contacts after Android permission.")||"Select all will import all contacts after Android permission.")
+    : (window.WBP_T?.("On the web, Android requires you to choose the contacts to share.")||"On the web, Android requires you to choose the contacts to share.");
+}
+setTimeout(updateAndroidImportHint,250);
+window.addEventListener("wbp-language-changed",updateAndroidImportHint);
 $("#pickerNewGroupBtn")?.addEventListener("click",()=>{showPage("chat");setTimeout(()=>$("#newGroupBox")?.classList.remove("hidden"),50)});
 $("#contactPickerSearchBtn")?.addEventListener("click",()=>$("#contactPickerSearch")?.classList.toggle("hidden"));
 $("#contactPickerSearch")?.addEventListener("input",render);
