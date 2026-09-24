@@ -328,6 +328,7 @@ function messageContent(m){
 function closeChatView(){
   $("#chatPage .conversation")?.classList.remove("open");
   $("#chatPage")?.classList.remove("chat-open");
+  document.body.classList.remove("chatConversationOpen");
   $("#messageForm")?.classList.add("hidden");
   $("#chatMoreMenu")?.classList.add("hidden");
   S.chatId=null;S.chatOtherUid=null;S.chatOtherName="";
@@ -397,6 +398,7 @@ async function openChat(id,name){
   S.chatOtherUid=peer.uid;
   $("#chatPage .conversation")?.classList.add("open");
   $("#chatPage")?.classList.add("chat-open");
+  document.body.classList.add("chatConversationOpen");
   const initial=esc((S.chatOtherName.trim()[0]||"?").toUpperCase());
   $("#chatTitle").innerHTML=
     '<button id="closeChatViewBtn" class="waChatBackBtn" type="button">←</button>'+
@@ -417,6 +419,20 @@ async function openChat(id,name){
       '<button id="chatMenuBlockBtn" type="button">Bloquer</button>'+
     '</div>';
   $("#messageForm").classList.remove("hidden");
+  if(S.chatOtherUid){
+    getDoc(doc(db,"publicProfiles",S.chatOtherUid)).then(pSnap=>{
+      if(!pSnap.exists())return;
+      const p=pSnap.data()||{};
+      const display=p.displayName||S.chatOtherName;
+      S.chatOtherName=display;
+      const identity=$("#chatContactInfoBtn .waChatHeaderIdentity b");
+      if(identity)identity.textContent=display;
+      if(p.photoUrl){
+        const avatar=$("#chatContactInfoBtn .waChatHeaderAvatar");
+        if(avatar)avatar.innerHTML='<img src="'+esc(p.photoUrl)+'" alt="">';
+      }
+    }).catch(()=>{});
+  }
   $("#closeChatViewBtn").onclick=closeChatView;
   $("#chatContactInfoBtn").onclick=()=>showChatContactInfo(S.chatOtherUid,S.chatOtherName);
   $("#showContactInfoMenu").onclick=()=>{ $("#chatMoreMenu").classList.add("hidden"); showChatContactInfo(S.chatOtherUid,S.chatOtherName); };
