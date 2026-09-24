@@ -2,14 +2,14 @@
 <html lang="ht">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#075e54"><title>Whatssap Business Pro</title>
-<link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="style.css">
+<meta name="theme-color" content="#075e54"><title>Whatsapp Business Pro</title>
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" type="image/webp" href="assets/logo.webp"><link rel="apple-touch-icon" href="assets/logo.webp"><link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div id="toast"></div>
-<section id="setupScreen" class="screen hidden"><div class="card authCard"><div class="brandIcon">W</div><h1>Whatssap Business Pro</h1><p>Firebase poko konfigire pou nouvo app endepandan sa a.</p><p class="muted">Kreye yon nouvo Firebase project epi mete config li nan <b>firebase-config.js</b>.</p></div></section>
+<section id="setupScreen" class="screen hidden"><div class="card authCard"><img class="brandLogo" src="assets/logo.webp" alt="Whatsapp Business Pro"><h1>Whatsapp Business Pro</h1><p>Firebase poko konfigire pou nouvo app endepandan sa a.</p><p class="muted">Kreye yon nouvo Firebase project epi mete config li nan <b>firebase-config.js</b>.</p></div></section>
 <section id="authScreen" class="screen">
- <div class="card authCard"><div class="brandIcon">W</div><h1>Whatssap Business Pro</h1><p>Business • Chat • Marketplace • Clips • Finance</p>
+ <div class="card authCard"><img class="brandLogo" src="assets/logo.webp" alt="Whatsapp Business Pro"><h1>Whatsapp Business Pro</h1><p>Business • Chat • Marketplace • Clips • Finance</p>
   <input id="phone" inputmode="tel" placeholder="+509XXXXXXXX"><div id="recaptcha-container"></div>
   <button id="sendOtp">Voye kòd OTP</button>
   <div id="otpBox" class="hidden"><input id="otp" inputmode="numeric" maxlength="6" placeholder="Kòd SMS"><button id="verifyOtp">Verifye</button></div>
@@ -17,7 +17,7 @@
 </section>
 
 <div id="appShell" class="hidden">
-<header><div><b>Whatssap Business Pro</b><small id="headerUser">Konekte</small></div>
+<header><div class="headerBrand"><img class="headerLogo" src="assets/logo.webp" alt=""><div><b>Whatsapp Business Pro</b><small id="headerUser">Konekte</small></div></div>
 <div class="headerActions"><button id="notificationBtn" class="ghost">🔔 <span id="notificationBadge" class="badge hidden">0</span></button><select id="lang"><option value="ht">HT</option><option value="fr">FR</option><option value="en">EN</option><option value="es">ES</option></select><button id="logout" class="ghost">Soti</button></div></header>
 
 <main>
@@ -297,7 +297,7 @@
    <span class="settingsIcon">❔</span><span class="settingsText"><b>Aide et commentaires</b><small>Assistance, politique de confidentialité et commentaires</small></span><span class="chevron">›</span>
   </button>
   <button class="settingsItem" id="inviteContactBtn" type="button">
-   <span class="settingsIcon">👥</span><span class="settingsText"><b>Inviter un contact</b><small>Partager le lien de Whatssap Business Pro</small></span><span class="chevron">›</span>
+   <span class="settingsIcon">👥</span><span class="settingsText"><b>Inviter un contact</b><small>Partager le lien de Whatsapp Business Pro</small></span><span class="chevron">›</span>
   </button>
  </div>
 
@@ -350,7 +350,7 @@
 
   <div class="settingPanel hidden" data-setting-panel="customerActivity">
    <label class="toggleRow"><span><b>Partager l’activité clientèle</b><small>Utiliser les interactions Marketplace/Business pour améliorer vos propres campagnes</small></span><input id="customerActivitySetting" type="checkbox"></label>
-   <p class="muted">Ce réglage ne donne pas accès aux conversations privées. Il concerne uniquement les interactions commerciales dans Whatssap Business Pro.</p>
+   <p class="muted">Ce réglage ne donne pas accès aux conversations privées. Il concerne uniquement les interactions commerciales dans Whatsapp Business Pro.</p>
   </div>
 
   <div class="settingPanel hidden" data-setting-panel="accessibility">
