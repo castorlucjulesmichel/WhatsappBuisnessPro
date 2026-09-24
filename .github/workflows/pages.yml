@@ -1,4 +1,4 @@
-name: Deploy Whatssap Business Pro to GitHub Pages
+name: Deploy Whatsapp Business Pro to GitHub Pages
 
 on:
   push:
@@ -10,9 +10,6 @@ permissions:
   pages: write
   id-token: write
 
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
 
 jobs:
   deploy:
