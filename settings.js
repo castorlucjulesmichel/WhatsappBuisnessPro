@@ -150,7 +150,7 @@ $("#settingsSearch")?.addEventListener("input",e=>{
 });
 $$("[data-setting-target]").forEach(b=>b.addEventListener("click",()=>openPanel(b.dataset.settingTarget)));
 $("#settingsBackBtn")?.addEventListener("click",closePanel);
-$("[data-info-msg]").forEach(b=>b.addEventListener("click",()=>toast(b.dataset.infoMsg)));
+$$("[data-info-msg]").forEach(b=>b.addEventListener("click",()=>toast(b.dataset.infoMsg)));
 $("#settingsProfileCard")?.addEventListener("click",()=>document.querySelector('[data-go="profile"]')?.click());
 
 $$('[data-go="settings"][data-settings-section]').forEach(b=>b.addEventListener("click",()=>{
