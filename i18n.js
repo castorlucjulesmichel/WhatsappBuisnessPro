@@ -587,6 +587,22 @@ Object.assign(X,{
 "native_picker_hint":["Abra a lista, use Selecionar tudo no topo e depois Importar.","Öffnen Sie die Kontaktliste, wählen Sie oben Alle auswählen und dann Importieren.","Apri la lista, usa Seleziona tutto in alto e poi Importa.","افتح قائمة جهات الاتصال، اختر تحديد الكل في الأعلى ثم استيراد.","打开联系人列表，点击顶部的全选，然后导入。","संपर्क सूची खोलें, ऊपर सभी चुनें दबाएँ, फिर आयात करें।","কন্ট্যাক্ট তালিকা খুলুন, উপরে সব নির্বাচন করুন, তারপর আমদানি করুন।","Откройте список контактов, нажмите Выбрать всё сверху, затем Импортировать.","Kişi listesini açın, üstte Tümünü seç deyin, sonra İçe aktarın.","連絡先一覧を開き、上部のすべて選択を押してからインポートします。","연락처 목록을 열고 상단의 전체 선택을 누른 다음 가져오기를 누르세요."]
 });
 
+
+Object.assign(D,{
+"import_all_vcf":["Enpòte tout kontak (.vcf)","Importer tous les contacts (.vcf)","Import all contacts (.vcf)","Importar todos los contactos (.vcf)"],
+"vcf_hint":["Ekspòte kontak telefòn ou nan yon sèl fichye VCF, epi chwazi fichye sa isit la.","Exportez vos contacts du téléphone en un seul fichier VCF, puis choisissez ce fichier ici.","Export your phone contacts to one VCF file, then choose that file here.","Exporta los contactos del teléfono a un solo archivo VCF y selecciónalo aquí."],
+"vcf_too_large":["Fichye VCF la twò gwo.","Le fichier VCF est trop volumineux.","VCF file is too large.","El archivo VCF es demasiado grande."],
+"vcf_no_contacts":["Nou pa jwenn okenn kontak ak nimewo telefòn nan fichye VCF sa a.","Aucun contact avec numéro de téléphone n’a été trouvé dans ce fichier VCF.","No phone contacts were found in this VCF file.","No se encontraron contactos con teléfono en este archivo VCF."],
+"vcf_import_failed":["Nou pa kapab enpòte fichye VCF la.","Impossible d’importer le fichier VCF.","Unable to import the VCF file.","No se pudo importar el archivo VCF."]
+});
+Object.assign(X,{
+"import_all_vcf":["Importar todos os contatos (.vcf)","Alle Kontakte importieren (.vcf)","Importa tutti i contatti (.vcf)","استيراد كل جهات الاتصال (.vcf)","导入所有联系人 (.vcf)","सभी संपर्क आयात करें (.vcf)","সব কন্ট্যাক্ট আমদানি করুন (.vcf)","Импортировать все контакты (.vcf)","Tüm kişileri içe aktar (.vcf)","すべての連絡先をインポート (.vcf)","모든 연락처 가져오기 (.vcf)"],
+"vcf_hint":["Exporte os contatos do telefone para um único arquivo VCF e escolha-o aqui.","Exportieren Sie Ihre Telefonkontakte in eine VCF-Datei und wählen Sie diese hier aus.","Esporta i contatti del telefono in un unico file VCF e selezionalo qui.","صدّر جهات اتصال الهاتف إلى ملف VCF واحد ثم اختره هنا.","将手机联系人导出为一个 VCF 文件，然后在此选择。","फ़ोन संपर्कों को एक VCF फ़ाइल में निर्यात करें और यहाँ चुनें।","ফোনের কন্ট্যাক্ট একটি VCF ফাইলে এক্সপোর্ট করে এখানে নির্বাচন করুন।","Экспортируйте контакты телефона в один VCF-файл и выберите его здесь.","Telefon kişilerinizi tek bir VCF dosyasına aktarın ve burada seçin.","電話の連絡先を1つのVCFファイルにエクスポートし、ここで選択します。","휴대폰 연락처를 하나의 VCF 파일로 내보낸 뒤 여기서 선택하세요."],
+"vcf_too_large":["O arquivo VCF é muito grande.","Die VCF-Datei ist zu groß.","Il file VCF è troppo grande.","ملف VCF كبير جدًا.","VCF 文件过大。","VCF फ़ाइल बहुत बड़ी है।","VCF ফাইলটি খুব বড়।","VCF-файл слишком большой.","VCF dosyası çok büyük.","VCFファイルが大きすぎます。","VCF 파일이 너무 큽니다."],
+"vcf_no_contacts":["Nenhum contato com telefone foi encontrado no VCF.","Keine Telefonkontakte in der VCF-Datei gefunden.","Nessun contatto telefonico trovato nel VCF.","لم يتم العثور على جهات اتصال بأرقام هاتف في ملف VCF.","VCF 文件中未找到电话号码联系人。","VCF फ़ाइल में कोई फ़ोन संपर्क नहीं मिला।","VCF ফাইলে কোনো ফোন কন্ট্যাক্ট পাওয়া যায়নি।","В VCF-файле не найдено контактов с телефонами.","VCF dosyasında telefon kişisi bulunamadı.","VCFファイルに電話番号付き連絡先がありません。","VCF 파일에서 전화번호가 있는 연락처를 찾지 못했습니다."],
+"vcf_import_failed":["Não foi possível importar o arquivo VCF.","VCF-Datei konnte nicht importiert werden.","Impossibile importare il file VCF.","تعذر استيراد ملف VCF.","无法导入 VCF 文件。","VCF फ़ाइल आयात नहीं की जा सकी।","VCF ফাইল আমদানি করা যায়নি।","Не удалось импортировать VCF-файл.","VCF dosyası içe aktarılamadı.","VCFファイルをインポートできませんでした。","VCF 파일을 가져올 수 없습니다."]
+});
+
 const reverse=new Map();
 for(const [key,vals] of Object.entries(D)){
   vals.forEach(v=>{if(v)reverse.set(v.trim(),key)});
@@ -610,6 +626,11 @@ reverse.set("Android will ask for Contacts permission, then import all contacts.
 reverse.set("Select all will import all contacts after Android permission.","native_select_all_hint");
 reverse.set("On the web, Android requires you to choose the contacts to share.","web_contact_limit");
 reverse.set("Already present","already_present");
+reverse.set("Importer tous les contacts (.vcf)","import_all_vcf");
+reverse.set("Exportez vos contacts du téléphone en un seul fichier VCF, puis choisissez ce fichier ici.","vcf_hint");
+reverse.set("VCF file is too large.","vcf_too_large");
+reverse.set("No phone contacts were found in this VCF file.","vcf_no_contacts");
+reverse.set("Unable to import the VCF file.","vcf_import_failed");
 reverse.set("Failed","failed");
 reverse.set("Sélectionner des contacts","select_contacts");
 reverse.set("Import","import_action");
