@@ -25,8 +25,8 @@ useDeviceLanguage(auth);
 function addOff(f){if(typeof f==="function")S.unsubs.push(f)}
 function clearOffs(){S.unsubs.forEach(f=>{try{f()}catch{}});S.unsubs=[]}
 function go(name){
-  $(".page").forEach(x=>x.classList.remove("active"));
-  $("nav button").forEach(x=>x.classList.remove("active"));
+  $$(".page").forEach(x=>x.classList.remove("active"));
+  $$("nav button").forEach(x=>x.classList.remove("active"));
   $("#"+name+"Page")?.classList.add("active");
   const parent={
     status:"actus", clips:"actus",
@@ -36,8 +36,8 @@ function go(name){
   document.querySelector('nav button[data-page="'+parent+'"]')?.classList.add("active");
 }
 $$("nav button[data-page]").forEach(b=>b.onclick=()=>go(b.dataset.page));
-$("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
-$("[data-market-mode]").forEach(b=>b.addEventListener("click",()=>{
+$$("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
+$$("[data-market-mode]").forEach(b=>b.addEventListener("click",()=>{
   const sell=$("#sellBox");
   if(!sell)return;
   if(b.dataset.marketMode==="sell"){
