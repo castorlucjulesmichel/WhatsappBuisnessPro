@@ -121,7 +121,7 @@ async function loadRemote(){
     fillControls();
   }catch(e){console.warn("settings load",e)}
 }
-function openPanel(name){
+async function openPanel(name){
   if(!name)return;
   $("#settingsMenuList")?.classList.add("hidden");
   $("#settingsDetail")?.classList.remove("hidden");
@@ -132,6 +132,10 @@ function openPanel(name){
   if(name==="account"){
     if($("#settingsEmail"))$("#settingsEmail").textContent=user?.email||"—";
     if($("#settingsAuthProvider"))$("#settingsAuthProvider").textContent="Google";
+    try{
+      const a=await getDoc(doc(db,"users",user.uid));
+      if($("#settingsMobile"))$("#settingsMobile").textContent=a.data()?.phone||"—";
+    }catch{}
   }
   if(name==="devices"){
     if($("#currentDeviceName"))$("#currentDeviceName").textContent=navigator.userAgentData?.platform||navigator.platform||"Appareil actuel";
