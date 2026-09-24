@@ -94,6 +94,10 @@
    <span class="settingsIcon">📊</span>
    <span class="settingsText"><b>Statistiques</b><small>Ventes, commandes, revenus et performances</small></span><span class="chevron">›</span>
   </button>
+  <button class="settingsItem" data-go="settings" data-settings-section="customerActivity">
+   <span class="settingsIcon">↔️</span>
+   <span class="settingsText"><b>Activité de votre clientèle</b><small>Gérez les données utilisées pour améliorer vos publicités</small></span><span class="chevron">›</span>
+  </button>
  </div>
 
  <div class="menuSectionTitle">Gérez votre compte</div>
@@ -108,7 +112,11 @@
   </button>
   <button class="settingsItem" data-go="profile">
    <span class="settingsIcon">👤</span>
-   <span class="settingsText"><b>Compte et profil</b><small>Photo, username, langue, confidentialité et localisation</small></span><span class="chevron">›</span>
+   <span class="settingsText"><b>Compte et profil</b><small>Photo, username et informations publiques</small></span><span class="chevron">›</span>
+  </button>
+  <button class="settingsItem" data-go="settings">
+   <span class="settingsIcon">⚙️</span>
+   <span class="settingsText"><b>Paramètres</b><small>Confidentialité, discussions, notifications, données et langue</small></span><span class="chevron">›</span>
   </button>
  </div>
 
@@ -224,6 +232,124 @@
   </form>
   <div id="myBoosts"></div>
  </div>
+ </div>
+</section>
+
+<section id="settingsPage" class="page menuPage">
+ <div class="menuHeader">
+  <div><button class="backLink ghost" data-go="tools">← Outils</button><h2>Paramètres</h2></div>
+  <button id="settingsSearchBtn" class="ghost" type="button">🔍</button>
+ </div>
+ <input id="settingsSearch" class="settingsSearch hidden" placeholder="Rechercher dans les paramètres...">
+
+ <div class="settingsList card" id="settingsMenuList">
+  <button class="settingsItem" data-setting-target="devices">
+   <span class="settingsIcon">🖥️</span><span class="settingsText"><b>Appareils connectés</b><small>Sessions ouvertes sur vos appareils</small></span><span class="chevron">›</span>
+  </button>
+  <button class="settingsItem" data-setting-target="account">
+   <span class="settingsIcon">🔑</span><span class="settingsText"><b>Compte</b><small>Sécurité, numéro et informations du compte</small></span><span class="chevron">›</span>
+  </button>
+  <button class="settingsItem" data-setting-target="privacy">
+   <span class="settingsIcon">🔒</span><span class="settingsText"><b>Confidentialité</b><small>Comptes bloqués, accusés de lecture, messages éphémères</small></span><span class="chevron">›</span>
+  </button>
+  <button class="settingsItem" data-setting-target="lists">
+   <span class="settingsIcon">🗂️</span><span class="settingsText"><b>Listes</b><small>Gérez vos contacts et groupes de clients</small></span><span class="chevron">›</span>
+  </button>
+  <button class="settingsItem" data-setting-target="chats">
+   <span class="settingsIcon">💬</span><span class="settingsText"><b>Discussions</b><small>Thème, fond d’écran et options d’affichage</small></span><span class="chevron">›</span>
+  </button>
+  <button class="settingsItem" data-setting-target="notifications">
+   <span class="settingsIcon">🔔</span><span class="settingsText"><b>Notifications</b><small>Messages, groupes, appels et alertes business</small></span><span class="chevron">›</span>
+  </button>
+  <button class="settingsItem" data-setting-target="storage">
+   <span class="settingsIcon">◔</span><span class="settingsText"><b>Stockage et données</b><small>Utilisation réseau et téléchargement automatique</small></span><span class="chevron">›</span>
+  </button>
+  <button class="settingsItem" data-setting-target="customerActivity">
+   <span class="settingsIcon">↔️</span><span class="settingsText"><b>Activité de votre clientèle</b><small>Contrôlez les données utilisées pour personnaliser vos publicités</small></span><span class="chevron">›</span>
+  </button>
+  <button class="settingsItem" id="settingsSocialBtn" type="button">
+   <span class="settingsIcon">🔗</span><span class="settingsText"><b>Facebook et Instagram</b><small>Associez vos comptes pour toucher une clientèle plus large</small></span><span class="chevron">›</span>
+  </button>
+  <button class="settingsItem" data-setting-target="accessibility">
+   <span class="settingsIcon">♿</span><span class="settingsText"><b>Accessibilité</b><small>Contraste, taille du texte et animations</small></span><span class="chevron">›</span>
+  </button>
+  <button class="settingsItem" data-setting-target="language">
+   <span class="settingsIcon">🌐</span><span class="settingsText"><b>Langue de l’application</b><small id="settingsLanguageLabel">Kreyòl</small></span><span class="chevron">›</span>
+  </button>
+  <button class="settingsItem" data-setting-target="help">
+   <span class="settingsIcon">❔</span><span class="settingsText"><b>Aide et commentaires</b><small>Assistance, politique de confidentialité et commentaires</small></span><span class="chevron">›</span>
+  </button>
+  <button class="settingsItem" id="inviteContactBtn" type="button">
+   <span class="settingsIcon">👥</span><span class="settingsText"><b>Inviter un contact</b><small>Partager le lien de Whatssap Business Pro</small></span><span class="chevron">›</span>
+  </button>
+ </div>
+
+ <div id="settingsDetail" class="card hidden">
+  <div class="settingsDetailHead"><button id="settingsBackBtn" class="ghost" type="button">←</button><h3 id="settingsDetailTitle">Paramètres</h3></div>
+
+  <div class="settingPanel hidden" data-setting-panel="devices">
+   <p class="muted">Appareil actuel</p>
+   <div class="deviceRow"><span>📱</span><div><b id="currentDeviceName">Navigateur actuel</b><small id="currentDeviceInfo">Session active</small></div></div>
+   <p class="muted">La gestion complète de plusieurs appareils sera disponible quand le suivi des sessions backend sera activé.</p>
+  </div>
+
+  <div class="settingPanel hidden" data-setting-panel="account">
+   <p><b>Numéro connecté :</b> <span id="settingsPhone">—</span></p>
+   <button id="openProfileFromSettings" type="button">Modifier le profil</button>
+   <button id="logoutFromSettings" class="danger" type="button">Déconnexion</button>
+  </div>
+
+  <div class="settingPanel hidden" data-setting-panel="privacy">
+   <label class="toggleRow"><span><b>Accusés de lecture</b><small>Afficher quand un message a été lu</small></span><input id="readReceiptsSetting" type="checkbox" checked></label>
+   <label class="toggleRow"><span><b>Messages éphémères par défaut</b><small>Supprimer automatiquement les nouveaux messages après 24 h</small></span><input id="defaultDisappearingSetting" type="checkbox"></label>
+   <label class="toggleRow"><span><b>Afficher mon statut en ligne</b><small>Permettre aux contacts de voir votre présence</small></span><input id="onlineVisibilitySetting" type="checkbox" checked></label>
+  </div>
+
+  <div class="settingPanel hidden" data-setting-panel="lists">
+   <p>Vos listes servent à organiser vos contacts professionnels.</p>
+   <input id="newListName" placeholder="Nom de la liste">
+   <button id="createListBtn" type="button">Créer une liste</button>
+   <div id="customerLists"></div>
+  </div>
+
+  <div class="settingPanel hidden" data-setting-panel="chats">
+   <label>Thème</label>
+   <select id="themeSetting"><option value="system">Système</option><option value="light">Clair</option><option value="dark">Sombre</option></select>
+   <label>Taille du texte</label>
+   <select id="fontSizeSetting"><option value="small">Petit</option><option value="normal">Normal</option><option value="large">Grand</option></select>
+  </div>
+
+  <div class="settingPanel hidden" data-setting-panel="notifications">
+   <label class="toggleRow"><span><b>Messages</b><small>Notifications de nouveaux messages</small></span><input id="messageNotificationsSetting" type="checkbox" checked></label>
+   <label class="toggleRow"><span><b>Commandes</b><small>Alertes achat et vente</small></span><input id="orderNotificationsSetting" type="checkbox" checked></label>
+   <label class="toggleRow"><span><b>Boost et publicités</b><small>Alertes de campagne et dépôt Ads</small></span><input id="adNotificationsSetting" type="checkbox" checked></label>
+  </div>
+
+  <div class="settingPanel hidden" data-setting-panel="storage">
+   <label>Téléchargement automatique</label>
+   <select id="autoDownloadSetting"><option value="wifi">Wi-Fi uniquement</option><option value="always">Wi-Fi et données mobiles</option><option value="never">Jamais</option></select>
+   <label class="toggleRow"><span><b>Économiseur de données vidéo</b><small>Réduire la qualité automatique des clips sur réseau mobile</small></span><input id="dataSaverSetting" type="checkbox"></label>
+  </div>
+
+  <div class="settingPanel hidden" data-setting-panel="customerActivity">
+   <label class="toggleRow"><span><b>Partager l’activité clientèle</b><small>Utiliser les interactions Marketplace/Business pour améliorer vos propres campagnes</small></span><input id="customerActivitySetting" type="checkbox"></label>
+   <p class="muted">Ce réglage ne donne pas accès aux conversations privées. Il concerne uniquement les interactions commerciales dans Whatssap Business Pro.</p>
+  </div>
+
+  <div class="settingPanel hidden" data-setting-panel="accessibility">
+   <label class="toggleRow"><span><b>Contraste élevé</b><small>Améliorer la lisibilité de l’interface</small></span><input id="highContrastSetting" type="checkbox"></label>
+   <label class="toggleRow"><span><b>Réduire les animations</b><small>Limiter les effets visuels</small></span><input id="reduceMotionSetting" type="checkbox"></label>
+  </div>
+
+  <div class="settingPanel hidden" data-setting-panel="language">
+   <label>Langue</label>
+   <select id="settingsLanguage"><option value="ht">Kreyòl</option><option value="fr">Français</option><option value="en">English</option><option value="es">Español</option></select>
+  </div>
+
+  <div class="settingPanel hidden" data-setting-panel="help">
+   <button id="openSupportFromSettings" type="button">Contacter l’assistance</button>
+   <p class="muted">Politique de confidentialité et conditions d’utilisation seront ajoutées avant publication publique.</p>
+  </div>
  </div>
 </section>
 
