@@ -205,7 +205,7 @@ function renderChatList(){
       </div>
       ${unread?'<span class="waUnread">'+unread+'</span>':"<span></span>"}
     </div>`;
-  }).join("")||'<div class="chatItem muted">Pa gen discussion pou filtè sa a.</div>';
+  }).join("")||'<div class="chatItem muted">'+(window.WBP_T?.("No chats for this filter.")||"No chats for this filter.")+'</div>';
   $$("[data-chat]").forEach(x=>x.onclick=()=>openChat(x.dataset.chat,x.dataset.name));
 }
 function watchChats(){
