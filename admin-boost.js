@@ -16,8 +16,8 @@ if(configured()){
 
  async function requireAdmin(u){
    if(!u) return false;
-   const token=await u.getIdTokenResult(true);
-   return token.claims.admin===true;
+   const s=await getDoc(doc(db,"admins",u.uid));
+   return s.exists() && s.data().active!==false;
  }
 
  function clear(){offs.forEach(f=>f&&f());offs=[]}
