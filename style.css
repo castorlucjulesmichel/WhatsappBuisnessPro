@@ -73,3 +73,40 @@ html[data-theme="dark"] .card,html[data-theme="dark"] .metrics>div,html[data-the
 .msgReceipt{display:block;text-align:right;font-size:10px;color:#4e9f87;margin-top:3px}
 #messageForm{align-items:center}#messageForm #attachBtn,#messageForm #voiceBtn{flex:0 0 auto;padding:9px 10px}#messageForm>button:last-child{flex:0 0 auto}
 @media(max-width:560px){.brandLogo{width:92px;height:92px}.headerLogo{width:34px;height:34px}.headerBrand b{font-size:13px}.headerActions{gap:4px}.headerActions button,.headerActions select{padding:8px}}
+
+/* WhatsApp-style discussions home */
+.whatsappChatsPage,.whatsappCallsPage{max-width:780px;background:var(--card);min-height:calc(100vh - 64px);padding-top:14px}
+.waChatsHead{display:flex;align-items:center;justify-content:space-between;padding:4px 4px 12px}
+.waChatsHead h1{margin:0;font-size:30px;letter-spacing:-.7px}
+.waChatsHeadActions{display:flex;gap:6px}
+.waIconBtn{background:transparent!important;color:var(--text)!important;font-size:24px;padding:8px 10px;border-radius:50%}
+.waSearch{display:flex;align-items:center;gap:8px;background:#f3f1f1;border-radius:28px;padding:0 15px;margin:2px 2px 14px}
+.waSearch span{font-size:27px;color:#59615e;transform:rotate(-15deg)}
+.waSearch input{border:0;background:transparent;padding:14px 0;outline:none;font-size:16px}
+.waNotice{display:grid;grid-template-columns:42px 1fr 32px;gap:10px;align-items:start;background:#f4f1ef;border-radius:22px;padding:15px;margin:0 2px 14px}
+.waNoticeBell{font-size:28px;color:#16a367}.waNotice b{display:block;font-size:16px;margin-bottom:4px}.waNotice small{display:block;color:#4f5753;line-height:1.35}
+.waNotice small button{background:transparent;color:#16a367;padding:0;font-weight:800}.waNoticeClose{background:transparent;color:#606663;font-size:25px;padding:0}
+.waFilters{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 12px;scrollbar-width:none}.waFilters::-webkit-scrollbar{display:none}
+.waFilter{background:transparent;color:#616764;border:1px solid #d1d5d3;border-radius:22px;padding:8px 16px;white-space:nowrap;font-weight:650}
+.waFilter.active{background:#e6f5eb;color:#176b44;border-color:#d1ead9}
+.whatsappChatsPage .chatLayout{display:block;min-height:0;border:0;border-radius:0;background:transparent;margin:0}
+.whatsappChatsPage #chatList{border:0;max-height:none}
+.whatsappChatsPage .conversation{display:none}
+.whatsappChatsPage .conversation.open{display:grid;position:fixed;inset:64px 0 72px;background:var(--card);z-index:45}
+.whatsappChatsPage .chatItem{display:grid;grid-template-columns:54px 1fr auto;gap:12px;align-items:center;padding:11px 3px;border-bottom:0;background:transparent}
+.whatsappChatsPage .chatItem:hover{background:#f7f7f7}
+.waChatAvatar{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;background:#e8dfe1;color:#6c4e55;font-size:22px;font-weight:800;overflow:hidden}
+.waChatAvatar img{width:100%;height:100%;object-fit:cover}
+.waChatBody{min-width:0;border-bottom:1px solid #efefef;padding:5px 0 13px}
+.waChatTop{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.waChatName{font-size:17px;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.waChatTime{font-size:12px;color:#1aa365;white-space:nowrap}
+.waChatPreview{display:flex;align-items:center;gap:5px;color:#6d7370;font-size:14px;min-width:0}
+.waChatPreview span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.waUnread{min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:#18ad60;color:#fff;display:grid;place-items:center;font-size:11px;font-weight:800}
+.waNewChatFab{position:fixed;right:20px;bottom:92px;z-index:46;width:58px;height:58px;border-radius:17px;background:#171918;color:#fff;font-size:21px;box-shadow:0 9px 24px #0003;padding:0}
+.waCallsIntro{display:flex;gap:13px;align-items:center}.waCallCircle{width:52px;height:52px;border-radius:50%;background:#19a86b;color:#fff;display:grid;place-items:center;font-size:23px}.waCallsIntro div:last-child{display:grid;gap:3px}.waCallsIntro small{color:var(--muted)}
+.waSectionLabel{font-size:15px;margin:18px 3px 8px}
+html[data-theme="dark"] .waSearch,html[data-theme="dark"] .waNotice{background:#202a27}
+html[data-theme="dark"] .waFilter{color:var(--text);border-color:#44504c}
+@media(max-width:560px){.whatsappChatsPage,.whatsappCallsPage{padding:12px 14px 92px}.waChatsHead h1{font-size:29px}.waNotice{grid-template-columns:36px 1fr 26px}.whatsappChatsPage .chatItem{grid-template-columns:50px 1fr auto}.waChatAvatar{width:50px;height:50px}.bottomNav button span:last-child{font-size:10px}}
