@@ -31,6 +31,7 @@ function go(name){
   $("#"+name+"Page")?.classList.add("active");
   const parent={
     status:"actus", clips:"actus",
+    contactPicker:"chat", newContact:"chat",
     market:"tools", orders:"tools", stats:"tools", business:"tools", profile:"tools", settings:"tools",
     invest:"wallet"
   }[name] || name;
@@ -83,6 +84,7 @@ async function loadProfile(){
   $("#displayName").value=S.profile.displayName||"";$("#username").value=S.profile.username||"";$("#bio").value=S.profile.bio||"";$("#country").value=S.profile.country||"";$("#birthYear").value=S.profile.birthYear||"";$("#role").value=S.profile.role||"buyer";
   $("#avatarPreview").src=S.profile.photoUrl||"";
   $("#headerUser").textContent=S.profile.displayName||S.profile.username||S.user.phoneNumber||"User";
+  if($("#profilePhoneDisplay"))$("#profilePhoneDisplay").textContent=S.user.phoneNumber||"Numéro Firebase";
 }
 async function upload(file,path,max,typePrefix){
   if(!file)return "";
@@ -97,6 +99,19 @@ $("#profileForm").onsubmit=async e=>{e.preventDefault();try{
   if(m.docs.some(d=>d.id!==S.user.uid))return toast("Username sa deja itilize.");
   let photoUrl=S.profile.photoUrl||"";const f=$("#avatarFile").files[0];if(f)photoUrl=await upload(f,"whatssap-business-pro/avatars",8*1024*1024,"image/");
   await setDoc(doc(db,"publicProfiles",S.user.uid),{displayName:$("#displayName").value.trim()||username,username,bio:$("#bio").value.trim(),country:$("#country").value.trim(),birthYear:Number($("#birthYear").value||0),role:$("#role").value,photoUrl,updatedAt:serverTimestamp()},{merge:true});
+  await setDoc(doc(db,"businesses",S.user.uid),{
+    ownerId:S.user.uid,
+    username,
+    name:$("#displayName").value.trim()||username,
+    description:$("#bio").value.trim(),
+    hours:$("#businessHoursProfile")?.value.trim()||"",
+    website:$("#businessWebsiteProfile")?.value.trim()||"",
+    instagram:$("#instagramProfile")?.value.trim()||"",
+    facebook:$("#facebookProfile")?.value.trim()||"",
+    email:$("#businessEmailProfile")?.value.trim()||"",
+    active:true,
+    updatedAt:serverTimestamp()
+  },{merge:true});
   await loadProfile();toast("Profil sove.");
 }catch(x){console.error(x);toast(x.message||"Profil pa t sove.");}};
 $("#shareLocation").onclick=()=>{if(!navigator.geolocation)return toast("Lokalizasyon pa disponib.");$("#locationStatus").textContent="Ap chèche...";navigator.geolocation.getCurrentPosition(async p=>{const loc={lat:p.coords.latitude,lng:p.coords.longitude,accuracy:p.coords.accuracy,sharedAt:serverTimestamp()};await setDoc(doc(db,"userSettings",S.user.uid),{location:loc},{merge:true});$("#locationStatus").textContent="Lokalizasyon pataje avèk presizyon "+Math.round(p.coords.accuracy)+" m.";toast("Lokalizasyon sove.")},()=>{$("#locationStatus").textContent="Pèmisyon lokalizasyon refize.";},{enableHighAccuracy:true,timeout:12000})};
@@ -274,7 +289,18 @@ function watchInvestments(){const q=query(collection(db,"investments"),where("us
 
 $("#businessForm").onsubmit=async e=>{e.preventDefault();await setDoc(doc(db,"businesses",S.user.uid),{ownerId:S.user.uid,username:S.profile.username||"",name:$("#businessName").value.trim(),description:$("#businessDescription").value.trim(),hours:$("#businessHours").value.trim(),website:$("#businessWebsite").value.trim(),active:true,updatedAt:serverTimestamp()},{merge:true});toast("Pwofil biznis sove.")};
 $("#businessToolsForm").onsubmit=async e=>{e.preventDefault();await setDoc(doc(db,"userSettings",S.user.uid),{businessTools:{greetingMessage:$("#greetingMessage").value.trim(),awayMessage:$("#awayMessage").value.trim(),quickReplies:$("#quickReplies").value.trim()},updatedAt:serverTimestamp()},{merge:true});toast("Zouti mesaj sove.")};
-async function loadBusiness(){const [b,s]=await Promise.all([getDoc(doc(db,"businesses",S.user.uid)),getDoc(doc(db,"userSettings",S.user.uid))]);if(b.exists()){const x=b.data();$("#businessName").value=x.name||"";$("#businessDescription").value=x.description||"";$("#businessHours").value=x.hours||"";$("#businessWebsite").value=x.website||""}if(s.exists()){const x=s.data().businessTools||{};$("#greetingMessage").value=x.greetingMessage||"";$("#awayMessage").value=x.awayMessage||"";$("#quickReplies").value=x.quickReplies||""}}
+async function loadBusiness(){const [b,s]=await Promise.all([getDoc(doc(db,"businesses",S.user.uid)),getDoc(doc(db,"userSettings",S.user.uid))]);if(b.exists()){
+  const x=b.data();
+  if($("#businessName"))$("#businessName").value=x.name||"";
+  if($("#businessDescription"))$("#businessDescription").value=x.description||"";
+  if($("#businessHours"))$("#businessHours").value=x.hours||"";
+  if($("#businessWebsite"))$("#businessWebsite").value=x.website||"";
+  if($("#businessHoursProfile"))$("#businessHoursProfile").value=x.hours||"";
+  if($("#businessWebsiteProfile"))$("#businessWebsiteProfile").value=x.website||"";
+  if($("#instagramProfile"))$("#instagramProfile").value=x.instagram||"";
+  if($("#facebookProfile"))$("#facebookProfile").value=x.facebook||"";
+  if($("#businessEmailProfile"))$("#businessEmailProfile").value=x.email||"";
+}if(s.exists()){const x=s.data().businessTools||{};$("#greetingMessage").value=x.greetingMessage||"";$("#awayMessage").value=x.awayMessage||"";$("#quickReplies").value=x.quickReplies||""}}
 
 $("#adForm")?.addEventListener("submit",async e=>{e.preventDefault();await addDoc(collection(db,"adRequests"),{userId:S.user.uid,product:$("#adProduct")?.value||"",country:$("#adCountry")?.value||"",budget:Number($("#adBudget")?.value||0),currency:$("#adCurrency")?.value||"HTG",goal:$("#adGoal")?.value||"Sales",description:$("#adDescription")?.value||"",status:"pending",createdAt:serverTimestamp()});toast("Kanpay piblisite voye.")});
 
