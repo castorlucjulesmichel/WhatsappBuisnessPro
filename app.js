@@ -11,7 +11,7 @@ const toast=t=>{const e=$("#toast");e.textContent=t;e.classList.add("show");setT
 const norm=s=>String(s||"").trim().toLowerCase().replace(/[^a-z0-9_.-]/g,"");
 const safe=s=>String(s||"file").replace(/[^a-zA-Z0-9._-]/g,"_");
 const money=(n,c)=>Number(n||0).toLocaleString(undefined,{maximumFractionDigits:2})+" "+(c||"HTG");
-const S={user:null,profile:{},chatId:null,products:[],clips:[],boosts:[],cart:[],unsubs:[]};
+const S={user:null,profile:{},chatId:null,chatRows:[],chatFilter:"all",products:[],clips:[],boosts:[],cart:[],unsubs:[]};
 
 if(!configured()){
   $("#authScreen").classList.add("hidden");
@@ -159,27 +159,96 @@ function watchClips(){addOff(onSnapshot(collection(db,"shortVideos"),s=>{S.clips
 
 $("#newChatBtn").onclick=()=>$("#newChatBox").classList.toggle("hidden");
 $("#startChatBtn").onclick=async()=>{try{const un=norm($("#targetUsername").value),q=query(collection(db,"publicProfiles"),where("username","==",un),limit(1)),s=await getDocs(q);if(s.empty)return toast("Username pa jwenn.");const o=s.docs[0];if(o.id===S.user.uid)return toast("Ou pa ka chat ak tèt ou.");const ids=[S.user.uid,o.id].sort(),id=ids.join("__"),names={[S.user.uid]:S.profile.displayName||S.profile.username||"User",[o.id]:o.data().displayName||o.data().username||"User"};await setDoc(doc(db,"chats",id),{type:"direct",participants:ids,participantNames:names,lastMessage:"",updatedAt:serverTimestamp()},{merge:true});openChat(id,names[o.id]);$("#newChatBox").classList.add("hidden")}catch(x){console.error(x);toast("Chat la pa kreye.");}};
-function watchChats(){const q=query(collection(db,"chats"),where("participants","array-contains",S.user.uid));addOff(onSnapshot(q,s=>{const rows=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.updatedAt?.seconds||0)-(a.updatedAt?.seconds||0));$("#chatList").innerHTML=rows.map(c=>{const oid=c.participants.find(x=>x!==S.user.uid)||S.user.uid,n=c.type==="group"?(c.groupName||"Gwoup"):(c.participantNames?.[oid]||"Chat");return `<div class="chatItem" data-chat="${c.id}" data-name="${esc(n)}"><b>${c.type==="group"?"👥 ":""}${esc(n)}</b><br><small>${esc(c.lastMessage||"")}</small></div>`}).join("")||'<div class="chatItem muted">Pa gen chat.</div>';$$("[data-chat]").forEach(x=>x.onclick=()=>openChat(x.dataset.chat,x.dataset.name))}))}
+function chatClock(ts){
+  const d=ts?.toDate?.() || (ts?.seconds?new Date(ts.seconds*1000):null);
+  if(!d)return "";
+  return d.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+}
+function renderChatList(){
+  const term=($("#chatSearch")?.value||"").trim().toLowerCase();
+  let rows=[...S.chatRows];
+  if(term)rows=rows.filter(c=>{
+    const oid=c.participants?.find(x=>x!==S.user.uid)||S.user.uid;
+    const n=c.type==="group"?(c.groupName||"Gwoup"):(c.participantNames?.[oid]||"Chat");
+    return (n+" "+(c.lastMessage||"")).toLowerCase().includes(term);
+  });
+  if(S.chatFilter==="groups")rows=rows.filter(c=>c.type==="group");
+  if(S.chatFilter==="favorites")rows=rows.filter(c=>Array.isArray(c.favorites)&&c.favorites.includes(S.user.uid));
+  if(S.chatFilter==="unread")rows=rows.filter(c=>Number(c.unreadCounts?.[S.user.uid]||0)>0);
+
+  $("#chatList").innerHTML=rows.map(c=>{
+    const oid=c.participants?.find(x=>x!==S.user.uid)||S.user.uid;
+    const n=c.type==="group"?(c.groupName||"Gwoup"):(c.participantNames?.[oid]||"Chat");
+    const unread=Number(c.unreadCounts?.[S.user.uid]||0);
+    const initial=(n.trim()[0]||"?").toUpperCase();
+    return `<div class="chatItem" data-chat="${c.id}" data-name="${esc(n)}">
+      <div class="waChatAvatar">${c.type==="group"?"👥":esc(initial)}</div>
+      <div class="waChatBody">
+       <div class="waChatTop"><span class="waChatName">${esc(n)}</span><span class="waChatTime">${chatClock(c.updatedAt)}</span></div>
+       <div class="waChatPreview"><span>${esc(c.lastMessage||"Nouvo konvèsasyon")}</span></div>
+      </div>
+      ${unread?'<span class="waUnread">'+unread+'</span>':"<span></span>"}
+    </div>`;
+  }).join("")||'<div class="chatItem muted">Pa gen discussion pou filtè sa a.</div>';
+  $$("[data-chat]").forEach(x=>x.onclick=()=>openChat(x.dataset.chat,x.dataset.name));
+}
+function watchChats(){
+  const q=query(collection(db,"chats"),where("participants","array-contains",S.user.uid));
+  addOff(onSnapshot(q,s=>{
+    S.chatRows=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.updatedAt?.seconds||0)-(a.updatedAt?.seconds||0));
+    renderChatList();
+  }));
+}
+$("#chatSearch")?.addEventListener("input",renderChatList);
+$$("[data-chat-filter]").forEach(b=>b.addEventListener("click",()=>{
+  S.chatFilter=b.dataset.chatFilter;
+  $$("[data-chat-filter]").forEach(x=>x.classList.toggle("active",x===b));
+  renderChatList();
+}));
+$("#closeNotificationPrompt")?.addEventListener("click",()=>{
+  $("#notificationPrompt")?.classList.add("hidden");
+  localStorage.setItem("wbp_hide_notification_prompt","1");
+});
+if(localStorage.getItem("wbp_hide_notification_prompt")==="1")$("#notificationPrompt")?.classList.add("hidden");
+$("#enableChatNotifications")?.addEventListener("click",async()=>{
+  if(!("Notification" in window))return toast("Notifikasyon pa sipòte sou navigatè sa a.");
+  const p=await Notification.requestPermission();
+  toast(p==="granted"?"Notifikasyon aktive.":"Pèmisyon notifikasyon pa aktive.");
+  if(p==="granted")$("#notificationPrompt")?.classList.add("hidden");
+});
+$("#chatCameraBtn")?.addEventListener("click",()=>{
+  go("status");
+  $("#statusForm")?.classList.remove("hidden");
+});
+$("#chatMenuBtn")?.addEventListener("click",()=>go("settings"));
+
 function messageContent(m){
   if(m.type==="image"&&m.mediaUrl)return '<img class="chatMediaImage" src="'+esc(m.mediaUrl)+'" alt="">'+(m.text?'<div>'+esc(m.text)+'</div>':'');
   if(m.type==="audio"&&m.mediaUrl)return '<audio class="chatAudio" controls src="'+esc(m.mediaUrl)+'"></audio>';
   if(m.type==="document"&&m.mediaUrl)return '<a class="chatFile" href="'+esc(m.mediaUrl)+'" target="_blank" rel="noopener">📄 '+esc(m.fileName||"Dokiman")+'</a>'+(m.text?'<div>'+esc(m.text)+'</div>':'');
   return esc(m.text||"");
 }
+function closeChatView(){
+  $("#chatPage .conversation")?.classList.remove("open");
+  $("#messageForm")?.classList.add("hidden");
+  S.chatId=null;window.WBP_CURRENT_CHAT=null;
+}
 function openChat(id,name){
   S.chatId=id;window.WBP_CURRENT_CHAT=id;window.WBP_CURRENT_USER=S.user?.uid||"";
-  $("#chatTitle").innerHTML=esc(name)+' <button id="blockChatBtn" class="ghost">Bloke</button> <button id="reportChatBtn" class="ghost">Rapòte</button>';
+  $("#chatPage .conversation")?.classList.add("open");
+  $("#chatTitle").innerHTML='<button id="closeChatViewBtn" class="ghost">←</button> '+esc(name)+' <button id="blockChatBtn" class="ghost">Bloke</button> <button id="reportChatBtn" class="ghost">Rapòte</button>';
   $("#messageForm").classList.remove("hidden");
+  $("#closeChatViewBtn").onclick=closeChatView;
   $("#reportChatBtn").onclick=()=>reportChat(id,name);
   window.dispatchEvent(new CustomEvent("wbp-chat-open",{detail:{chatId:id,name}}));
   const q=query(collection(db,"chats",id,"messages"),orderBy("createdAt","asc"),limit(300));
   addOff(onSnapshot(q,s=>{
-    $("#messages").innerHTML=s.docs.map(d=>{const m=d.data();const receipt=Array.isArray(m.readBy)&&m.readBy.includes(S.user.uid)?" ✓✓":"";return '<div class="msg '+(m.senderId===S.user.uid?"me":"")+'">'+messageContent(m)+(m.senderId===S.user.uid?'<small class="msgReceipt">'+receipt+'</small>':'')+'</div>'}).join("");
+    $("#messages").innerHTML=s.docs.map(d=>{const m=d.data();const receipt=Array.isArray(m.readBy)&&m.readBy.length>1?" ✓✓":(m.senderId===S.user.uid?" ✓":"");return '<div class="msg '+(m.senderId===S.user.uid?"me":"")+'">'+messageContent(m)+(m.senderId===S.user.uid?'<small class="msgReceipt">'+receipt+'</small>':'')+'</div>'}).join("");
     $("#messages").scrollTop=$("#messages").scrollHeight;
     window.dispatchEvent(new CustomEvent("wbp-messages-rendered",{detail:{chatId:id,messages:s.docs.map(d=>({id:d.id,...d.data()}))}}));
   }))
 }
-$("#messageForm").onsubmit=async e=>{e.preventDefault();const t=$("#messageText").value.trim();if(!t||!S.chatId)return;await addDoc(collection(db,"chats",S.chatId,"messages"),{senderId:S.user.uid,text:t,createdAt:serverTimestamp()});await updateDoc(doc(db,"chats",S.chatId),{lastMessage:t.slice(0,120),updatedAt:serverTimestamp()});$("#messageText").value=""};
+$("#messageForm").onsubmit=async e=>{e.preventDefault();const t=$("#messageText").value.trim();if(!t||!S.chatId)return;await addDoc(collection(db,"chats",S.chatId,"messages"),{senderId:S.user.uid,type:"text",text:t,readBy:[S.user.uid],createdAt:serverTimestamp()});await updateDoc(doc(db,"chats",S.chatId),{lastMessage:t.slice(0,120),updatedAt:serverTimestamp()});$("#messageText").value=""};
 async function reportChat(id,name){const q=query(collection(db,"chats",id,"messages"),orderBy("createdAt","desc"),limit(20)),s=await getDocs(q),excerpt=s.docs.reverse().map(d=>({senderId:d.data().senderId,text:d.data().text||""}));await addDoc(collection(db,"moderationCases"),{reporterId:S.user.uid,type:"chat",targetId:id,title:"Chat ak "+name,excerpt,status:"open",createdAt:serverTimestamp()});toast("Dènye mesaj yo pataje ak moderasyon.")}
 
 function watchSupport(){const r=doc(db,"supportThreads",S.user.uid);setDoc(r,{userId:S.user.uid,updatedAt:serverTimestamp()},{merge:true}).catch(()=>{});const q=query(collection(db,"supportThreads",S.user.uid,"messages"),orderBy("createdAt","asc"),limit(200));addOff(onSnapshot(q,s=>{$("#supportMessages").innerHTML=s.docs.map(d=>{const m=d.data();return `<div class="msg ${m.senderId===S.user.uid?"me":""}">${esc(m.text||"")}</div>`}).join("");$("#supportMessages").scrollTop=$("#supportMessages").scrollHeight}))}
@@ -222,6 +291,7 @@ onAuthStateChanged(auth,async u=>{
   if(!u){$("#authScreen").classList.remove("hidden");$("#appShell").classList.add("hidden");return}
   if(!(await ensureUser(u)))return;
   $("#authScreen").classList.add("hidden");$("#appShell").classList.remove("hidden");
+  go("chat");
   await loadProfile();loadCart();await loadBusiness();
   watchProducts();watchBoosts();watchClips();watchChats();watchSupport();watchWallet();watchLevels();watchInvestments();watchOrders();
 });
