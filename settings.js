@@ -129,7 +129,10 @@ function openPanel(name){
   document.querySelector('[data-setting-panel="'+name+'"]')?.classList.remove("hidden");
   const title=document.querySelector('[data-setting-target="'+name+'"] .settingsText b')?.textContent || "Paramètres";
   if($("#settingsDetailTitle"))$("#settingsDetailTitle").textContent=title;
-  if(name==="account"&&$("#settingsPhone"))$("#settingsPhone").textContent=user?.phoneNumber||"—";
+  if(name==="account"){
+    if($("#settingsEmail"))$("#settingsEmail").textContent=user?.email||"—";
+    if($("#settingsAuthProvider"))$("#settingsAuthProvider").textContent="Google";
+  }
   if(name==="devices"){
     if($("#currentDeviceName"))$("#currentDeviceName").textContent=navigator.userAgentData?.platform||navigator.platform||"Appareil actuel";
     if($("#currentDeviceInfo"))$("#currentDeviceInfo").textContent="Session active • "+(navigator.onLine?"En ligne":"Hors ligne");
