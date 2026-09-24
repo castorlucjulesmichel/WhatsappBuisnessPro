@@ -144,3 +144,7 @@ html[data-theme="dark"] .waFilter{color:var(--text);border-color:#44504c}
 .waProfilePhone{padding:14px 28px;font-size:17px}.waBusinessProfileForm>.waSettingRow{padding-left:28px;padding-right:28px}.waBusinessProfileForm>.waSaveWide{width:calc(100% - 56px);margin-left:28px}
 html[data-theme="dark"] .waSubPage,html[data-theme="dark"] .waSettingsPage,html[data-theme="dark"] .waProfilePage,html[data-theme="dark"] .waSubHead,html[data-theme="dark"] .waSettingsProfile,html[data-theme="dark"] .waSettingRow,html[data-theme="dark"] .waContactAction,html[data-theme="dark"] .waContactPerson,html[data-theme="dark"] .waBusinessProfileForm{background:var(--card);color:var(--text)}
 @media(max-width:560px){.waSubPage,.waSettingsPage{padding-left:14px;padding-right:14px}.waSubHead{margin-left:-14px;margin-right:-14px;padding-left:14px;padding-right:14px}.waSubHead h2{font-size:25px}.waPhoneRow{grid-template-columns:36px 125px 1fr}.waSelectRow{grid-template-columns:1fr 135px}.waProfileHero{height:280px}.waProfileAvatar{width:160px;height:160px}.waCameraFab{top:175px}}
+
+/* Navigation touch safety */
+.bottomNav{z-index:1000!important;pointer-events:auto!important;touch-action:manipulation}
+.bottomNav button{pointer-events:auto!important;touch-action:manipulation;position:relative;z-index:1001}
