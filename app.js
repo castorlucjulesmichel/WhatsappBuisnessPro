@@ -44,7 +44,7 @@ async function syncPhoneDirectory(phone,oldPhone="",meta={}){
 }
 const safe=s=>String(s||"file").replace(/[^a-zA-Z0-9._-]/g,"_");
 const money=(n,c)=>Number(n||0).toLocaleString(undefined,{maximumFractionDigits:2})+" "+(c||"HTG");
-const S={user:null,profile:{},account:{},chatId:null,chatRows:[],chatFilter:"all",products:[],clips:[],boosts:[],cart:[],unsubs:[]};
+const S={user:null,profile:{},account:{},chatId:null,chatOtherUid:null,chatOtherName:"",chatRows:[],chatFilter:"all",products:[],clips:[],boosts:[],cart:[],unsubs:[]};
 
 if(!configured()){
   $("#authScreen").classList.add("hidden");
@@ -327,17 +327,106 @@ function messageContent(m){
 }
 function closeChatView(){
   $("#chatPage .conversation")?.classList.remove("open");
+  $("#chatPage")?.classList.remove("chat-open");
   $("#messageForm")?.classList.add("hidden");
-  S.chatId=null;window.WBP_CURRENT_CHAT=null;
+  $("#chatMoreMenu")?.classList.add("hidden");
+  S.chatId=null;S.chatOtherUid=null;S.chatOtherName="";
+  window.WBP_CURRENT_CHAT=null;
 }
-function openChat(id,name){
-  S.chatId=id;window.WBP_CURRENT_CHAT=id;window.WBP_CURRENT_USER=S.user?.uid||"";
+async function resolveChatPeer(id){
+  let chat=S.chatRows.find(x=>x.id===id)||null;
+  if(!chat){
+    const snap=await getDoc(doc(db,"chats",id));
+    if(snap.exists())chat={id:snap.id,...snap.data()};
+  }
+  const uid=chat?.participants?.find(x=>x!==S.user.uid)||null;
+  return {chat,uid};
+}
+function callNotReady(type,name){
+  const label=type==="video"?"Apèl vidéo":"Apèl vocal";
+  toast(label+" ak "+(name||"kontak")+" ap parèt isit la; koneksyon WebRTC reyèl la poko aktive.");
+}
+async function showChatContactInfo(uid,name){
+  if(!uid)return;
+  try{
+    const [pSnap,cSnap]=await Promise.all([
+      getDoc(doc(db,"publicProfiles",uid)),
+      getDocs(query(collection(db,"users",S.user.uid,"contacts"),where("contactUid","==",uid),limit(1)))
+    ]);
+    const p=pSnap.exists()?pSnap.data():{};
+    const local=cSnap.empty?{}:cSnap.docs[0].data();
+    const display=p.displayName||name||p.username||"Contact";
+    $("#chatInfoName").textContent=display;
+    $("#chatInfoUsername").textContent=p.username?("@"+p.username):"";
+    $("#chatInfoPhone").textContent=local.phone||"—";
+    $("#chatInfoBio").textContent=p.bio||"—";
+    $("#chatInfoCountry").textContent=p.country||"—";
+    $("#chatInfoRole").textContent=p.role||"—";
+    const img=$("#chatInfoAvatar"),fallback=$("#chatInfoFallbackAvatar");
+    if(p.photoUrl){
+      img.src=p.photoUrl;img.classList.remove("hidden");fallback.classList.add("hidden");
+    }else{
+      img.removeAttribute("src");img.classList.add("hidden");fallback.classList.remove("hidden");
+      fallback.textContent=(display.trim()[0]||"?").toUpperCase();
+    }
+    $("#chatContactInfoPanel").classList.remove("hidden");
+    $("#chatContactInfoPanel").setAttribute("aria-hidden","false");
+  }catch(e){console.error(e);toast("Info kontak la pa disponib.");}
+}
+$("#closeChatContactInfo")?.addEventListener("click",()=>{
+  $("#chatContactInfoPanel")?.classList.add("hidden");
+  $("#chatContactInfoPanel")?.setAttribute("aria-hidden","true");
+});
+$("#chatInfoMessageBtn")?.addEventListener("click",()=>$("#closeChatContactInfo")?.click());
+$("#chatInfoVoiceBtn")?.addEventListener("click",()=>callNotReady("voice",S.chatOtherName));
+$("#chatInfoVideoBtn")?.addEventListener("click",()=>callNotReady("video",S.chatOtherName));
+
+async function blockCurrentPeer(){
+  if(!S.chatOtherUid)return;
+  try{
+    await setDoc(doc(db,"users",S.user.uid,"blocks",S.chatOtherUid),{blockedAt:serverTimestamp()});
+    toast("Kontak la bloke.");
+    $("#chatMoreMenu")?.classList.add("hidden");
+  }catch(e){console.error(e);toast("Blokaj la echwe.");}
+}
+
+async function openChat(id,name){
+  S.chatId=id;S.chatOtherName=name||"Contact";
+  window.WBP_CURRENT_CHAT=id;window.WBP_CURRENT_USER=S.user?.uid||"";
+  const peer=await resolveChatPeer(id);
+  S.chatOtherUid=peer.uid;
   $("#chatPage .conversation")?.classList.add("open");
-  $("#chatTitle").innerHTML='<button id="closeChatViewBtn" class="ghost">←</button> '+esc(name)+' <button id="blockChatBtn" class="ghost">Bloke</button> <button id="reportChatBtn" class="ghost">Rapòte</button>';
+  $("#chatPage")?.classList.add("chat-open");
+  const initial=esc((S.chatOtherName.trim()[0]||"?").toUpperCase());
+  $("#chatTitle").innerHTML=
+    '<button id="closeChatViewBtn" class="waChatBackBtn" type="button">←</button>'+
+    '<button id="chatContactInfoBtn" class="waChatContactBtn" type="button"><span class="waChatHeaderAvatar">'+initial+'</span><span class="waChatHeaderIdentity"><b>'+esc(S.chatOtherName)+'</b><small>en ligne</small></span></button>'+
+    '<div class="waChatHeaderActions">'+
+      '<button id="videoCallBtn" class="waChatHeaderIcon" type="button" aria-label="Appel vidéo">📹</button>'+
+      '<button id="voiceCallBtn" class="waChatHeaderIcon" type="button" aria-label="Appel vocal">📞</button>'+
+      '<button id="chatMoreBtn" class="waChatHeaderIcon" type="button" aria-label="Menu">⋮</button>'+
+    '</div>'+
+    '<div id="chatMoreMenu" class="waChatMoreMenu hidden">'+
+      '<button id="showContactInfoMenu" type="button">Afficher le contact</button>'+
+      '<button type="button" data-chat-menu-info="Recherche dans la discussion à ajouter.">Rechercher</button>'+
+      '<button type="button" data-chat-menu-info="Médias, liens et documents seront regroupés ici.">Médias, liens et documents</button>'+
+      '<button type="button" data-chat-menu-info="Mode silencieux enregistré dans Paramètres.">Mode silencieux</button>'+
+      '<button type="button" data-chat-menu-info="Messages éphémères disponibles dans Paramètres > Discussions.">Messages éphémères</button>'+
+      '<button type="button" data-chat-menu-info="Thèmes de discussion à connecter.">Thème de la discussion</button>'+
+      '<button id="chatMenuReportBtn" type="button">Signaler</button>'+
+      '<button id="chatMenuBlockBtn" type="button">Bloquer</button>'+
+    '</div>';
   $("#messageForm").classList.remove("hidden");
   $("#closeChatViewBtn").onclick=closeChatView;
-  $("#reportChatBtn").onclick=()=>reportChat(id,name);
-  window.dispatchEvent(new CustomEvent("wbp-chat-open",{detail:{chatId:id,name}}));
+  $("#chatContactInfoBtn").onclick=()=>showChatContactInfo(S.chatOtherUid,S.chatOtherName);
+  $("#showContactInfoMenu").onclick=()=>{ $("#chatMoreMenu").classList.add("hidden"); showChatContactInfo(S.chatOtherUid,S.chatOtherName); };
+  $("#videoCallBtn").onclick=()=>callNotReady("video",S.chatOtherName);
+  $("#voiceCallBtn").onclick=()=>callNotReady("voice",S.chatOtherName);
+  $("#chatMoreBtn").onclick=()=>$("#chatMoreMenu").classList.toggle("hidden");
+  $("[data-chat-menu-info]").forEach(b=>b.onclick=()=>{toast(b.dataset.chatMenuInfo);$("#chatMoreMenu").classList.add("hidden")});
+  $("#chatMenuReportBtn").onclick=()=>{ $("#chatMoreMenu").classList.add("hidden");reportChat(id,S.chatOtherName); };
+  $("#chatMenuBlockBtn").onclick=blockCurrentPeer;
+  window.dispatchEvent(new CustomEvent("wbp-chat-open",{detail:{chatId:id,name:S.chatOtherName,uid:S.chatOtherUid}}));
   const q=query(collection(db,"chats",id,"messages"),orderBy("createdAt","asc"),limit(300));
   addOff(onSnapshot(q,s=>{
     $("#messages").innerHTML=s.docs.map(d=>{const m=d.data();const receipt=Array.isArray(m.readBy)&&m.readBy.length>1?" ✓✓":(m.senderId===S.user.uid?" ✓":"");return '<div class="msg '+(m.senderId===S.user.uid?"me":"")+'">'+messageContent(m)+(m.senderId===S.user.uid?'<small class="msgReceipt">'+receipt+'</small>':'')+'</div>'}).join("");
