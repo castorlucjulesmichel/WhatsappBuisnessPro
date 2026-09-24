@@ -69,7 +69,9 @@ function renderUsers(){
     <div class="actions"><button data-block="${u.id}" data-next="${!u.blocked}">${u.blocked?"Debloke":"Bloke"}</button></div></div>`;
   }).join("")||'<p class="muted">Pa gen itilizatè.</p>';
   $$("[data-block]").forEach(b=>b.onclick=async()=>{
-    await updateDoc(doc(db,"users",b.dataset.block),{blocked:b.dataset.next==="true",updatedAt:serverTimestamp()});
+    const blocked=b.dataset.next==="true";
+    await updateDoc(doc(db,"users",b.dataset.block),{blocked,updatedAt:serverTimestamp()});
+    await addDoc(collection(db,"notifications"),{recipientId:b.dataset.block,title:blocked?"Kont bloke":"Kont debloke",message:blocked?"Administrasyon bloke kont ou.":"Administrasyon reaktive kont ou.",read:false,createdAt:serverTimestamp()});
     toast("Kont mete ajou.");loadAll();
   });
 }
@@ -92,6 +94,8 @@ async function decideRequest(source,id,decision){
   try{
     if(decision==="rejected"){
       await updateDoc(doc(db,source,id),{status:"rejected",reviewedBy:admin.uid,reviewedAt:serverTimestamp()});
+      const rs=await getDoc(doc(db,source,id));
+      if(rs.exists()) await addDoc(collection(db,"notifications"),{recipientId:rs.data().userId,title:"Demann rejte",message:"Operasyon an pa valide.",read:false,createdAt:serverTimestamp()});
       toast("Demand rejte.");return loadAll();
     }
     await runTransaction(db,async tx=>{
@@ -123,6 +127,8 @@ async function decideRequest(source,id,decision){
         tx.set(doc(collection(db,"walletTransactions")),{userId:r.userId,type,amount,currency:cur,method:r.method||"",reference:r.reference||"",createdAt:serverTimestamp()});
       }
     });
+    const rs=await getDoc(doc(db,source,id));
+    if(rs.exists()) await addDoc(collection(db,"notifications"),{recipientId:rs.data().userId,title:"Demann apwouve",message:"Operasyon "+(rs.data().type||"exchange")+" la valide.",read:false,createdAt:serverTimestamp()});
     toast("Demand apwouve.");loadAll();
   }catch(e){console.error(e);toast(e.message||"Demand pa t trete.");}
 }
@@ -132,7 +138,7 @@ function renderOrders(){
   $("#adminOrders").innerHTML=rows.map(o=>`<div class="adminRow"><b>${money(o.total,o.currency)} • ${esc(o.status||"pending")}</b><br>
   <span class="muted">Achtè: ${esc(label(o.buyerId))} • Vandè: ${esc(label(o.sellerId))} • Komisyon: ${money(o.platformCommission||0,o.currency)}</span>
   ${o.status==="pending"?`<div class="actions"><button data-order="${o.id}" data-os="approved">Valide vant</button><button class="danger" data-order="${o.id}" data-os="rejected">Rejte</button></div>`:""}</div>`).join("")||'<p class="muted">Pa gen kòmand.</p>';
-  $$("[data-order]").forEach(b=>b.onclick=async()=>{await updateDoc(doc(db,"orders",b.dataset.order),{status:b.dataset.os,reviewedBy:admin.uid,reviewedAt:serverTimestamp()});toast("Kòmand mete ajou.");loadAll()});
+  $("[data-order]").forEach(b=>b.onclick=async()=>{const r=doc(db,"orders",b.dataset.order),s=await getDoc(r);await updateDoc(r,{status:b.dataset.os,reviewedBy:admin.uid,reviewedAt:serverTimestamp()});if(s.exists()){await addDoc(collection(db,"notifications"),{recipientId:s.data().buyerId,title:"Kòmand mete ajou",message:"Estati kòmand ou: "+b.dataset.os,read:false,createdAt:serverTimestamp()});await addDoc(collection(db,"notifications"),{recipientId:s.data().sellerId,title:"Vant mete ajou",message:"Estati vant la: "+b.dataset.os,read:false,createdAt:serverTimestamp()})}toast("Kòmand mete ajou.");loadAll()});
 }
 
 function renderVideos(){
@@ -143,7 +149,7 @@ function renderVideos(){
 function renderInvestments(){
   $("#adminInvestments").innerHTML=data.investments.map(x=>`<div class="adminRow"><b>${esc(x.levelName||"Envestisman")} • ${money(x.amount,x.currency)}</b><br><span class="muted">${esc(label(x.userId))} • ${esc(x.status||"pending")}</span>
   ${x.status==="pending"?`<div class="actions"><button data-investment="${x.id}" data-is="approved">Apwouve</button><button class="danger" data-investment="${x.id}" data-is="rejected">Rejte</button></div>`:""}</div>`).join("")||'<p class="muted">Pa gen demann envestisman.</p>';
-  $$("[data-investment]").forEach(b=>b.onclick=async()=>{await updateDoc(doc(db,"investments",b.dataset.investment),{status:b.dataset.is,reviewedBy:admin.uid,reviewedAt:serverTimestamp()});toast("Envestisman mete ajou.");loadAll()});
+  $("[data-investment]").forEach(b=>b.onclick=async()=>{const r=doc(db,"investments",b.dataset.investment),s=await getDoc(r);await updateDoc(r,{status:b.dataset.is,reviewedBy:admin.uid,reviewedAt:serverTimestamp()});if(s.exists())await addDoc(collection(db,"notifications"),{recipientId:s.data().userId,title:"Envestisman mete ajou",message:"Estati demann ou: "+b.dataset.is,read:false,createdAt:serverTimestamp()});toast("Envestisman mete ajou.");loadAll()});
 }
 
 function renderCases(){
