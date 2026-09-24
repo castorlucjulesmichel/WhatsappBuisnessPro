@@ -43,6 +43,20 @@ service cloud.firestore {
       }
     }
 
+    // Exact phone discovery without exposing the users collection.
+    // Clients may fetch a known phone hash, but cannot list the directory.
+    match /phoneDirectory/{phoneHash} {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create: if active()
+        && request.resource.data.uid == request.auth.uid;
+      allow update: if active()
+        && resource.data.uid == request.auth.uid
+        && request.resource.data.uid == request.auth.uid;
+      allow delete: if active()
+        && resource.data.uid == request.auth.uid;
+    }
+
     match /publicProfiles/{uid} {
       allow read: if signedIn();
       allow create, update: if isSelf(uid) && active();
