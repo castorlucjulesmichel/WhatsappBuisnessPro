@@ -179,3 +179,27 @@ html[data-theme="dark"] .waImportContactsBlock{background:var(--card);border-col
 .supportHelpForm{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:10px}
 .supportHelpForm input{min-width:0}
 @media(max-width:560px){.supportHelpMessages{min-height:240px;max-height:48vh}.supportHelpForm{grid-template-columns:1fr auto}}
+
+/* Native Android contact selector */
+.nativeContactSelector{position:fixed;inset:0;z-index:5000;background:#fff;color:#111;display:flex;flex-direction:column;min-height:100dvh}
+.nativeContactHead{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid #eceeed;background:#fff;position:sticky;top:0;z-index:2}
+.nativeContactHead h2{margin:0;font-size:23px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nativeContactHead small{display:block;margin-top:2px;color:#6c7370}
+.nativeSelectAllBtn{background:transparent!important;color:#119b61!important;padding:9px 7px!important;font-weight:800;white-space:nowrap}
+.nativeContactSearch{padding:10px 14px;background:#fff}
+.nativeContactSearch input{width:100%;border:0;background:#f2f3f2;border-radius:22px;padding:13px 16px;font-size:16px}
+.nativeContactList{flex:1;overflow:auto;padding:0 14px 92px}
+.nativeContactRow{display:grid;grid-template-columns:28px 52px 1fr;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid #f1f2f1}
+.nativeContactRow input{width:21px;height:21px;accent-color:#119b61}
+.nativeContactText{display:flex;flex-direction:column;gap:3px;min-width:0}
+.nativeContactText b{font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nativeContactText small{font-size:14px;color:#676e6b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nativeContactFooter{position:fixed;left:0;right:0;bottom:0;z-index:5001;padding:10px 14px max(10px,env(safe-area-inset-bottom));background:#fff;border-top:1px solid #e8ebe9}
+.nativeContactFooter button{width:100%;border-radius:24px;padding:13px;font-size:16px;font-weight:800}
+.nativeContactFooter button:disabled{opacity:.45}
+html[data-theme="dark"] .nativeContactSelector,
+html[data-theme="dark"] .nativeContactHead,
+html[data-theme="dark"] .nativeContactSearch,
+html[data-theme="dark"] .nativeContactFooter{background:var(--card);color:var(--text)}
+html[data-theme="dark"] .nativeContactSearch input{background:#111a17;color:var(--text)}
+html[data-theme="dark"] .nativeContactRow{border-color:var(--line)}
