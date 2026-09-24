@@ -345,6 +345,7 @@ function openChat(id,name){
     window.dispatchEvent(new CustomEvent("wbp-messages-rendered",{detail:{chatId:id,messages:s.docs.map(d=>({id:d.id,...d.data()}))}}));
   }))
 }
+window.WBP_OPEN_CHAT=(id,name)=>openChat(id,name);
 $("#messageForm").onsubmit=async e=>{e.preventDefault();const t=$("#messageText").value.trim();if(!t||!S.chatId)return;await addDoc(collection(db,"chats",S.chatId,"messages"),{senderId:S.user.uid,type:"text",text:t,readBy:[S.user.uid],createdAt:serverTimestamp()});await updateDoc(doc(db,"chats",S.chatId),{lastMessage:t.slice(0,120),updatedAt:serverTimestamp()});$("#messageText").value=""};
 async function reportChat(id,name){const q=query(collection(db,"chats",id,"messages"),orderBy("createdAt","desc"),limit(20)),s=await getDocs(q),excerpt=s.docs.reverse().map(d=>({senderId:d.data().senderId,text:d.data().text||""}));await addDoc(collection(db,"moderationCases"),{reporterId:S.user.uid,type:"chat",targetId:id,title:"Chat ak "+name,excerpt,status:"open",createdAt:serverTimestamp()});toast("Dènye mesaj yo pataje ak moderasyon.")}
 
