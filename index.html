@@ -10,9 +10,8 @@
 <section id="setupScreen" class="screen hidden"><div class="card authCard"><img class="brandLogo" src="assets/logo.webp" alt="Whatsapp Business Pro"><h1>Whatsapp Business Pro</h1><p>Firebase poko konfigire pou nouvo app endepandan sa a.</p><p class="muted">Kreye yon nouvo Firebase project epi mete config li nan <b>firebase-config.js</b>.</p></div></section>
 <section id="authScreen" class="screen">
  <div class="card authCard"><img class="brandLogo" src="assets/logo.webp" alt="Whatsapp Business Pro"><h1>Whatsapp Business Pro</h1><p>Business • Chat • Marketplace • Clips • Finance</p>
-  <input id="phone" inputmode="tel" placeholder="+509XXXXXXXX"><div id="recaptcha-container"></div>
-  <button id="sendOtp">Voye kòd OTP</button>
-  <div id="otpBox" class="hidden"><input id="otp" inputmode="numeric" maxlength="6" placeholder="Kòd SMS"><button id="verifyOtp">Verifye</button></div>
+  <button id="googleSignInBtn" class="googleSignInBtn" type="button"><span class="googleG">G</span><span>Continuer avec Google</span></button>
+  <p class="muted authHint">Connectez-vous avec votre compte Google. Aucun code OTP ni SMS n’est requis.</p>
  </div>
 </section>
 
@@ -350,13 +349,13 @@
   <div class="settingPanel hidden" data-setting-panel="account">
    <div class="waSectionTitle">Connexion et sécurité</div>
    <button class="waSettingRow" type="button" data-info-msg="Les clés d’accès nécessitent WebAuthn et seront activées dans une étape dédiée."><span>👥🔑</span><div><b>Clés d’accès</b></div></button>
-   <button class="waSettingRow" type="button" data-info-msg="Whatsapp Business Pro utilise actuellement Firebase Phone Auth. Aucun mot de passe n’est requis."><span>***</span><div><b>Mot de passe</b><small>Non utilisé avec la connexion par téléphone</small></div></button>
-   <button class="waSettingRow" type="button" data-info-msg="L’ajout d’une adresse e-mail de récupération sera disponible après activation du fournisseur e-mail Firebase."><span>✉️</span><div><b>Adresse e-mail</b></div></button>
+   <button class="waSettingRow" type="button" data-info-msg="Whatsapp Business Pro utilise la connexion Google via Firebase Authentication. Aucun mot de passe n’est géré par l’application."><span>***</span><div><b>Mot de passe</b><small>Géré par votre compte Google</small></div></button>
+   <button class="waSettingRow" type="button" data-info-msg="L’adresse e-mail provient du compte Google utilisé pour se connecter."><span>✉️</span><div><b>Compte Google</b><small id="settingsEmail">—</small></div></button>
    <label class="toggleRow"><span><b>Vérification en deux étapes</b><small>Préférence de sécurité enregistrée</small></span><input id="twoStepSetting" type="checkbox"></label>
    <label class="toggleRow"><span><b>Notifications de sécurité</b><small>Afficher les changements importants du compte</small></span><input id="securityNotificationsSetting" type="checkbox" checked></label>
    <div class="waSectionTitle">Votre compte</div>
    <button class="waSettingRow" id="openProfileFromSettings" type="button"><span>@</span><div><b>Nom de profil</b></div><span>›</span></button>
-   <button class="waSettingRow" type="button" data-info-msg="Le changement de numéro nécessite une nouvelle vérification OTP."><span>☎️↗</span><div><b>Changer de numéro de téléphone</b><small id="settingsPhone">—</small></div></button>
+   <button class="waSettingRow" type="button" data-info-msg="La connexion utilise maintenant votre compte Google. Vous pouvez modifier vos coordonnées publiques dans votre profil."><span>🔐</span><div><b>Compte de connexion</b><small id="settingsAuthProvider">Google</small></div></button>
    <button class="waSettingRow" type="button" data-info-msg="Une fonction d’export des données sera ajoutée côté serveur."><span>📄</span><div><b>Demander les infos du compte</b></div></button>
    <button class="waSettingRow dangerText" type="button" data-info-msg="La suppression définitive exige une confirmation sécurisée côté serveur."><span>🗑️</span><div><b>Supprimer le compte</b></div></button>
    <button id="logoutFromSettings" class="danger waFullBtn" type="button">Déconnexion</button>
@@ -482,7 +481,7 @@
   <label class="waProfileField"><span>ⓕ</span><input id="facebookProfile" placeholder="Facebook"></label>
   <div class="waSectionTitle">Coordonnées</div>
   <label class="waProfileField"><span>✉️</span><input id="businessEmailProfile" type="email" placeholder="Adresse e-mail professionnelle"></label>
-  <p class="waProfilePhone">☎️ <span id="profilePhoneDisplay">Numéro Firebase</span></p>
+  <p class="waProfilePhone">✉️ <span id="profilePhoneDisplay">Compte Google</span></p>
   <button type="submit" class="waSaveWide">Enregistrer le profil</button>
  </form>
  <div class="card"><h3>Localisation</h3><p id="locationStatus" class="muted">Non partagée.</p><button id="shareLocation">Partager la localisation actuelle</button></div>
