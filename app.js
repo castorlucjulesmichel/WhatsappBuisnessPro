@@ -283,8 +283,14 @@ function renderProducts(){
       if(o.id===S.user.uid)return toast("Sa se pwòp kont pa w.");
       const ids=[S.user.uid,o.id].sort(),id=ids.join("__");
       const names={[S.user.uid]:S.profile.displayName||S.profile.username||"User",[o.id]:o.data().displayName||o.data().username||"User"};
-      const ref=doc(db,"chats",id),existing=await getDoc(ref);
-      if(!existing.exists())await setDoc(ref,{type:"direct",participants:ids,participantNames:names,lastMessage:"",updatedAt:serverTimestamp()});
+      const ref=doc(db,"chats",id);
+      try{
+        await setDoc(ref,{type:"direct",participants:ids,participantNames:names},{merge:true});
+      }catch(writeErr){
+        if(writeErr?.code!=="permission-denied")throw writeErr;
+        const existing=await getDoc(ref);
+        if(!existing.exists())throw writeErr;
+      }
       go("chat");await openChat(id,names[o.id]);
     }catch(e){console.error(e);toast("Chat vandè a pa ouvri.");}
   });
