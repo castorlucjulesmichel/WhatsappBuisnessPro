@@ -81,15 +81,17 @@ function clearNormal(){normalOffs.forEach(f=>{try{f()}catch{}});normalOffs=[]}
 function watchNormalStatuses(){
   clearNormal();normalStatuses=[];
   const ownerIds=[user.uid,...contacts.map(c=>c.id)];
-  const chunks=[];for(let i=0;i<ownerIds.length;i+=30)chunks.push(ownerIds.slice(i,i+30));
-  for(const ids of chunks){
-    const q=query(collection(db,"statuses"),where("ownerId","in",ids));
+  const buckets=new Map();
+  const merge=()=>{
+    normalStatuses=[...buckets.values()].flat().sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+    render();
+  };
+  for(const ownerId of ownerIds){
+    const q=query(collection(db,"statuses"),where("ownerId","==",ownerId));
     const off=onSnapshot(q,s=>{
-      const byChunk=s.docs.map(d=>({id:d.id,...d.data()})).filter(x=>x.boostActive!==true||ids.includes(x.ownerId));
-      const other=normalStatuses.filter(x=>!ids.includes(x.ownerId));
-      normalStatuses=[...other,...byChunk].sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
-      render();
-    },e=>console.warn("Status contacts",e));
+      buckets.set(ownerId,s.docs.map(d=>({id:d.id,...d.data()})));
+      merge();
+    },e=>console.warn("Status contact",ownerId,e));
     normalOffs.push(off);
   }
 }
