@@ -8,7 +8,7 @@ const toast=t=>{const e=$("#toast");if(!e)return;e.textContent=t;e.classList.add
 const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 const norm=s=>String(s||"").trim().toLowerCase().replace(/[^a-z0-9_.-]/g,"");
 const configured=()=>firebaseConfig.apiKey&&!String(firebaseConfig.apiKey).includes("YOUR_");
-let auth=null,db=null,user=null,contacts=[],off=null,nativePhoneContacts=[],nativeSelectedContacts=new Set();
+let auth=null,db=null,user=null,accountPhone="",contacts=[],off=null,nativePhoneContacts=[],nativeSelectedContacts=new Set();
 
 const COUNTRY_CODES = [
 ["HT","+509"],["US","+1"],["CA","+1"],["FR","+33"],["GB","+44"],["ES","+34"],["DO","+1809"],["DO","+1829"],["DO","+1849"],
@@ -91,7 +91,7 @@ async function saveImportedContacts(items){
       const ref=doc(db,"users",user.uid,"contacts",item.id);
       const snap=await getDoc(ref);
       if(snap.exists())return "skipped";
-      const isSelfPhone=normalizePhone(user?.phoneNumber||"")===item.phone;
+      const isSelfPhone=normalizePhone(accountPhone||user?.phoneNumber||"")===item.phone;
       await setDoc(ref,{
         contactUid:isSelfPhone?user.uid:"",
         username:"",
@@ -264,7 +264,7 @@ function render(){
     const name=esc(c.displayName||c.username||c.phone||"Contact");
     const subtitle=esc(c.phone||(c.username?("@"+c.username):""));
     const avatar=esc((c.displayName||c.username||"?").charAt(0).toUpperCase());
-    const isSelf=!!user && normalizePhone(c.phone||"")===normalizePhone(user.phoneNumber||"");
+    const isSelf=!!user && normalizePhone(c.phone||"")===normalizePhone(accountPhone||user.phoneNumber||"");
     if(isSelf){
       return `<div class="waContactPerson waContactSelfRow">
         <span class="waPersonAvatar">${avatar}</span>
@@ -344,4 +344,5 @@ $("#newContactForm")?.addEventListener("submit",async e=>{
   toast(window.WBP_T?.(target?"Contact enregistré.":"Contact enregistré localement; il pourra être contacté lorsqu’il rejoindra l’application.")||(target?"Contact enregistré.":"Contact enregistré localement; il pourra être contacté lorsqu’il rejoindra l’application."));
   e.target.reset();showPage("contactPicker");
 });
-onAuthStateChanged(auth,u=>{user=u;if(u)watchContacts();else{off?.();contacts=[]}});
+onAuthStateChanged(auth,async u=>{user=u;if(u){try{const s=await getDoc(doc(db,"users",u.uid));accountPhone=s.data()?.phone||u.phoneNumber||""}catch{accountPhone=u.phoneNumber||""}watchContacts()}else{off?.();contacts=[];accountPhone=""}});
+window.addEventListener("wbp-phone-updated",e=>{accountPhone=e.detail?.phone||accountPhone;render()});
