@@ -509,6 +509,9 @@ const reverse=new Map();
 for(const [key,vals] of Object.entries(D)){
   vals.forEach(v=>{if(v)reverse.set(v.trim(),key)});
 }
+for(const [key,vals] of Object.entries(X)){
+  vals.forEach(v=>{if(v)reverse.set(v.trim(),key)});
+}
 for(const [src,key] of Object.entries(extraAliases))reverse.set(src,key);
 reverse.set("Pa gen discussion pou filtè sa a.","no_chats");
 reverse.set("No chats for this filter.","no_chats");
