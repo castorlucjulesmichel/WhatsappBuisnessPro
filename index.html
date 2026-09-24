@@ -493,6 +493,19 @@
  <div class="card"><h3>Assistant virtuel</h3><div id="assistantMessages" class="assistantMessages"></div><form id="assistantForm" class="row"><input id="assistantInput" placeholder="Posez une question..."><button>Envoyer</button></form></div>
 </section>
 
+<section id="nativeContactSelector" class="nativeContactSelector hidden" aria-hidden="true">
+ <div class="nativeContactHead">
+  <button id="closeNativeContactSelector" class="waBackBtn" type="button">←</button>
+  <div><h2>Sélectionner des contacts</h2><small id="nativeContactSelectionCount">0 sélectionné</small></div>
+  <button id="nativeSelectAllBtn" type="button" class="nativeSelectAllBtn">Tout sélectionner</button>
+ </div>
+ <div class="nativeContactSearch"><input id="nativeContactSearch" placeholder="Rechercher un contact..."></div>
+ <div id="nativeContactList" class="nativeContactList"></div>
+ <div class="nativeContactFooter">
+  <button id="importNativeSelectedBtn" type="button" disabled>Importer</button>
+ </div>
+</section>
+
 </main>
 
 <nav class="bottomNav">
