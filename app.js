@@ -26,7 +26,7 @@ function addOff(f){if(typeof f==="function")S.unsubs.push(f)}
 function clearOffs(){S.unsubs.forEach(f=>{try{f()}catch{}});S.unsubs=[]}
 function go(name){
   document.body.classList.toggle("waMainTab",name==="chat"||name==="calls");
-  $(".page").forEach(x=>x.classList.remove("active"));
+  $$(".page").forEach(x=>x.classList.remove("active"));
   $$("nav button").forEach(x=>x.classList.remove("active"));
   $("#"+name+"Page")?.classList.add("active");
   const parent={
