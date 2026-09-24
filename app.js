@@ -30,7 +30,7 @@ function go(name){
   $("#"+name+"Page")?.classList.add("active");
   const parent={
     status:"actus", clips:"actus",
-    market:"tools", orders:"tools", stats:"tools", business:"tools", profile:"tools",
+    market:"tools", orders:"tools", stats:"tools", business:"tools", profile:"tools", settings:"tools",
     invest:"wallet"
   }[name] || name;
   document.querySelector('nav button[data-page="'+parent+'"]')?.classList.add("active");
