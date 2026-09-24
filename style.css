@@ -172,3 +172,10 @@ html[data-theme="dark"] .waImportContactsBlock{background:var(--card);border-col
 @media(max-width:560px){.waImportContactsBlock .waBulkContactsBar{margin-left:0}}
 
 #selectAllContactsHint{display:block;color:#6d7370;font-size:12px;line-height:1.35;flex-basis:100%}
+
+.supportHelpIntro{padding:4px 0 10px}
+.supportHelpIntro h3{margin:0 0 6px}
+.supportHelpMessages{min-height:280px;max-height:52vh;overflow:auto;border:1px solid var(--line);border-radius:16px;padding:12px;background:var(--bg)}
+.supportHelpForm{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:10px}
+.supportHelpForm input{min-width:0}
+@media(max-width:560px){.supportHelpMessages{min-height:240px;max-height:48vh}.supportHelpForm{grid-template-columns:1fr auto}}
