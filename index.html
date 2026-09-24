@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ht">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#075e54"><title>Whatssap Business Pro</title>
+<link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="toast"></div>
+<section id="setupScreen" class="screen hidden"><div class="card authCard"><div class="brandIcon">W</div><h1>Whatssap Business Pro</h1><p>Firebase poko konfigire pou nouvo app endepandan sa a.</p><p class="muted">Kreye yon nouvo Firebase project epi mete config li nan <b>firebase-config.js</b>.</p></div></section>
+<section id="authScreen" class="screen">
+ <div class="card authCard"><div class="brandIcon">W</div><h1>Whatssap Business Pro</h1><p>Business • Chat • Marketplace • Clips • Finance</p>
+  <input id="phone" inputmode="tel" placeholder="+509XXXXXXXX"><div id="recaptcha-container"></div>
+  <button id="sendOtp">Voye kòd OTP</button>
+  <div id="otpBox" class="hidden"><input id="otp" inputmode="numeric" maxlength="6" placeholder="Kòd SMS"><button id="verifyOtp">Verifye</button></div>
+ </div>
+</section>
+
+<div id="appShell" class="hidden">
+<header><div><b>Whatssap Business Pro</b><small id="headerUser">Konekte</small></div>
+<div class="headerActions"><select id="lang"><option value="ht">HT</option><option value="fr">FR</option><option value="en">EN</option><option value="es">ES</option></select><button id="logout" class="ghost">Soti</button></div></header>
+
+<main>
+<section id="homePage" class="page active">
+ <div class="hero"><h2 data-i18n="welcome">Byenvini</h2><p>Chat, biznis, marketplace, videyo, wallet ak envestisman nan yon sèl app.</p></div>
+ <div class="metrics"><div><b id="mBalance">0 HTG</b><span>Balans</span></div><div><b id="mProducts">0</b><span>Pwodwi</span></div><div><b id="mOrders">0</b><span>Kòmand</span></div><div><b id="mInvest">0</b><span>Envestisman</span></div></div>
+ <div class="quickGrid">
+  <button data-go="chat">💬 Chat</button><button data-go="market">🛍️ Marketplace</button><button data-go="clips">▶ Clips</button>
+  <button data-go="wallet">💳 Wallet</button><button data-go="invest">📈 Envestisman</button><button data-go="business">🏪 Business</button>
+ </div>
+</section>
+
+<section id="chatPage" class="page">
+ <div class="title"><div><h2>Chats</h2><p>Mesaj prive ant itilizatè</p></div><button id="newChatBtn">+ Chat</button></div>
+ <div id="newChatBox" class="card hidden"><input id="targetUsername" placeholder="Username"><button id="startChatBtn">Kòmanse</button></div>
+ <div class="chatLayout"><aside id="chatList"></aside><section class="conversation"><div id="chatTitle" class="chatTitle">Chwazi yon chat</div><div id="messages"></div>
+ <form id="messageForm" class="hidden"><input id="messageText" maxlength="2000" placeholder="Ekri mesaj..."><button>Voye</button></form></section></div>
+ <div class="card"><h3>🔐 Chat sipò / Admin</h3><div id="supportMessages" class="supportMessages"></div><form id="supportForm" class="row"><input id="supportText" placeholder="Ekri administrasyon..."><button>Voye</button></form></div>
+</section>
+
+<section id="marketPage" class="page">
+ <div class="title"><div><h2>Marketplace</h2><p>Catalog, pwodwi, panier ak kòmand</p></div><div><button id="cartBtn">Panier <span id="cartCount">0</span></button><button id="sellBtn">+ Vann</button></div></div>
+ <div id="sellBox" class="card hidden"><form id="productForm"><input id="pName" required placeholder="Non pwodwi"><div class="row"><input id="pPrice" type="number" min="0" step="0.01" required placeholder="Pri"><select id="pCurrency"></select></div><select id="pCategory"><option>Electronics</option><option>Fashion</option><option>Cosmetics</option><option>Food</option><option>Services</option><option>Other</option></select><input id="pStock" type="number" min="0" value="1" placeholder="Stock"><textarea id="pDesc" placeholder="Deskripsyon"></textarea><input id="pImage" type="file" accept="image/*"><button>Pibliye</button></form></div>
+ <div id="cartBox" class="card hidden"><h3>Panier</h3><div id="cartItems"></div><button id="checkoutBtn">Kreye kòmand</button></div>
+ <div class="filters"><input id="marketSearch" placeholder="Chèche pwodwi..."><select id="marketCategory"><option value="">Tout kategori</option><option>Electronics</option><option>Fashion</option><option>Cosmetics</option><option>Food</option><option>Services</option><option>Other</option></select></div>
+ <div id="productGrid" class="productGrid"></div>
+</section>
+
+<section id="clipsPage" class="page">
+ <div class="title"><div><h2>Clips</h2><p>Espas videyo kout</p></div><button id="clipBtn">+ Pibliye</button></div>
+ <form id="clipForm" class="card hidden"><input id="clipFile" type="file" accept="video/*" required><textarea id="clipCaption" maxlength="500" placeholder="Caption"></textarea><button>Pibliye clip</button></form>
+ <div id="clipFeed" class="clipFeed"></div>
+</section>
+
+<section id="walletPage" class="page">
+ <div class="title"><div><h2>Wallet & Operasyon</h2><p>Depo, retrè, transfè, echanj ak istorik</p></div></div>
+ <div id="walletBalances" class="balances"></div>
+ <div class="financeGrid">
+  <form id="walletRequestForm" class="card"><h3>Nouvo operasyon</h3>
+   <select id="walletType"><option value="deposit">Depo</option><option value="withdrawal">Retrè</option><option value="transfer">Transfè</option><option value="payout">Payout</option></select>
+   <div class="row"><input id="walletAmount" type="number" min="0" step="0.01" placeholder="Montan" required><select id="walletCurrency"></select></div>
+   <select id="walletMethod"><option>MonCash</option><option>NatCash</option><option>Bank Transfer</option><option>MoneyGram</option><option>Ria</option><option>Unitransfer</option><option>Cash</option></select>
+   <input id="walletDestination" placeholder="Nimewo / kont / destinasyon"><input id="walletReference" placeholder="Referans tranzaksyon">
+   <label>Prèv (opsyonèl)</label><input id="walletProof" type="file" accept="image/*"><textarea id="walletNote" placeholder="Nòt"></textarea><button>Soumèt</button>
+  </form>
+  <form id="exchangeForm" class="card"><h3>Echanj deviz</h3><input id="exchangeAmount" type="number" min="0" step="0.01" placeholder="Montan" required><div class="row"><select id="exchangeFrom"></select><select id="exchangeTo"></select></div><button>Voye demann echanj</button></form>
+ </div>
+ <div class="card"><h3>Istorik operasyon</h3><div id="operationHistory"></div></div>
+</section>
+
+<section id="investPage" class="page">
+ <div class="title"><div><h2>Envestisman</h2><p>Nivo, demann ak suivi</p></div></div>
+ <div id="investmentLevels" class="levelGrid"></div>
+ <div class="card"><h3>Envestisman mwen</h3><div id="myInvestments"></div></div>
+</section>
+
+<section id="businessPage" class="page">
+ <div class="title"><div><h2>Business Pro</h2><p>Pwofil biznis ak zouti mesaj</p></div></div>
+ <div class="businessGrid">
+  <form id="businessForm" class="card"><h3>Pwofil biznis</h3><input id="businessName" placeholder="Non biznis"><textarea id="businessDescription" placeholder="Deskripsyon"></textarea><input id="businessHours" placeholder="Orè"><input id="businessWebsite" type="url" placeholder="Sit entènèt"><button>Sove</button></form>
+  <form id="businessToolsForm" class="card"><h3>Zouti mesaj</h3><textarea id="greetingMessage" placeholder="Mesaj akey"></textarea><textarea id="awayMessage" placeholder="Mesaj absans"></textarea><textarea id="quickReplies" placeholder="/pri = Men pri yo..."></textarea><button>Sove zouti</button></form>
+  <form id="adForm" class="card"><h3>Piblisite</h3><input id="adProduct" placeholder="Pwodwi / sèvis"><input id="adCountry" placeholder="Peyi sib"><div class="row"><input id="adBudget" type="number" min="0" step="0.01" placeholder="Bidjè"><select id="adCurrency"></select></div><select id="adGoal"><option>Sales</option><option>Website visits</option><option>Messages</option><option>Awareness</option></select><textarea id="adDescription" placeholder="Deskripsyon kanpay"></textarea><button>Soumèt kanpay</button></form>
+ </div>
+</section>
+
+<section id="profilePage" class="page">
+ <div class="title"><div><h2>Profil</h2><p>Kont, lang, foto ak lokalizasyon</p></div></div>
+ <form id="profileForm" class="card profileCard"><img id="avatarPreview" class="avatar" alt=""><input id="avatarFile" type="file" accept="image/*"><input id="displayName" placeholder="Non piblik"><input id="username" placeholder="Username"><select id="role"><option value="buyer">Achtè</option><option value="seller">Vandè</option><option value="business">Business</option><option value="investor">Envestisè</option></select><textarea id="bio" placeholder="Bio"></textarea><button>Sove profil</button></form>
+ <div class="card"><h3>Lokalizasyon</h3><p id="locationStatus" class="muted">Pa pataje.</p><button id="shareLocation">Pataje lokalizasyon aktyèl</button></div>
+ <div class="card"><h3>Asistans vityèl</h3><div id="assistantMessages" class="assistantMessages"></div><form id="assistantForm" class="row"><input id="assistantInput" placeholder="Poze yon kestyon..."><button>Voye</button></form></div>
+</section>
+</main>
+
+<nav>
+<button data-page="home" class="active">🏠<span>Akèy</span></button><button data-page="chat">💬<span>Chat</span></button><button data-page="market">🛍️<span>Market</span></button><button data-page="clips">▶️<span>Clips</span></button><button data-page="wallet">💳<span>Wallet</span></button><button data-page="invest">📈<span>Invest</span></button><button data-page="business">🏪<span>Business</span></button><button data-page="profile">👤<span>Profil</span></button>
+</nav>
+</div>
+<script type="module" src="app.js"></script>
+</body></html>
