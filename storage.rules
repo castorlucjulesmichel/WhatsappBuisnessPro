@@ -1,0 +1,34 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn(){ return request.auth != null; }
+    function admin(){ return signedIn() && request.auth.token.admin == true; }
+    function owner(uid){ return signedIn() && request.auth.uid == uid; }
+
+    match /whatssap-business-pro/products/{uid}/{file} {
+      allow read: if signedIn();
+      allow write: if owner(uid) && request.resource.size < 8 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+    match /whatssap-business-pro/clips/{uid}/{file} {
+      allow read: if signedIn();
+      allow write: if owner(uid) && request.resource.size < 80 * 1024 * 1024
+        && request.resource.contentType.matches('video/.*');
+    }
+    match /whatssap-business-pro/avatars/{uid}/{file} {
+      allow read: if signedIn();
+      allow write: if owner(uid) && request.resource.size < 8 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+    match /whatssap-business-pro/proofs/{uid}/{file} {
+      allow read: if owner(uid) || admin();
+      allow write: if owner(uid) && request.resource.size < 8 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+    match /whatssap-business-pro/ad-proofs/{uid}/{file} {
+      allow read: if owner(uid) || admin();
+      allow write: if owner(uid) && request.resource.size < 8 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+  }
+}
