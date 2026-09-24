@@ -273,7 +273,21 @@ function renderProducts(){
   $("#mProducts").textContent=list.length;
   $("#productGrid").innerHTML=list.length?list.map(p=>`<article class="product">${p.imageUrl?`<img src="${esc(p.imageUrl)}" alt="">`:""}<div class="productBody">${sponsored.has(p.id)?'<span class="status approved">Sponsored</span>':""}<h3>${esc(p.name)}</h3><p>${esc(p.description||"")}</p><b>${money(p.price,p.currency)}</b><div class="productActions"><button data-cart="${p.id}">Ajoute</button><button class="ghost" data-seller="${esc(p.sellerUsername||"")}">Chat</button></div></div></article>`).join(""):'<p class="muted">Pa gen pwodwi.</p>';
   $$("[data-cart]").forEach(b=>b.onclick=()=>addCart(b.dataset.cart));
-  $$("[data-seller]").forEach(b=>b.onclick=()=>{$("#targetUsername").value=b.dataset.seller;go("chat");$("#newChatBox").classList.remove("hidden")});
+  $("[data-seller]").forEach(b=>b.onclick=async()=>{
+    const un=norm(b.dataset.seller||"");
+    if(!un)return toast("Vandè a pa gen username.");
+    try{
+      const s=await getDocs(query(collection(db,"publicProfiles"),where("username","==",un),limit(1)));
+      if(s.empty)return toast("Vandè a pa jwenn.");
+      const o=s.docs[0];
+      if(o.id===S.user.uid)return toast("Sa se pwòp kont pa w.");
+      const ids=[S.user.uid,o.id].sort(),id=ids.join("__");
+      const names={[S.user.uid]:S.profile.displayName||S.profile.username||"User",[o.id]:o.data().displayName||o.data().username||"User"};
+      const ref=doc(db,"chats",id),existing=await getDoc(ref);
+      if(!existing.exists())await setDoc(ref,{type:"direct",participants:ids,participantNames:names,lastMessage:"",updatedAt:serverTimestamp()});
+      go("chat");await openChat(id,names[o.id]);
+    }catch(e){console.error(e);toast("Chat vandè a pa ouvri.");}
+  });
 }
 $("#marketSearch").oninput=renderProducts;$("#marketCategory").onchange=renderProducts;
 function watchProducts(){addOff(onSnapshot(collection(db,"products"),s=>{S.products=s.docs.map(d=>({id:d.id,...d.data()}));renderProducts()}))}
@@ -315,8 +329,11 @@ function renderClips(){
 }
 function watchClips(){addOff(onSnapshot(collection(db,"shortVideos"),s=>{S.clips=s.docs.map(d=>({id:d.id,...d.data()}));$("#mProducts");renderClips()}))}
 
-$("#newChatBtn").onclick=()=>$("#newChatBox").classList.toggle("hidden");
-$("#startChatBtn").onclick=async()=>{try{const un=norm($("#targetUsername").value),q=query(collection(db,"publicProfiles"),where("username","==",un),limit(1)),s=await getDocs(q);if(s.empty)return toast("Username pa jwenn.");const o=s.docs[0];if(o.id===S.user.uid)return toast("Ou pa ka chat ak tèt ou.");const ids=[S.user.uid,o.id].sort(),id=ids.join("__"),names={[S.user.uid]:S.profile.displayName||S.profile.username||"User",[o.id]:o.data().displayName||o.data().username||"User"};await setDoc(doc(db,"chats",id),{type:"direct",participants:ids,participantNames:names,lastMessage:"",updatedAt:serverTimestamp()},{merge:true});openChat(id,names[o.id]);$("#newChatBox").classList.add("hidden")}catch(x){console.error(x);toast("Chat la pa kreye.");}};
+$("#newChatBtn")?.addEventListener("click",()=>{
+  $("#newChatBox")?.classList.add("hidden");
+  go("contactPicker");
+});
+$("#newChatBox")?.classList.add("hidden");
 function chatClock(ts){
   const d=ts?.toDate?.() || (ts?.seconds?new Date(ts.seconds*1000):null);
   if(!d)return "";
@@ -350,11 +367,31 @@ function renderChatList(){
   }).join("")||'<div class="chatItem muted">'+(window.WBP_T?.("No chats for this filter.")||"No chats for this filter.")+'</div>';
   $$("[data-chat]").forEach(x=>x.onclick=()=>openChat(x.dataset.chat,x.dataset.name));
 }
+async function refreshChatsOnce(){
+  if(!S.user)return;
+  const q=query(collection(db,"chats"),where("participants","array-contains",S.user.uid));
+  try{
+    const s=await getDocs(q);
+    S.chatRows=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.updatedAt?.seconds||0)-(a.updatedAt?.seconds||0));
+    renderChatList();
+  }catch(e){
+    console.error("refresh chats",e);
+    const box=$("#chatList");
+    if(box&&!S.chatRows.length)box.innerHTML='<div class="chatItem muted">Impossible de charger les discussions. '+esc(e?.code||"")+'</div>';
+  }
+}
 function watchChats(){
   const q=query(collection(db,"chats"),where("participants","array-contains",S.user.uid));
+  refreshChatsOnce();
   addOff(onSnapshot(q,s=>{
     S.chatRows=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.updatedAt?.seconds||0)-(a.updatedAt?.seconds||0));
     renderChatList();
+  },e=>{
+    console.error("watch chats",e);
+    if(!S.chatRows.length){
+      const box=$("#chatList");
+      if(box)box.innerHTML='<div class="chatItem muted">Impossible de charger les discussions. '+esc(e?.code||"")+'</div>';
+    }
   }));
 }
 $("#chatSearch")?.addEventListener("input",renderChatList);
@@ -395,6 +432,8 @@ function closeChatView(){
   S.chatPresenceOff?.();S.chatPresenceOff=null;
   S.chatId=null;S.chatOtherUid=null;S.chatOtherName="";
   window.WBP_CURRENT_CHAT=null;
+  renderChatList();
+  refreshChatsOnce();
 }
 async function resolveChatPeer(id){
   let chat=S.chatRows.find(x=>x.id===id)||null;
@@ -458,6 +497,10 @@ async function openChat(id,name){
   window.WBP_CURRENT_CHAT=id;window.WBP_CURRENT_USER=S.user?.uid||"";
   const peer=await resolveChatPeer(id);
   S.chatOtherUid=peer.uid;
+  if(peer.chat){
+    const i=S.chatRows.findIndex(x=>x.id===id);
+    if(i>=0)S.chatRows[i]=peer.chat;else S.chatRows.unshift(peer.chat);
+  }
   $("#chatPage .conversation")?.classList.add("open");
   $("#chatPage")?.classList.add("chat-open");
   document.body.classList.add("chatConversationOpen");
