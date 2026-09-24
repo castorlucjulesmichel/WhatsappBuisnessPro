@@ -57,6 +57,60 @@ async function phoneDocId(phone){
   }catch{}
   return "phone_"+p.replace(/[^0-9]/g,"");
 }
+async function lookupAppUserByPhone(phone){
+  if(!user)return null;
+  const p=normalizePhone(phone);
+  if(!p)return null;
+  try{
+    const id=await phoneDocId(p);
+    const snap=await getDoc(doc(db,"phoneDirectory",id));
+    if(!snap.exists())return null;
+    const data=snap.data()||{};
+    return data.uid?{uid:data.uid,username:data.username||"",displayName:data.displayName||""}:null;
+  }catch(e){
+    if(e?.code!=="permission-denied")console.warn("phone lookup",e);
+    return null;
+  }
+}
+
+let resolvingContactLinks=false;
+async function refreshDirectoryLinks(rows=contacts){
+  if(resolvingContactLinks||!user||!Array.isArray(rows)||!rows.length)return;
+  resolvingContactLinks=true;
+  try{
+    for(const contact of rows){
+      const phone=normalizePhone(contact.phone||"");
+      if(!phone)continue;
+      const isSelf=phone===normalizePhone(accountPhone||user.phoneNumber||"");
+      let targetUid=isSelf?user.uid:"";
+      let targetUsername=contact.username||"";
+      if(!isSelf){
+        const found=await lookupAppUserByPhone(phone);
+        targetUid=found?.uid||"";
+        if(found?.username)targetUsername=found.username;
+      }
+      if(targetUid&&contact.contactUid!==targetUid){
+        await setDoc(doc(db,"users",user.uid,"contacts",contact.id),{
+          contactUid:targetUid,
+          username:targetUsername,
+          linkedByPhone:true,
+          updatedAt:serverTimestamp()
+        },{merge:true});
+      }else if(!targetUid&&contact.linkedByPhone===true&&contact.contactUid){
+        await setDoc(doc(db,"users",user.uid,"contacts",contact.id),{
+          contactUid:"",
+          linkedByPhone:false,
+          updatedAt:serverTimestamp()
+        },{merge:true});
+      }
+    }
+  }catch(e){
+    console.warn("refresh phone links",e);
+  }finally{
+    resolvingContactLinks=false;
+  }
+}
+
 async function saveImportedContacts(items){
   if(!user||!Array.isArray(items)||!items.length)return {imported:0,skipped:0,failed:0};
 
@@ -92,9 +146,10 @@ async function saveImportedContacts(items){
       const snap=await getDoc(ref);
       if(snap.exists())return "skipped";
       const isSelfPhone=normalizePhone(accountPhone||user?.phoneNumber||"")===item.phone;
+      const found=isSelfPhone?{uid:user.uid,username:""}:await lookupAppUserByPhone(item.phone);
       await setDoc(ref,{
-        contactUid:isSelfPhone?user.uid:"",
-        username:"",
+        contactUid:found?.uid||"",
+        username:found?.username||"",
         displayName:item.name,
         phone:item.phone,
         importedFromPhone:true,
@@ -315,6 +370,7 @@ function watchContacts(){
   off=onSnapshot(collection(db,"users",user.uid,"contacts"),snap=>{
     contacts=snap.docs.map(d=>({id:d.id,...d.data()}));
     render();
+    refreshDirectoryLinks(contacts);
   });
 }
 $("#newChatBtn")?.addEventListener("click",e=>{e.preventDefault();showPage("contactPicker");});
