@@ -613,6 +613,14 @@ Object.assign(X,{
 "sync_contacts_hint":["Permita acesso aos contatos que deseja adicionar.","Erlauben Sie den Zugriff auf die Kontakte, die Sie hinzufügen möchten.","Consenti l’accesso ai contatti che vuoi aggiungere.","اسمح بالوصول إلى جهات الاتصال التي تريد إضافتها.","允许访问你想添加的联系人。","जिन संपर्कों को जोड़ना चाहते हैं, उनकी अनुमति दें।","যে কন্ট্যাক্ট যোগ করতে চান সেগুলোর অনুমতি দিন।","Разрешите доступ к контактам, которые хотите добавить.","Eklemek istediğiniz kişilere erişime izin verin.","追加したい連絡先へのアクセスを許可してください。","추가할 연락처에 대한 접근을 허용하세요."]
 });
 
+
+Object.assign(D,{
+"you_label":["Ou","Vous","You","Tú"]
+});
+Object.assign(X,{
+"you_label":["Você","Sie","Tu","أنت","你","आप","আপনি","Вы","Siz","あなた","나"]
+});
+
 const reverse=new Map();
 for(const [key,vals] of Object.entries(D)){
   vals.forEach(v=>{if(v)reverse.set(v.trim(),key)});
@@ -622,6 +630,7 @@ for(const [key,vals] of Object.entries(X)){
 }
 for(const [src,key] of Object.entries(extraAliases))reverse.set(src,key);
 reverse.set("Inviter","invite");
+reverse.set("Vous","you_label");
 reverse.set("Synchroniser les contacts","sync_contacts");
 reverse.set("Autorisez l’accès aux contacts que vous souhaitez ajouter.","sync_contacts_hint");
 reverse.set("Join me on Whatsapp Business Pro","join_invite");
