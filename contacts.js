@@ -198,7 +198,7 @@ function renderNativePhoneContacts(){
     </label>`;
   }).join("")||'<p class="muted">'+esc(window.WBP_T?.("Aucun contact pour le moment.")||"Aucun contact pour le moment.")+'</p>';
 
-  $("[data-native-phone]").forEach(cb=>cb.onchange=()=>{
+  $$("[data-native-phone]").forEach(cb=>cb.onchange=()=>{
     cb.checked?nativeSelectedContacts.add(cb.dataset.nativePhone):nativeSelectedContacts.delete(cb.dataset.nativePhone);
     updateNativeSelectorControls();
   });
