@@ -549,6 +549,14 @@ Object.assign(X,{
 "share_invites_failed":["Não foi possível compartilhar os convites.","Einladungen konnten nicht geteilt werden.","Impossibile condividere gli inviti.","تعذر مشاركة الدعوات.","无法分享邀请。","आमंत्रण साझा नहीं किए जा सके।","আমন্ত্রণ শেয়ার করা যায়নি।","Не удалось поделиться приглашениями.","Davetler paylaşılamadı.","招待を共有できませんでした。","초대를 공유할 수 없습니다."]
 });
 
+
+Object.assign(D,{
+"android_confirm_contacts":["Android ap mande w konfime kontak ou vle pataje yo.","Android vous demandera de confirmer les contacts à partager.","Android will ask you to confirm the contacts to share.","Android te pedirá confirmar los contactos que deseas compartir."]
+});
+Object.assign(X,{
+"android_confirm_contacts":["O Android pedirá que você confirme os contatos a compartilhar.","Android fordert Sie auf, die zu teilenden Kontakte zu bestätigen.","Android ti chiederà di confermare i contatti da condividere.","سيطلب منك Android تأكيد جهات الاتصال التي تريد مشاركتها.","Android 会要求你确认要分享的联系人。","Android आपसे साझा किए जाने वाले संपर्कों की पुष्टि करने को कहेगा।","Android আপনাকে শেয়ার করার কন্ট্যাক্ট নিশ্চিত করতে বলবে।","Android попросит подтвердить контакты для передачи.","Android paylaşılacak kişileri onaylamanızı isteyecek.","Android が共有する連絡先の確認を求めます。","Android에서 공유할 연락처를 확인하라는 메시지가 표시됩니다."]
+});
+
 const reverse=new Map();
 for(const [key,vals] of Object.entries(D)){
   vals.forEach(v=>{if(v)reverse.set(v.trim(),key)});
@@ -565,6 +573,8 @@ reverse.set("Deselect all","deselect_all");
 reverse.set("Inviter sélectionnés","invite_selected");
 reverse.set("selected","selected");
 reverse.set("Unable to share invitations.","share_invites_failed");
+reverse.set("Android will ask you to confirm the contacts to share.","android_confirm_contacts");
+reverse.set("Android vous demandera de confirmer les contacts à partager.","android_confirm_contacts");
 reverse.set("Pa gen discussion pou filtè sa a.","no_chats");
 reverse.set("No chats for this filter.","no_chats");
 
