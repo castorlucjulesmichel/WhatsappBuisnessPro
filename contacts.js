@@ -41,6 +41,67 @@ function showPage(name){
   document.body.classList.toggle("waMainTab",name==="chat"||name==="calls");
 }
 
+function decodeVcfValue(v){
+  let s=String(v||"").trim();
+  try{
+    if(/ENCODING=QUOTED-PRINTABLE/i.test(s))return s;
+  }catch{}
+  return s.replace(/\\n/gi,"\n").replace(/\\,/g,",").replace(/\\;/g,";").replace(/\\\\/g,"\\");
+}
+function unfoldVcf(text){
+  return String(text||"").replace(/\r\n/g,"\n").replace(/\r/g,"\n").replace(/\n[ \t]/g,"");
+}
+function parseVcfContacts(text){
+  const input=unfoldVcf(text);
+  const cards=input.split(/BEGIN:VCARD/i).slice(1);
+  const out=[];
+  for(const raw of cards){
+    const card=raw.split(/END:VCARD/i)[0]||"";
+    const lines=card.split("\n").map(x=>x.trim()).filter(Boolean);
+    let name="";
+    let fallbackName="";
+    const phones=[];
+    for(const line of lines){
+      const colon=line.indexOf(":");
+      if(colon<0)continue;
+      const left=line.slice(0,colon);
+      const value=line.slice(colon+1);
+      const prop=left.split(";")[0].toUpperCase();
+      if(prop==="FN"&&!name)name=decodeVcfValue(value);
+      else if(prop==="N"&&!fallbackName){
+        const p=decodeVcfValue(value).split(";");
+        fallbackName=[p[1],p[2],p[0]].filter(Boolean).join(" ").trim();
+      } else if(prop==="TEL"){
+        const phone=normalizePhone(decodeVcfValue(value));
+        if(phone)phones.push(phone);
+      }
+    }
+    const displayName=(name||fallbackName||"Contact").trim();
+    [...new Set(phones)].forEach(phone=>out.push({name:displayName,phone}));
+  }
+  return out;
+}
+async function importVcfFile(file){
+  if(!file)return;
+  if(!user)return toast(window.WBP_T?.("Sign in first.")||"Sign in first.");
+  try{
+    if(file.size>12*1024*1024){
+      toast(window.WBP_T?.("VCF file is too large.")||"VCF file is too large.");
+      return;
+    }
+    const text=await file.text();
+    const parsed=parseVcfContacts(text);
+    if(!parsed.length){
+      toast(window.WBP_T?.("No phone contacts were found in this VCF file.")||"No phone contacts were found in this VCF file.");
+      return;
+    }
+    const result=await saveImportedContacts(parsed);
+    showImportResult(result);
+  }catch(e){
+    console.warn("vcf import",e);
+    toast(window.WBP_T?.("Unable to import the VCF file.")||"Unable to import the VCF file.");
+  }
+}
 function normalizePhone(v){
   let p=String(v||"").trim().replace(/[^0-9+]/g,"");
   if(p.startsWith("00"))p="+"+p.slice(2);
@@ -327,6 +388,12 @@ window.addEventListener("wbp-language-changed",updateAndroidImportHint);
 $("#pickerNewGroupBtn")?.addEventListener("click",()=>{showPage("chat");setTimeout(()=>$("#newGroupBox")?.classList.remove("hidden"),50)});
 $("#contactPickerSearchBtn")?.addEventListener("click",()=>$("#contactPickerSearch")?.classList.toggle("hidden"));
 $("#contactPickerSearch")?.addEventListener("input",render);
+$("#importVcfContactsBtn")?.addEventListener("click",()=>$("#vcfContactsFile")?.click());
+$("#vcfContactsFile")?.addEventListener("change",async e=>{
+  const file=e.target.files?.[0];
+  if(file)await importVcfFile(file);
+  e.target.value="";
+});
 window.addEventListener("wbp-language-changed",render);
 $("#newContactForm")?.addEventListener("submit",async e=>{
   e.preventDefault();
