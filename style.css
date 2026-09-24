@@ -152,3 +152,7 @@ html[data-theme="dark"] .waSubPage,html[data-theme="dark"] .waSettingsPage,html[
 .waContactInviteRow{cursor:default}
 .waInviteBtn{background:transparent!important;color:#119b61!important;font-size:16px;font-weight:800;padding:10px 4px;border-radius:0}
 .waInviteBtn:hover{background:transparent!important;opacity:.78}
+
+.waImportContactsAction{margin-top:2px}
+.waImportContactsAction>span:nth-child(2){display:flex;flex-direction:column;gap:3px}
+.waImportContactsAction small{color:#6d7370;font-size:13px;line-height:1.3;font-weight:400}
