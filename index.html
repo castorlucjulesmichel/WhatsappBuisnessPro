@@ -33,10 +33,27 @@
 </section>
 
 <section id="chatPage" class="page">
- <div class="title"><div><h2>Chats</h2><p>Mesaj prive ant itilizatè</p></div><button id="newChatBtn">+ Chat</button></div>
+ <div class="title"><div><h2>Chats</h2><p>Mesaj prive, gwoup, foto, dokiman ak mesaj vokal</p></div><div class="actions"><button id="newChatBtn">+ Chat</button><button id="newGroupBtn" class="ghost">+ Gwoup</button></div></div>
  <div id="newChatBox" class="card hidden"><input id="targetUsername" placeholder="Username"><button id="startChatBtn">Kòmanse</button></div>
- <div class="chatLayout"><aside id="chatList"></aside><section class="conversation"><div id="chatTitle" class="chatTitle">Chwazi yon chat</div><div id="messages"></div>
- <form id="messageForm" class="hidden"><input id="messageText" maxlength="2000" placeholder="Ekri mesaj..."><button>Voye</button></form></section></div>
+ <div id="newGroupBox" class="card hidden">
+   <h3>Nouvo gwoup</h3>
+   <input id="groupName" maxlength="60" placeholder="Non gwoup">
+   <textarea id="groupMembers" placeholder="Username manm yo, separe ak vigil. Egzanp: jean, marie, pierre"></textarea>
+   <button id="createGroupBtn" type="button">Kreye gwoup</button>
+ </div>
+ <div class="chatLayout"><aside id="chatList"></aside><section class="conversation">
+   <div id="chatTitle" class="chatTitle">Chwazi yon chat</div>
+   <div id="typingIndicator" class="typingIndicator hidden">Ap ekri...</div>
+   <div id="messages"></div>
+   <form id="messageForm" class="hidden">
+     <button id="attachBtn" type="button" class="ghost" title="Ajoute fichye">📎</button>
+     <input id="chatAttachment" class="hidden" type="file" accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt">
+     <input id="messageText" maxlength="2000" placeholder="Ekri mesaj...">
+     <button id="voiceBtn" type="button" class="ghost" title="Mesaj vokal">🎤</button>
+     <button>Voye</button>
+   </form>
+   <div id="voiceStatus" class="voiceStatus hidden"></div>
+  </section></div>
  <div class="card"><h3>🔐 Chat sipò / Admin</h3><div id="supportMessages" class="supportMessages"></div><form id="supportForm" class="row"><input id="supportText" placeholder="Ekri administrasyon..."><button>Voye</button></form></div>
 </section>
 
@@ -378,4 +395,5 @@
 <script type="module" src="boost.js"></script>
 <script type="module" src="orders.js"></script>
 <script type="module" src="notifications.js"></script>\n<script type="module" src="settings.js"></script>
+<script type="module" src="chat-advanced.js"></script>
 </body></html>
