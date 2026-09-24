@@ -182,6 +182,17 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+
+    match /notifications/{id} {
+      allow create: if isAdmin();
+      allow read: if signedIn() && resource.data.recipientId == request.auth.uid;
+      allow update: if signedIn()
+        && resource.data.recipientId == request.auth.uid
+        && request.resource.data.recipientId == resource.data.recipientId;
+      allow delete: if isAdmin()
+        || (signedIn() && resource.data.recipientId == request.auth.uid);
+    }
+
     match /moderationCases/{id} {
       allow create: if active() && request.resource.data.reporterId == request.auth.uid;
       allow read, update: if isAdmin();
