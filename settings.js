@@ -10,10 +10,27 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&
 const defaultPrefs={
   readReceipts:true,
   disappearing:false,
+  disappearingDuration:"off",
   onlineVisibility:true,
+  onlinePresence:"contacts",
+  profilePhotoPrivacy:"everyone",
+  aboutPrivacy:"everyone",
+  statusPrivacy:"contacts",
+  groupsPrivacy:"contacts",
+  twoStep:false,
+  securityNotifications:true,
+  autoLists:false,
+  enterToSend:false,
+  mediaVisibility:true,
+  stickerSuggestions:true,
+  keepArchived:true,
+  messageSound:true,
+  reminders:true,
+  priorityNotifications:true,
+  reactionNotifications:true,
+  statusReaction:true,
   theme:"system",
   fontSize:"normal",
-  messageNotifications:true,
   orderNotifications:true,
   adNotifications:true,
   autoDownload:"wifi",
@@ -45,11 +62,26 @@ function fillControls(){
   const setCheck=(id,v)=>{const e=$(id);if(e)e.checked=!!v};
   const setValue=(id,v)=>{const e=$(id);if(e)e.value=v??""};
   setCheck("#readReceiptsSetting",prefs.readReceipts);
-  setCheck("#defaultDisappearingSetting",prefs.disappearing);
-  setCheck("#onlineVisibilitySetting",prefs.onlineVisibility);
+  setValue("#disappearingDurationSetting",prefs.disappearingDuration||"off");
+  setValue("#onlinePresenceSetting",prefs.onlinePresence||"contacts");
+  setValue("#profilePhotoPrivacySetting",prefs.profilePhotoPrivacy||"everyone");
+  setValue("#aboutPrivacySetting",prefs.aboutPrivacy||"everyone");
+  setValue("#statusPrivacySetting",prefs.statusPrivacy||"contacts");
+  setValue("#groupsPrivacySetting",prefs.groupsPrivacy||"contacts");
+  setCheck("#twoStepSetting",prefs.twoStep);
+  setCheck("#securityNotificationsSetting",prefs.securityNotifications);
+  setCheck("#autoListsSetting",prefs.autoLists);
+  setCheck("#enterToSendSetting",prefs.enterToSend);
+  setCheck("#mediaVisibilitySetting",prefs.mediaVisibility);
+  setCheck("#stickerSuggestionsSetting",prefs.stickerSuggestions);
+  setCheck("#keepArchivedSetting",prefs.keepArchived);
+  setCheck("#messageSoundSetting",prefs.messageSound);
+  setCheck("#remindersSetting",prefs.reminders);
+  setCheck("#priorityNotificationsSetting",prefs.priorityNotifications);
+  setCheck("#reactionNotificationsSetting",prefs.reactionNotifications);
+  setCheck("#statusReactionSetting",prefs.statusReaction);
   setValue("#themeSetting",prefs.theme);
   setValue("#fontSizeSetting",prefs.fontSize);
-  setCheck("#messageNotificationsSetting",prefs.messageNotifications);
   setCheck("#orderNotificationsSetting",prefs.orderNotifications);
   setCheck("#adNotificationsSetting",prefs.adNotifications);
   setValue("#autoDownloadSetting",prefs.autoDownload);
@@ -118,6 +150,8 @@ $("#settingsSearch")?.addEventListener("input",e=>{
 });
 $$("[data-setting-target]").forEach(b=>b.addEventListener("click",()=>openPanel(b.dataset.settingTarget)));
 $("#settingsBackBtn")?.addEventListener("click",closePanel);
+$("[data-info-msg]").forEach(b=>b.addEventListener("click",()=>toast(b.dataset.infoMsg)));
+$("#settingsProfileCard")?.addEventListener("click",()=>document.querySelector('[data-go="profile"]')?.click());
 
 $$('[data-go="settings"][data-settings-section]').forEach(b=>b.addEventListener("click",()=>{
   setTimeout(()=>openPanel(b.dataset.settingsSection),30);
@@ -125,11 +159,26 @@ $$('[data-go="settings"][data-settings-section]').forEach(b=>b.addEventListener(
 
 const binds=[
   ["#readReceiptsSetting","readReceipts","checked"],
-  ["#defaultDisappearingSetting","disappearing","checked"],
-  ["#onlineVisibilitySetting","onlineVisibility","checked"],
+  ["#disappearingDurationSetting","disappearingDuration","value"],
+  ["#onlinePresenceSetting","onlinePresence","value"],
+  ["#profilePhotoPrivacySetting","profilePhotoPrivacy","value"],
+  ["#aboutPrivacySetting","aboutPrivacy","value"],
+  ["#statusPrivacySetting","statusPrivacy","value"],
+  ["#groupsPrivacySetting","groupsPrivacy","value"],
+  ["#twoStepSetting","twoStep","checked"],
+  ["#securityNotificationsSetting","securityNotifications","checked"],
+  ["#autoListsSetting","autoLists","checked"],
+  ["#enterToSendSetting","enterToSend","checked"],
+  ["#mediaVisibilitySetting","mediaVisibility","checked"],
+  ["#stickerSuggestionsSetting","stickerSuggestions","checked"],
+  ["#keepArchivedSetting","keepArchived","checked"],
+  ["#messageSoundSetting","messageSound","checked"],
+  ["#remindersSetting","reminders","checked"],
+  ["#priorityNotificationsSetting","priorityNotifications","checked"],
+  ["#reactionNotificationsSetting","reactionNotifications","checked"],
+  ["#statusReactionSetting","statusReaction","checked"],
   ["#themeSetting","theme","value"],
   ["#fontSizeSetting","fontSize","value"],
-  ["#messageNotificationsSetting","messageNotifications","checked"],
   ["#orderNotificationsSetting","orderNotifications","checked"],
   ["#adNotificationsSetting","adNotifications","checked"],
   ["#autoDownloadSetting","autoDownload","value"],
@@ -173,4 +222,18 @@ $("#inviteContactBtn")?.addEventListener("click",async()=>{
 });
 
 loadLocal();
-if(configured())onAuthStateChanged(auth,async u=>{user=u;if(u)await loadRemote();});
+if(configured())onAuthStateChanged(auth,async u=>{
+  user=u;
+  if(!u)return;
+  await loadRemote();
+  if($("#settingsPhone"))$("#settingsPhone").textContent=u.phoneNumber||"—";
+  try{
+    const p=await getDoc(doc(db,"publicProfiles",u.uid));
+    if(p.exists()){
+      const d=p.data();
+      if($("#settingsDisplayName"))$("#settingsDisplayName").textContent=d.displayName||d.username||"Mon profil";
+      if($("#settingsAbout"))$("#settingsAbout").textContent=d.bio||"Whatsapp Business Pro";
+      if($("#settingsAvatar")&&d.photoUrl)$("#settingsAvatar").src=d.photoUrl;
+    }
+  }catch{}
+});
