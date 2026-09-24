@@ -517,6 +517,22 @@ Object.assign(X,{
 "invite_link_copied":["Link de convite copiado.","Einladungslink kopiert.","Link di invito copiato.","تم نسخ رابط الدعوة.","邀请链接已复制。","आमंत्रण लिंक कॉपी किया गया।","আমন্ত্রণ লিঙ্ক কপি হয়েছে।","Ссылка приглашения скопирована.","Davet bağlantısı kopyalandı.","招待リンクをコピーしました。","초대 링크가 복사되었습니다."]
 });
 
+
+Object.assign(D,{
+"import_phone_contacts":["Enpòte kontak telefòn mwen","Importer mes contacts","Import my contacts","Importar mis contactos"],
+"import_phone_contacts_hint":["Chwazi plizyè kontak oswa Tout nan selektè telefòn nan.","Sélectionnez plusieurs contacts ou Tous dans le sélecteur du téléphone.","Select multiple contacts or All in the phone picker.","Selecciona varios contactos o Todos en el selector del teléfono."],
+"phone_contacts_unsupported":["Kontak telefòn pa sipòte nan navigatè sa a. Louvri app la nan Chrome sou Android.","Les contacts du téléphone ne sont pas pris en charge dans ce navigateur. Ouvrez l’application dans Chrome sur Android.","Phone contacts are not supported in this browser. Open the app in Chrome on Android.","Los contactos del teléfono no son compatibles con este navegador. Abre la aplicación en Chrome para Android."],
+"contacts_imported":["Kontak enpòte","Contacts importés","Contacts imported","Contactos importados"],
+"contacts_import_failed":["Nou pa kapab enpòte kontak telefòn yo.","Impossible d’importer les contacts du téléphone.","Unable to import phone contacts.","No se pudieron importar los contactos del teléfono."]
+});
+Object.assign(X,{
+"import_phone_contacts":["Importar meus contatos","Meine Kontakte importieren","Importa i miei contatti","استيراد جهات اتصالي","导入我的联系人","मेरे संपर्क आयात करें","আমার কন্ট্যাক্ট আমদানি করুন","Импортировать мои контакты","Kişilerimi içe aktar","連絡先をインポート","연락처 가져오기"],
+"import_phone_contacts_hint":["Selecione vários contatos ou Todos no seletor do telefone.","Wählen Sie mehrere Kontakte oder Alle im Telefon-Auswahldialog.","Seleziona più contatti o Tutti nel selettore del telefono.","اختر عدة جهات اتصال أو الكل من منتقي الهاتف.","在手机联系人选择器中选择多个联系人或全部。","फ़ोन चयनकर्ता में कई संपर्क या सभी चुनें।","ফোন সিলেক্টরে একাধিক কন্ট্যাক্ট বা সব নির্বাচন করুন।","Выберите несколько контактов или Все в системном окне.","Telefon seçicisinde birden fazla kişi veya Tümü'nü seçin.","電話の選択画面で複数またはすべてを選択してください。","휴대폰 선택기에서 여러 연락처 또는 전체를 선택하세요."],
+"phone_contacts_unsupported":["Os contatos não são suportados neste navegador. Abra no Chrome para Android.","Telefonkontakte werden in diesem Browser nicht unterstützt. Öffnen Sie die App in Chrome auf Android.","I contatti non sono supportati in questo browser. Apri l’app in Chrome su Android.","جهات الاتصال غير مدعومة في هذا المتصفح. افتح التطبيق في Chrome على Android.","此浏览器不支持手机联系人。请在 Android Chrome 中打开应用。","इस ब्राउज़र में फ़ोन संपर्क समर्थित नहीं हैं। Android पर Chrome में ऐप खोलें।","এই ব্রাউজারে ফোন কন্ট্যাক্ট সমর্থিত নয়। Android Chrome-এ অ্যাপ খুলুন।","Контакты не поддерживаются в этом браузере. Откройте приложение в Chrome на Android.","Bu tarayıcı telefon kişilerini desteklemiyor. Android Chrome'da açın.","このブラウザは連絡先に対応していません。Android の Chrome で開いてください。","이 브라우저는 휴대폰 연락처를 지원하지 않습니다. Android Chrome에서 여세요."],
+"contacts_imported":["Contatos importados","Kontakte importiert","Contatti importati","تم استيراد جهات الاتصال","联系人已导入","संपर्क आयात किए गए","কন্ট্যাক্ট আমদানি হয়েছে","Контакты импортированы","Kişiler içe aktarıldı","連絡先をインポートしました","연락처를 가져왔습니다"],
+"contacts_import_failed":["Não foi possível importar os contatos.","Kontakte konnten nicht importiert werden.","Impossibile importare i contatti.","تعذر استيراد جهات الاتصال.","无法导入联系人。","संपर्क आयात नहीं किए जा सके।","কন্ট্যাক্ট আমদানি করা যায়নি।","Не удалось импортировать контакты.","Kişiler içe aktarılamadı.","連絡先をインポートできませんでした。","연락처를 가져올 수 없습니다."]
+});
+
 const reverse=new Map();
 for(const [key,vals] of Object.entries(D)){
   vals.forEach(v=>{if(v)reverse.set(v.trim(),key)});
