@@ -24,9 +24,11 @@
 <section id="homePage" class="page active">
  <div class="hero"><h2 data-i18n="welcome">Byenvini</h2><p>Chat, biznis, marketplace, videyo, wallet ak envestisman nan yon sèl app.</p></div>
  <div class="metrics"><div><b id="mBalance">0 HTG</b><span>Balans</span></div><div><b id="mProducts">0</b><span>Pwodwi</span></div><div><b id="mOrders">0</b><span>Kòmand</span></div><div><b id="mInvest">0</b><span>Envestisman</span></div></div>
- <div class="quickGrid">
-  <button data-go="chat">💬 Chat</button><button data-go="status">⭕ Status</button><button data-go="market">🛍️ Marketplace</button><button data-go="clips">▶ Clips</button>
-  <button data-go="wallet">💳 Wallet</button><button data-go="orders">📦 Kòmand</button><button data-go="stats">📊 Statistik</button><button data-go="invest">📈 Envestisman</button><button data-go="business">🏪 Business</button>
+ <div class="quickGrid homeQuick">
+  <button data-go="chat">💬 <span>Chats</span></button>
+  <button data-go="actus">🎬 <span>Actus</span></button>
+  <button data-go="tools">🧰 <span>Outils</span></button>
+  <button data-go="wallet">💼 <span>Portefeuille</span></button>
  </div>
 </section>
 
@@ -38,8 +40,89 @@
  <div class="card"><h3>🔐 Chat sipò / Admin</h3><div id="supportMessages" class="supportMessages"></div><form id="supportForm" class="row"><input id="supportText" placeholder="Ekri administrasyon..."><button>Voye</button></form></div>
 </section>
 
+<section id="actusPage" class="page menuPage">
+ <div class="menuHeader"><div><h2>Actus</h2><p>Status, vidéos courtes et contenus sponsorisés</p></div></div>
+ <div class="settingsList card">
+  <button class="settingsItem" data-go="status">
+   <span class="settingsIcon">⭕</span>
+   <span class="settingsText"><b>Statut</b><small>Publiez des photos, vidéos ou textes pendant 24 heures</small></span><span class="chevron">›</span>
+  </button>
+  <button class="settingsItem" data-go="status">
+   <span class="settingsIcon">📣</span>
+   <span class="settingsText"><b>Statuts sponsorisés</b><small>Statuts boostés selon l’audience sélectionnée</small></span><span class="chevron">›</span>
+  </button>
+  <button class="settingsItem" data-go="clips">
+   <span class="settingsIcon">▶️</span>
+   <span class="settingsText"><b>Clips</b><small>Regardez et publiez des vidéos courtes comme sur TikTok</small></span><span class="chevron">›</span>
+  </button>
+ </div>
+ <div class="menuSectionTitle">Développer votre audience</div>
+ <div class="settingsList card">
+  <button class="settingsItem" data-go="business">
+   <span class="settingsIcon">🚀</span>
+   <span class="settingsText"><b>Booster un contenu</b><small>Boostez un statut, un clip ou un produit depuis Outils</small></span><span class="chevron">›</span>
+  </button>
+ </div>
+</section>
+
+<section id="toolsPage" class="page menuPage">
+ <div class="menuHeader"><div><h2>Outils</h2><p>Marché, publicité et gestion professionnelle</p></div></div>
+
+ <div class="menuSectionTitle">Marché</div>
+ <div class="settingsList card">
+  <button class="settingsItem" data-go="market" data-market-mode="buy">
+   <span class="settingsIcon">🛒</span>
+   <span class="settingsText"><b>Achat</b><small>Parcourez les produits, ajoutez au panier et passez commande</small></span><span class="chevron">›</span>
+  </button>
+  <button class="settingsItem" data-go="market" data-market-mode="sell">
+   <span class="settingsIcon">🏷️</span>
+   <span class="settingsText"><b>Vente</b><small>Publiez vos produits et gérez vos ventes</small></span><span class="chevron">›</span>
+  </button>
+  <button class="settingsItem" data-go="orders">
+   <span class="settingsIcon">📦</span>
+   <span class="settingsText"><b>Commandes et ventes</b><small>Suivez vos achats, commandes et ventes</small></span><span class="chevron">›</span>
+  </button>
+ </div>
+
+ <div class="menuSectionTitle">Publicité</div>
+ <div class="settingsList card">
+  <button class="settingsItem" data-go="business">
+   <span class="settingsIcon">📣</span>
+   <span class="settingsText"><b>Boost & Ads</b><small>Budget HTG/USD, audience, MonCash et NatCash</small></span><span class="chevron">›</span>
+  </button>
+  <button class="settingsItem" data-go="stats">
+   <span class="settingsIcon">📊</span>
+   <span class="settingsText"><b>Statistiques</b><small>Ventes, commandes, revenus et performances</small></span><span class="chevron">›</span>
+  </button>
+ </div>
+
+ <div class="menuSectionTitle">Gérez votre compte</div>
+ <div class="settingsList card">
+  <button class="settingsItem" data-go="business">
+   <span class="settingsIcon">🏪</span>
+   <span class="settingsText"><b>Profil Business</b><small>Adresses, horaires, site Web et réponses rapides</small></span><span class="chevron">›</span>
+  </button>
+  <button class="settingsItem" id="socialAccountsBtn" type="button">
+   <span class="settingsIcon">🔗</span>
+   <span class="settingsText"><b>Facebook et Instagram</b><small>Associez vos comptes pour toucher une clientèle plus large</small></span><span class="chevron">›</span>
+  </button>
+  <button class="settingsItem" data-go="profile">
+   <span class="settingsIcon">👤</span>
+   <span class="settingsText"><b>Compte et profil</b><small>Photo, username, langue, confidentialité et localisation</small></span><span class="chevron">›</span>
+  </button>
+ </div>
+
+ <div class="menuSectionTitle">Assistance</div>
+ <div class="settingsList card">
+  <button class="settingsItem" data-go="chat">
+   <span class="settingsIcon">❔</span>
+   <span class="settingsText"><b>Aide et commentaires</b><small>Contactez l’assistance depuis le chat sécurisé</small></span><span class="chevron">›</span>
+  </button>
+ </div>
+</section>
+
 <section id="statusPage" class="page">
- <div class="title"><div><h2>Status</h2><p>Status nòmal: kontak sèlman • Status Boost: odyans piblisite</p></div><button id="newStatusBtn">+ Status</button></div>
+ <div class="title"><div><button class="backLink ghost" data-go="actus">← Actus</button><h2>Status</h2><p>Status nòmal: kontak sèlman • Status Boost: odyans piblisite</p></div><button id="newStatusBtn">+ Status</button></div>
  <form id="statusForm" class="card hidden">
    <textarea id="statusText" maxlength="700" placeholder="Ekri yon status..."></textarea>
    <input id="statusMedia" type="file" accept="image/*,video/*">
@@ -55,7 +138,7 @@
 </section>
 
 <section id="marketPage" class="page">
- <div class="title"><div><h2>Marketplace</h2><p>Catalog, pwodwi, panier ak kòmand</p></div><div><button id="cartBtn">Panier <span id="cartCount">0</span></button><button id="sellBtn">+ Vann</button></div></div>
+ <div class="title"><div><button class="backLink ghost" data-go="tools">← Outils</button><h2>Marketplace</h2><p>Achat et vente de produits</p></div><div><button id="cartBtn">Panier <span id="cartCount">0</span></button><button id="sellBtn">+ Vann</button></div></div>
  <div id="sellBox" class="card hidden"><form id="productForm"><input id="pName" required placeholder="Non pwodwi"><div class="row"><input id="pPrice" type="number" min="0" step="0.01" required placeholder="Pri"><select id="pCurrency"></select></div><select id="pCategory"><option>Electronics</option><option>Fashion</option><option>Cosmetics</option><option>Food</option><option>Services</option><option>Other</option></select><input id="pStock" type="number" min="0" value="1" placeholder="Stock"><textarea id="pDesc" placeholder="Deskripsyon"></textarea><input id="pImage" type="file" accept="image/*"><button>Pibliye</button></form></div>
  <div id="cartBox" class="card hidden"><h3>Panier</h3><div id="cartItems"></div><button id="checkoutBtn">Kreye kòmand</button></div>
  <div class="filters"><input id="marketSearch" placeholder="Chèche pwodwi..."><select id="marketCategory"><option value="">Tout kategori</option><option>Electronics</option><option>Fashion</option><option>Cosmetics</option><option>Food</option><option>Services</option><option>Other</option></select></div>
@@ -63,14 +146,20 @@
 </section>
 
 <section id="clipsPage" class="page">
- <div class="title"><div><h2>Clips</h2><p>Espas videyo kout</p></div><button id="clipBtn">+ Pibliye</button></div>
+ <div class="title"><div><button class="backLink ghost" data-go="actus">← Actus</button><h2>Clips</h2><p>Espas videyo kout</p></div><button id="clipBtn">+ Pibliye</button></div>
  <form id="clipForm" class="card hidden"><input id="clipFile" type="file" accept="video/*" required><textarea id="clipCaption" maxlength="500" placeholder="Caption"></textarea><button>Pibliye clip</button></form>
  <div id="clipFeed" class="clipFeed"></div>
 </section>
 
 <section id="walletPage" class="page">
- <div class="title"><div><h2>Wallet & Operasyon</h2><p>Depo, retrè, transfè, echanj ak istorik</p></div></div>
+ <div class="title"><div><h2>Portefeuille</h2><p>Balances, dépôts, retraits, échanges et investissements</p></div></div>
  <div id="walletBalances" class="balances"></div>
+ <div class="settingsList card walletMenu">
+  <button class="settingsItem" data-go="invest">
+   <span class="settingsIcon">📈</span>
+   <span class="settingsText"><b>Investissements</b><small>Niveaux, demandes et suivi de vos placements</small></span><span class="chevron">›</span>
+  </button>
+ </div>
  <div class="financeGrid">
   <form id="walletRequestForm" class="card"><h3>Nouvo operasyon</h3>
    <select id="walletType"><option value="deposit">Depo</option><option value="withdrawal">Retrè</option><option value="transfer">Transfè</option><option value="payout">Payout</option></select>
@@ -85,13 +174,13 @@
 </section>
 
 <section id="ordersPage" class="page">
- <div class="title"><div><h2>Kòmand & Vant</h2><p>Suivi kòmand kòm achtè ak kòm vandè</p></div></div>
+ <div class="title"><div><button class="backLink ghost" data-go="tools">← Outils</button><h2>Kòmand & Vant</h2><p>Suivi kòmand kòm achtè ak kòm vandè</p></div></div>
  <div class="card"><h3>Kòmand mwen kòm achtè</h3><div id="buyerOrders"></div></div>
  <div class="card"><h3>Vant mwen kòm vandè</h3><div id="sellerOrders"></div></div>
 </section>
 
 <section id="statsPage" class="page">
- <div class="title"><div><h2>Statistik</h2><p>Rezime aktivite biznis ou</p></div></div>
+ <div class="title"><div><button class="backLink ghost" data-go="tools">← Outils</button><h2>Statistik</h2><p>Rezime aktivite biznis ou</p></div></div>
  <div class="metrics">
   <div><b id="statProducts">0</b><span>Pwodwi</span></div>
   <div><b id="statSales">0</b><span>Vant</span></div>
@@ -102,13 +191,13 @@
 </section>
 
 <section id="investPage" class="page">
- <div class="title"><div><h2>Envestisman</h2><p>Nivo, demann ak suivi</p></div></div>
+ <div class="title"><div><button class="backLink ghost" data-go="wallet">← Portefeuille</button><h2>Envestisman</h2><p>Nivo, demann ak suivi</p></div></div>
  <div id="investmentLevels" class="levelGrid"></div>
  <div class="card"><h3>Envestisman mwen</h3><div id="myInvestments"></div></div>
 </section>
 
 <section id="businessPage" class="page">
- <div class="title"><div><h2>Business Pro</h2><p>Pwofil biznis ak zouti mesaj</p></div></div>
+ <div class="title"><div><button class="backLink ghost" data-go="tools">← Outils</button><h2>Business Pro</h2><p>Pwofil biznis ak zouti mesaj</p></div></div>
  <div class="businessGrid">
   <form id="businessForm" class="card"><h3>Pwofil biznis</h3><input id="businessName" placeholder="Non biznis"><textarea id="businessDescription" placeholder="Deskripsyon"></textarea><input id="businessHours" placeholder="Orè"><input id="businessWebsite" type="url" placeholder="Sit entènèt"><button>Sove</button></form>
   <form id="businessToolsForm" class="card"><h3>Zouti mesaj</h3><textarea id="greetingMessage" placeholder="Mesaj akey"></textarea><textarea id="awayMessage" placeholder="Mesaj absans"></textarea><textarea id="quickReplies" placeholder="/pri = Men pri yo..."></textarea><button>Sove zouti</button></form>
@@ -143,15 +232,19 @@
       <div id="notificationList"></div>
     </section>
 <section id="profilePage" class="page">
- <div class="title"><div><h2>Profil</h2><p>Kont, lang, foto ak lokalizasyon</p></div></div>
+ <div class="title"><div><button class="backLink ghost" data-go="tools">← Outils</button><h2>Profil</h2><p>Kont, lang, foto ak lokalizasyon</p></div></div>
  <form id="profileForm" class="card profileCard"><img id="avatarPreview" class="avatar" alt=""><input id="avatarFile" type="file" accept="image/*"><input id="displayName" placeholder="Non piblik"><input id="username" placeholder="Username"><div class="row"><input id="country" placeholder="Peyi (egzanp: Haiti)"><input id="birthYear" type="number" min="1900" max="2100" placeholder="Ane nesans"></div><select id="role"><option value="buyer">Achtè</option><option value="seller">Vandè</option><option value="business">Business</option><option value="investor">Envestisè</option></select><textarea id="bio" placeholder="Bio"></textarea><button>Sove profil</button></form>
  <div class="card"><h3>Lokalizasyon</h3><p id="locationStatus" class="muted">Pa pataje.</p><button id="shareLocation">Pataje lokalizasyon aktyèl</button></div>
  <div class="card"><h3>Asistans vityèl</h3><div id="assistantMessages" class="assistantMessages"></div><form id="assistantForm" class="row"><input id="assistantInput" placeholder="Poze yon kestyon..."><button>Voye</button></form></div>
 </section>
 </main>
 
-<nav>
-<button data-page="home" class="active">🏠<span>Akèy</span></button><button data-page="chat">💬<span>Chat</span></button><button data-page="status">⭕<span>Status</span></button><button data-page="market">🛍️<span>Market</span></button><button data-page="clips">▶️<span>Clips</span></button><button data-page="wallet">💳<span>Wallet</span></button><button data-page="orders">📦<span>Kòmand</span></button><button data-page="stats">📊<span>Stats</span></button><button data-page="invest">📈<span>Invest</span></button><button data-page="business">🏪<span>Business</span></button><button data-page="profile">👤<span>Profil</span></button>
+<nav class="bottomNav">
+ <button data-page="home" class="active"><span class="navIcon">🏠</span><span>Accueil</span></button>
+ <button data-page="chat"><span class="navIcon">💬</span><span>Chats</span></button>
+ <button data-page="actus"><span class="navIcon">🎬</span><span>Actus</span></button>
+ <button data-page="tools"><span class="navIcon">🧰</span><span>Outils</span></button>
+ <button data-page="wallet"><span class="navIcon">💼</span><span>Portefeuille</span></button>
 </nav>
 </div>
 <script type="module" src="app.js"></script>
