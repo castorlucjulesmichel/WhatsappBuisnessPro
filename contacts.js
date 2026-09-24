@@ -365,9 +365,15 @@ async function startChat(uid,name){
     const contactName=name||"Contact";
     const names={[user.uid]:myName,[uid]:contactName};
     const chatRef=doc(db,"chats",id);
-    const existingChat=await getDoc(chatRef);
-    if(!existingChat.exists()){
-      await setDoc(chatRef,{type:"direct",participants:ids,participantNames:names,lastMessage:"",updatedAt:serverTimestamp()});
+    // Do not read a non-existent chat first: Firestore correctly denies that read.
+    // Try an idempotent create/merge. If it is an existing chat and metadata differs,
+    // the restricted update may be denied; in that case verify the existing chat is readable.
+    try{
+      await setDoc(chatRef,{type:"direct",participants:ids,participantNames:names},{merge:true});
+    }catch(writeErr){
+      if(writeErr?.code!=="permission-denied")throw writeErr;
+      const existingChat=await getDoc(chatRef);
+      if(!existingChat.exists())throw writeErr;
     }
 
     if(typeof window.WBP_ROUTE==="function")window.WBP_ROUTE("chat");
