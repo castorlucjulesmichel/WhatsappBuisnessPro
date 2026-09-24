@@ -1,7 +1,7 @@
 (() => {
 "use strict";
 
-const LANGS=["ht","fr","en","es"];
+const LANGS=["ht","fr","en","es","pt","de","it","ar","zh","hi","bn","ru","tr","ja","ko"];
 const saved=()=>{const v=localStorage.getItem("wbp_lang");return LANGS.includes(v)?v:"ht"};
 
 /*
@@ -401,17 +401,130 @@ Object.assign(D,{
 "other_cat":["Lòt","Autre","Other","Otro"]
 });
 
+
+const EXTRA_LANGS=["pt","de","it","ar","zh","hi","bn","ru","tr","ja","ko"];
+const X={
+"welcome":["Bem-vindo","Willkommen","Benvenuto","مرحبًا","欢迎","स्वागत है","স্বাগতম","Добро пожаловать","Hoş geldiniz","ようこそ","환영합니다"],
+"logout":["Sair","Abmelden","Esci","تسجيل الخروج","退出","लॉग आउट","লগ আউট","Выйти","Çıkış","ログアウト","로그아웃"],
+"search":["Pesquisar...","Suchen...","Cerca...","بحث...","搜索...","खोजें...","খুঁজুন...","Поиск...","Ara...","検索...","검색..."],
+"receive_notifications":["Receber notificações","Benachrichtigungen erhalten","Ricevi notifiche","تلقي الإشعارات","接收通知","सूचनाएँ प्राप्त करें","নোটিফিকেশন পান","Получать уведомления","Bildirimleri al","通知を受け取る","알림 받기"],
+"notification_hint":["Não perca nenhuma nova mensagem.","Verpassen Sie keine neue Nachricht.","Non perdere nessun nuovo messaggio.","تأكد من عدم تفويت أي رسالة جديدة.","确保不错过任何新消息。","कोई नया संदेश न छूटे।","কোনো নতুন বার্তা মিস করবেন না।","Не пропускайте новые сообщения.","Yeni mesajları kaçırmayın.","新しいメッセージを見逃さないでください。","새 메시지를 놓치지 마세요."],
+"activate":["Ativar","Aktivieren","Attiva","تفعيل","启用","सक्रिय करें","সক্রিয় করুন","Включить","Etkinleştir","有効にする","활성화"],
+"all":["Todas","Alle","Tutte","الكل","全部","सभी","সব","Все","Tümü","すべて","전체"],
+"unread":["Não lidas","Ungelesen","Non lette","غير مقروءة","未读","अपठित","অপঠিত","Непрочитанные","Okunmamış","未読","읽지 않음"],
+"favorites":["Favoritos","Favoriten","Preferiti","المفضلة","收藏","पसंदीदा","পছন্দের","Избранное","Favoriler","お気に入り","즐겨찾기"],
+"groups":["Grupos","Gruppen","Gruppi","المجموعات","群组","समूह","গ্রুপ","Группы","Gruplar","グループ","그룹"],
+"discussions":["Conversas","Chats","Chat","الدردشات","聊天","चैट","চ্যাট","Чаты","Sohbetler","チャット","채팅"],
+"calls":["Chamadas","Anrufe","Chiamate","المكالمات","通话","कॉल","কল","Звонки","Aramalar","通話","통화"],
+"news":["Atualizações","Aktuelles","Aggiornamenti","التحديثات","动态","अपडेट","আপডেট","Обновления","Güncellemeler","更新","업데이트"],
+"tools":["Ferramentas","Tools","Strumenti","الأدوات","工具","टूल्स","টুলস","Инструменты","Araçlar","ツール","도구"],
+"wallet":["Carteira","Wallet","Portafoglio","المحفظة","钱包","वॉलेट","ওয়ালেট","Кошелёк","Cüzdan","ウォレット","지갑"],
+"new_group":["Novo grupo","Neue Gruppe","Nuovo gruppo","مجموعة جديدة","新建群组","नया समूह","নতুন গ্রুপ","Новая группа","Yeni grup","新しいグループ","새 그룹"],
+"create_group":["Criar grupo","Gruppe erstellen","Crea gruppo","إنشاء مجموعة","创建群组","समूह बनाएँ","গ্রুপ তৈরি করুন","Создать группу","Grup oluştur","グループを作成","그룹 만들기"],
+"choose_chat":["Escolha uma conversa","Chat auswählen","Scegli una chat","اختر دردشة","选择聊天","चैट चुनें","চ্যাট নির্বাচন করুন","Выберите чат","Sohbet seçin","チャットを選択","채팅 선택"],
+"typing":["Digitando...","Schreibt...","Sta scrivendo...","يكتب...","正在输入...","टाइप कर रहा है...","টাইপ করছে...","Печатает...","Yazıyor...","入力中...","입력 중..."],
+"send":["Enviar","Senden","Invia","إرسال","发送","भेजें","পাঠান","Отправить","Gönder","送信","보내기"],
+"support_admin":["🔐 Suporte / Admin","🔐 Support / Admin","🔐 Supporto / Admin","🔐 الدعم / الإدارة","🔐 支持 / 管理员","🔐 सहायता / एडमिन","🔐 সহায়তা / অ্যাডমিন","🔐 Поддержка / Админ","🔐 Destek / Yönetici","🔐 サポート / 管理者","🔐 지원 / 관리자"],
+"select_contact":["Selecionar contato","Kontakt auswählen","Seleziona contatto","اختر جهة اتصال","选择联系人","संपर्क चुनें","কন্ট্যাক্ট নির্বাচন করুন","Выбрать контакт","Kişi seç","連絡先を選択","연락처 선택"],
+"new_contact":["Novo contato","Neuer Kontakt","Nuovo contatto","جهة اتصال جديدة","新建联系人","नया संपर्क","নতুন কন্ট্যাক্ট","Новый контакт","Yeni kişi","新しい連絡先","새 연락처"],
+"contacts_on_app":["Contatos no Whatsapp Business Pro","Kontakte auf Whatsapp Business Pro","Contatti su Whatsapp Business Pro","جهات الاتصال على Whatsapp Business Pro","Whatsapp Business Pro 上的联系人","Whatsapp Business Pro पर संपर्क","Whatsapp Business Pro-তে কন্ট্যাক্ট","Контакты в Whatsapp Business Pro","Whatsapp Business Pro kişileri","Whatsapp Business Pro の連絡先","Whatsapp Business Pro 연락처"],
+"no_contacts":["Ainda não há contatos.","Noch keine Kontakte.","Nessun contatto.","لا توجد جهات اتصال بعد.","暂无联系人。","अभी कोई संपर्क नहीं।","এখনও কোনো কন্ট্যাক্ট নেই।","Контактов пока нет.","Henüz kişi yok.","連絡先はまだありません。","아직 연락처가 없습니다."],
+"first_name":["Nome","Vorname","Nome","الاسم الأول","名字","पहला नाम","নাম","Имя","Ad","名","이름"],
+"last_name":["Sobrenome","Nachname","Cognome","اسم العائلة","姓氏","उपनाम","পদবি","Фамилия","Soyad","姓","성"],
+"profile_name":["Nome do perfil / usuário","Profilname / Benutzername","Nome profilo / username","اسم الملف / اسم المستخدم","个人资料名 / 用户名","प्रोफ़ाइल नाम / यूज़रनेम","প্রোফাইল নাম / ইউজারনেম","Имя профиля / username","Profil adı / kullanıcı adı","プロフィール名 / ユーザー名","프로필 이름 / 사용자명"],
+"phone":["Telefone","Telefon","Telefono","الهاتف","电话","फ़ोन","ফোন","Телефон","Telefon","電話","전화"],
+"sync_phone":["Sincronizar contato com o telefone","Kontakt mit Telefon synchronisieren","Sincronizza contatto sul telefono","مزامنة جهة الاتصال مع الهاتف","同步联系人到手机","संपर्क को फ़ोन से सिंक करें","ফোনে কন্ট্যাক্ট সিঙ্ক করুন","Синхронизировать с телефоном","Kişiyi telefonla eşitle","連絡先を電話と同期","연락처를 휴대폰과 동기화"],
+"save":["Salvar","Speichern","Salva","حفظ","保存","सहेजें","সংরক্ষণ","Сохранить","Kaydet","保存","저장"],
+"status":["Status","Status","Stato","الحالة","状态","स्टेटस","স্ট্যাটাস","Статус","Durum","ステータス","상태"],
+"clips":["Clipes","Clips","Clip","المقاطع","短视频","क्लिप","ক্লিপ","Клипы","Klipler","クリップ","클립"],
+"develop_audience":["Amplie seu público","Zielgruppe erweitern","Fai crescere il pubblico","وسّع جمهورك","扩大受众","अपना ऑडियंस बढ़ाएँ","অডিয়েন্স বাড়ান","Расширяйте аудиторию","Kitleni büyüt","オーディエンスを拡大","대상 확장"],
+"boost_content":["Promover conteúdo","Inhalt bewerben","Promuovi contenuto","روّج للمحتوى","推广内容","कंटेंट प्रमोट करें","কনটেন্ট বুস্ট করুন","Продвигать контент","İçeriği öne çıkar","コンテンツを宣伝","콘텐츠 홍보"],
+"market":["Mercado","Markt","Mercato","السوق","市场","मार्केट","মার্কেট","Рынок","Pazar","マーケット","마켓"],
+"buy":["Comprar","Kaufen","Acquista","شراء","购买","खरीदें","কিনুন","Купить","Satın al","購入","구매"],
+"sell":["Vender","Verkaufen","Vendi","بيع","出售","बेचें","বিক্রি","Продать","Sat","販売","판매"],
+"orders_sales":["Pedidos e vendas","Bestellungen und Verkäufe","Ordini e vendite","الطلبات والمبيعات","订单与销售","ऑर्डर और बिक्री","অর্ডার ও বিক্রয়","Заказы и продажи","Siparişler ve satışlar","注文と販売","주문 및 판매"],
+"advertising":["Publicidade","Werbung","Pubblicità","الإعلانات","广告","विज्ञापन","বিজ্ঞাপন","Реклама","Reklam","広告","광고"],
+"statistics":["Estatísticas","Statistiken","Statistiche","الإحصاءات","统计","आँकड़े","পরিসংখ্যান","Статистика","İstatistikler","統計","통계"],
+"customer_activity":["Atividade dos clientes","Kundenaktivität","Attività clienti","نشاط العملاء","客户活动","ग्राहक गतिविधि","কাস্টমার কার্যকলাপ","Активность клиентов","Müşteri etkinliği","顧客アクティビティ","고객 활동"],
+"business_profile":["Perfil Business","Business-Profil","Profilo Business","الملف التجاري","商业资料","बिज़नेस प्रोफ़ाइल","বিজনেস প্রোফাইল","Бизнес-профиль","İşletme profili","ビジネスプロフィール","비즈니스 프로필"],
+"account_profile":["Conta e perfil","Konto und Profil","Account e profilo","الحساب والملف","账户和资料","खाता और प्रोफ़ाइल","অ্যাকাউন্ট ও প্রোফাইল","Аккаунт и профиль","Hesap ve profil","アカウントとプロフィール","계정 및 프로필"],
+"settings":["Configurações","Einstellungen","Impostazioni","الإعدادات","设置","सेटिंग्स","সেটিংস","Настройки","Ayarlar","設定","설정"],
+"help_feedback":["Ajuda e comentários","Hilfe und Feedback","Aiuto e feedback","المساعدة والملاحظات","帮助与反馈","सहायता और फ़ीडबैक","সহায়তা ও মতামত","Помощь и отзывы","Yardım ve geri bildirim","ヘルプとフィードバック","도움말 및 피드백"],
+"publish":["Publicar","Veröffentlichen","Pubblica","نشر","发布","प्रकाशित करें","প্রকাশ করুন","Опубликовать","Yayınla","公開","게시"],
+"cart":["Carrinho","Warenkorb","Carrello","السلة","购物车","कार्ट","কার্ট","Корзина","Sepet","カート","장바구니"],
+"investments":["Investimentos","Investitionen","Investimenti","الاستثمارات","投资","निवेश","বিনিয়োগ","Инвестиции","Yatırımlar","投資","투자"],
+"deposit":["Depósito","Einzahlung","Deposito","إيداع","充值","जमा","ডিপোজিট","Пополнение","Yatırma","入金","입금"],
+"withdrawal":["Saque","Auszahlung","Prelievo","سحب","提现","निकासी","উত্তোলন","Вывод","Çekme","出金","출금"],
+"transfer":["Transferência","Überweisung","Trasferimento","تحويل","转账","ट्रांसफ़र","ট্রান্সফার","Перевод","Transfer","送金","이체"],
+"submit":["Enviar","Absenden","Invia","إرسال","提交","सबमिट","জমা দিন","Отправить","Gönder","送信","제출"],
+"operation_history":["Histórico de operações","Transaktionsverlauf","Cronologia operazioni","سجل العمليات","操作记录","लेनदेन इतिहास","অপারেশন ইতিহাস","История операций","İşlem geçmişi","操作履歴","작업 기록"],
+"account":["Conta","Konto","Account","الحساب","账户","खाता","অ্যাকাউন্ট","Аккаунт","Hesap","アカウント","계정"],
+"privacy":["Privacidade","Datenschutz","Privacy","الخصوصية","隐私","गोपनीयता","গোপনীয়তা","Конфиденциальность","Gizlilik","プライバシー","개인정보"],
+"lists":["Listas","Listen","Liste","القوائم","列表","सूचियाँ","লিস্ট","Списки","Listeler","リスト","목록"],
+"notifications":["Notificações","Benachrichtigungen","Notifiche","الإشعارات","通知","सूचनाएँ","নোটিফিকেশন","Уведомления","Bildirimler","通知","알림"],
+"storage_data":["Armazenamento e dados","Speicher und Daten","Archiviazione e dati","التخزين والبيانات","存储和数据","स्टोरेज और डेटा","স্টোরেজ ও ডেটা","Хранилище и данные","Depolama ve veriler","ストレージとデータ","저장공간 및 데이터"],
+"accessibility":["Acessibilidade","Barrierefreiheit","Accessibilità","إمكانية الوصول","辅助功能","सुलभता","অ্যাক্সেসিবিলিটি","Спец. возможности","Erişilebilirlik","アクセシビリティ","접근성"],
+"app_language":["Idioma do app","App-Sprache","Lingua dell’app","لغة التطبيق","应用语言","ऐप की भाषा","অ্যাপের ভাষা","Язык приложения","Uygulama dili","アプリの言語","앱 언어"],
+"invite_contact":["Convidar contato","Kontakt einladen","Invita contatto","دعوة جهة اتصال","邀请联系人","संपर्क आमंत्रित करें","কন্ট্যাক্ট আমন্ত্রণ","Пригласить контакт","Kişi davet et","連絡先を招待","연락처 초대"],
+"connection_security":["Conexão e segurança","Verbindung und Sicherheit","Connessione e sicurezza","الاتصال والأمان","连接与安全","कनेक्शन और सुरक्षा","সংযোগ ও নিরাপত্তা","Подключение и безопасность","Bağlantı ve güvenlik","接続とセキュリティ","연결 및 보안"],
+"password":["Senha","Passwort","Password","كلمة المرور","密码","पासवर्ड","পাসওয়ার্ড","Пароль","Şifre","パスワード","비밀번호"],
+"email":["E-mail","E-Mail-Adresse","E-mail","البريد الإلكتروني","电子邮件","ईमेल","ইমেইল","Эл. почта","E-posta","メールアドレス","이메일"],
+"two_step":["Verificação em duas etapas","Bestätigung in zwei Schritten","Verifica in due passaggi","التحقق بخطوتين","两步验证","दो-चरण सत्यापन","দুই ধাপ যাচাই","Двухэтапная проверка","İki adımlı doğrulama","2段階認証","2단계 인증"],
+"security_notifications":["Notificações de segurança","Sicherheitsbenachrichtigungen","Notifiche di sicurezza","إشعارات الأمان","安全通知","सुरक्षा सूचनाएँ","নিরাপত্তা নোটিফিকেশন","Уведомления безопасности","Güvenlik bildirimleri","セキュリティ通知","보안 알림"],
+"your_account":["Sua conta","Ihr Konto","Il tuo account","حسابك","你的账户","आपका खाता","আপনার অ্যাকাউন্ট","Ваш аккаунт","Hesabınız","あなたのアカウント","내 계정"],
+"change_phone":["Alterar número de telefone","Telefonnummer ändern","Cambia numero di telefono","تغيير رقم الهاتف","更改电话号码","फ़ोन नंबर बदलें","ফোন নম্বর পরিবর্তন","Изменить номер телефона","Telefon numarasını değiştir","電話番号を変更","전화번호 변경"],
+"delete_account":["Excluir conta","Konto löschen","Elimina account","حذف الحساب","删除账户","खाता हटाएँ","অ্যাকাউন্ট মুছুন","Удалить аккаунт","Hesabı sil","アカウントを削除","계정 삭제"],
+"online_presence":["Presença online","Online-Status","Presenza online","الظهور على الإنترنت","在线状态","ऑनलाइन उपस्थिति","অনলাইন উপস্থিতি","Онлайн-статус","Çevrimiçi durumu","オンライン状態","온라인 상태"],
+"everyone":["Todos","Alle","Tutti","الجميع","所有人","सभी","সবাই","Все","Herkes","全員","모두"],
+"nobody":["Ninguém","Niemand","Nessuno","لا أحد","无人","कोई नहीं","কেউ না","Никто","Hiç kimse","誰もいない","아무도 없음"],
+"profile_photo":["Foto do perfil","Profilbild","Foto profilo","صورة الملف","头像","प्रोफ़ाइल फ़ोटो","প্রোফাইল ছবি","Фото профиля","Profil fotoğrafı","プロフィール写真","프로필 사진"],
+"read_receipts":["Confirmações de leitura","Lesebestätigungen","Conferme di lettura","إيصالات القراءة","已读回执","रीड रिसीट","পঠিত নিশ্চিতকরণ","Отчёты о прочтении","Okundu bilgisi","既読通知","읽음 확인"],
+"disappearing_messages":["Mensagens temporárias","Selbstlöschende Nachrichten","Messaggi effimeri","الرسائل ذاتية الاختفاء","自动消失消息","गायब होने वाले संदेश","অদৃশ্য বার্তা","Исчезающие сообщения","Süreli mesajlar","消えるメッセージ","사라지는 메시지"],
+"theme":["Tema","Design","Tema","السمة","主题","थीम","থিম","Тема","Tema","テーマ","테마"],
+"light":["Claro","Hell","Chiaro","فاتح","浅色","हल्का","হালকা","Светлая","Açık","ライト","라이트"],
+"dark":["Escuro","Dunkel","Scuro","داكن","深色","डार्क","ডার্ক","Тёмная","Koyu","ダーク","다크"],
+"font_size":["Tamanho da fonte","Schriftgröße","Dimensione carattere","حجم الخط","字体大小","फ़ॉन्ट आकार","ফন্ট সাইজ","Размер шрифта","Yazı tipi boyutu","フォントサイズ","글꼴 크기"],
+"message_sound":["Som das mensagens","Nachrichtentöne","Suono messaggi","صوت الرسائل","消息声音","संदेश ध्वनि","মেসেজ সাউন্ড","Звуки сообщений","Mesaj sesi","メッセージ音","메시지 소리"],
+"reminders":["Lembretes","Erinnerungen","Promemoria","التذكيرات","提醒","रिमाइंडर","রিমাইন্ডার","Напоминания","Hatırlatmalar","リマインダー","리마인더"],
+"messages":["Mensagens","Nachrichten","Messaggi","الرسائل","消息","संदेश","মেসেজ","Сообщения","Mesajlar","メッセージ","메시지"],
+"reactions":["Reações","Reaktionen","Reazioni","التفاعلات","回应","प्रतिक्रियाएँ","রিঅ্যাকশন","Реакции","Tepkiler","リアクション","반응"],
+"auto_download":["Download automático","Automatischer Download","Download automatico","التنزيل التلقائي","自动下载","ऑटो डाउनलोड","অটো ডাউনলোড","Автозагрузка","Otomatik indirme","自動ダウンロード","자동 다운로드"],
+"never":["Nunca","Nie","Mai","أبدًا","从不","कभी नहीं","কখনও না","Никогда","Asla","なし","안 함"],
+"contact_support":["Contatar suporte","Support kontaktieren","Contatta supporto","الاتصال بالدعم","联系支持","सहायता से संपर्क करें","সহায়তায় যোগাযোগ","Связаться с поддержкой","Destekle iletişim","サポートに連絡","지원 문의"],
+"modify_profile":["Editar perfil","Profil bearbeiten","Modifica profilo","تعديل الملف","编辑资料","प्रोफ़ाइल संपादित करें","প্রোফাইল সম্পাদনা","Редактировать профиль","Profili düzenle","プロフィールを編集","프로필 편집"],
+"business_info":["Informações da empresa","Unternehmensinformationen","Informazioni aziendali","معلومات النشاط","商家信息","व्यवसाय जानकारी","ব্যবসার তথ্য","Информация о бизнесе","İşletme bilgileri","ビジネス情報","비즈니스 정보"],
+"buyer":["Comprador","Käufer","Acquirente","مشتري","买家","खरीदार","ক্রেতা","Покупатель","Alıcı","購入者","구매자"],
+"seller":["Vendedor","Verkäufer","Venditore","بائع","卖家","विक्रेता","বিক্রেতা","Продавец","Satıcı","販売者","판매자"],
+"other_business":["Outra empresa","Anderes Unternehmen","Altra impresa","نشاط آخر","其他企业","अन्य व्यवसाय","অন্যান্য ব্যবসা","Другой бизнес","Diğer işletme","その他のビジネス","기타 비즈니스"],
+"investor":["Investidor","Investor","Investitore","مستثمر","投资者","निवेशक","বিনিয়োগকারী","Инвестор","Yatırımcı","投資家","투자자"],
+"products_services":["Produtos e serviços","Produkte und Dienstleistungen","Prodotti e servizi","المنتجات والخدمات","产品和服务","उत्पाद और सेवाएँ","পণ্য ও সেবা","Товары и услуги","Ürünler ve hizmetler","商品とサービス","제품 및 서비스"],
+"catalog":["Catálogo","Katalog","Catalogo","الكتالوج","目录","कैटलॉग","ক্যাটালগ","Каталог","Katalog","カタログ","카탈로그"],
+"location":["Localização","Standort","Posizione","الموقع","位置","स्थान","লোকেশন","Местоположение","Konum","位置情報","위치"],
+"virtual_assistant":["Assistente virtual","Virtueller Assistent","Assistente virtuale","مساعد افتراضي","虚拟助手","वर्चुअल असिस्टेंट","ভার্চুয়াল সহকারী","Виртуальный помощник","Sanal asistan","バーチャルアシスタント","가상 도우미"],
+"no_chats":["Nenhuma conversa para este filtro.","Keine Chats für diesen Filter.","Nessuna chat per questo filtro.","لا توجد دردشات لهذا الفلتر.","此筛选条件下没有聊天。","इस फ़िल्टर के लिए कोई चैट नहीं है।","এই ফিল্টারে কোনো চ্যাট নেই।","Нет чатов для этого фильтра.","Bu filtre için sohbet yok.","このフィルターに該当するチャットはありません。","이 필터에 해당하는 채팅이 없습니다."],
+"no_notifications":["Sem notificações.","Keine Benachrichtigungen.","Nessuna notifica.","لا توجد إشعارات.","暂无通知。","कोई सूचना नहीं।","কোনো নোটিফিকেশন নেই।","Нет уведомлений.","Bildirim yok.","通知はありません。","알림이 없습니다."]
+};
+
 const reverse=new Map();
 for(const [key,vals] of Object.entries(D)){
   vals.forEach(v=>{if(v)reverse.set(v.trim(),key)});
 }
 for(const [src,key] of Object.entries(extraAliases))reverse.set(src,key);
+reverse.set("Pa gen discussion pou filtè sa a.","no_chats");
+reverse.set("No chats for this filter.","no_chats");
 
 let lang=saved();
 const nodeKeys=new WeakMap();
 const attrKeys=new WeakMap();
 
-function tr(key){const e=D[key];if(!e)return key;return e[LANGS.indexOf(lang)]||e[0]||key}
+function tr(key){
+  const e=D[key]; if(!e)return key;
+  const baseIndex=["ht","fr","en","es"].indexOf(lang);
+  if(baseIndex>=0)return e[baseIndex]||e[2]||e[0]||key;
+  const extraIndex=EXTRA_LANGS.indexOf(lang);
+  if(extraIndex>=0&&X[key]?.[extraIndex])return X[key][extraIndex];
+  return e[2]||e[0]||key;
+}
 function infer(s){
   const clean=String(s??"").replace(/\s+/g," ").trim();
   if(!clean)return null;
@@ -461,6 +574,7 @@ function setLang(next){
   if(!LANGS.includes(next))next="ht";
   lang=next;localStorage.setItem("wbp_lang",next);
   document.documentElement.lang=next;
+  document.documentElement.dir=next==="ar"?"rtl":"ltr";
   const select=document.querySelector("#lang");if(select&&select.value!==next)select.value=next;
   const settings=document.querySelector("#settingsLanguage");if(settings&&settings.value!==next)settings.value=next;
   walk(document.body);
