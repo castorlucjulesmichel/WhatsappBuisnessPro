@@ -163,3 +163,10 @@ html[data-theme="dark"] .waSubPage,html[data-theme="dark"] .waSettingsPage,html[
 .waContactCheck{width:20px;height:20px;accent-color:#119b61}
 .waContactMainBtn{background:transparent!important;color:inherit!important;text-align:left;padding:0!important}
 .waContactMainBtn>span{display:flex;flex-direction:column;gap:2px}
+
+.waImportContactsBlock{border:1px solid #edf0ee;border-radius:18px;padding:4px 12px 10px;margin:6px 0 12px;background:#fff}
+.waImportContactsBlock .waContactAction{padding-left:0;padding-right:0}
+.waImportContactsBlock .waBulkContactsBar{padding:4px 0 2px;margin-left:64px}
+.waImportContactsBlock .waBulkContactsBar button{font-size:14px}
+html[data-theme="dark"] .waImportContactsBlock{background:var(--card);border-color:#2c3733}
+@media(max-width:560px){.waImportContactsBlock .waBulkContactsBar{margin-left:0}}
