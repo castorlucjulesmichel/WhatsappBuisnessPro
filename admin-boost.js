@@ -1,7 +1,7 @@
 import {firebaseConfig} from "./firebase-config.js";
 import {getApps,getApp,initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {getAuth,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import {getFirestore,doc,collection,onSnapshot,runTransaction,updateDoc,serverTimestamp,Timestamp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import {getFirestore,doc,getDoc,addDoc,collection,onSnapshot,runTransaction,updateDoc,serverTimestamp,Timestamp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const configured=()=>firebaseConfig.apiKey && !String(firebaseConfig.apiKey).includes("YOUR_");
@@ -114,9 +114,9 @@ if(configured()){
        return;
      }
      if(action==="reject"){
-       const cref=doc(db,"adCampaigns",id),cs=await (await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js")).getDoc(cref);
+       const cref=doc(db,"adCampaigns",id),cs=await getDoc(cref);
        await updateDoc(cref,{status:"rejected",reviewedBy:admin.uid,reviewedAt:serverTimestamp()});
-       if(cs.exists()) await (await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js")).addDoc(collection(db,"notifications"),{recipientId:cs.data().ownerId,title:"Boost rejte",message:cs.data().targetLabel||"Kanpay la pa valide.",read:false,createdAt:serverTimestamp()});
+       if(cs.exists()) await addDoc(collection(db,"notifications"),{recipientId:cs.data().ownerId,title:"Boost rejte",message:cs.data().targetLabel||"Kanpay la pa valide.",read:false,createdAt:serverTimestamp()});
        toast("Boost rejte."); return;
      }
      if(action==="pause"){
