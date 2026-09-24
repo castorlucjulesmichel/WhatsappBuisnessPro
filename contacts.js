@@ -58,26 +58,70 @@ async function phoneDocId(phone){
   return "phone_"+p.replace(/[^0-9]/g,"");
 }
 async function saveImportedContacts(items){
-  if(!user||!Array.isArray(items)||!items.length)return 0;
-  let imported=0;
+  if(!user||!Array.isArray(items)||!items.length)return {imported:0,skipped:0,failed:0};
+
+  const unique=new Map();
   for(const item of items){
-    const name=String(item?.name||"Contact").trim()||"Contact";
     const phone=normalizePhone(item?.phone||"");
     if(!phone)continue;
-    const existing=contacts.find(x=>normalizePhone(x.phone)===phone);
-    const id=existing?.id||await phoneDocId(phone);
-    await setDoc(doc(db,"users",user.uid,"contacts",id),{
-      contactUid:existing?.contactUid||"",
-      username:existing?.username||"",
-      displayName:name,
-      phone,
-      importedFromPhone:true,
-      updatedAt:serverTimestamp(),
-      createdAt:existing?.createdAt||serverTimestamp()
-    },{merge:true});
-    imported++;
+    const name=String(item?.name||"Contact").trim()||"Contact";
+    if(!unique.has(phone))unique.set(phone,{name,phone});
   }
-  return imported;
+
+  const existingPhones=new Set(
+    contacts.map(x=>normalizePhone(x.phone)).filter(Boolean)
+  );
+
+  let imported=0,skipped=0,failed=0;
+  const pending=[];
+
+  for(const item of unique.values()){
+    if(existingPhones.has(item.phone)){
+      skipped++;
+      continue;
+    }
+    const id=await phoneDocId(item.phone);
+    pending.push({id,...item});
+  }
+
+  const CHUNK=15;
+  for(let i=0;i<pending.length;i+=CHUNK){
+    const chunk=pending.slice(i,i+CHUNK);
+    const results=await Promise.allSettled(chunk.map(async item=>{
+      const ref=doc(db,"users",user.uid,"contacts",item.id);
+      const snap=await getDoc(ref);
+      if(snap.exists())return "skipped";
+      await setDoc(ref,{
+        contactUid:"",
+        username:"",
+        displayName:item.name,
+        phone:item.phone,
+        importedFromPhone:true,
+        createdAt:serverTimestamp(),
+        updatedAt:serverTimestamp()
+      });
+      return "imported";
+    }));
+
+    for(const r of results){
+      if(r.status==="fulfilled"){
+        if(r.value==="skipped")skipped++;
+        else imported++;
+      }else{
+        failed++;
+        console.warn("contact import write failed",r.reason?.code||r.reason);
+      }
+    }
+  }
+
+  return {imported,skipped,failed};
+}
+function showImportResult(result){
+  const r=result||{imported:0,skipped:0,failed:0};
+  const base=(window.WBP_T?.("Contacts imported")||"Contacts imported")+": "+r.imported;
+  const skipped=r.skipped?" • "+(window.WBP_T?.("Already present")||"Already present")+": "+r.skipped:"";
+  const failed=r.failed?" • "+(window.WBP_T?.("Failed")||"Failed")+": "+r.failed:"";
+  toast(base+skipped+failed);
 }
 async function importPhoneContacts(){
   if(!user)return;
@@ -93,8 +137,8 @@ async function importPhoneContacts(){
       const name=String(item.name?.[0]||"Contact").trim()||"Contact";
       for(const phone of (item.tel||[]))flat.push({name,phone});
     }
-    const imported=await saveImportedContacts(flat);
-    toast((window.WBP_T?.("Contacts imported")||"Contacts imported")+": "+imported);
+    const result=await saveImportedContacts(flat);
+    showImportResult(result);
   }catch(e){
     if(e?.name==="AbortError")return;
     console.warn("contact picker",e);
@@ -104,8 +148,8 @@ async function importPhoneContacts(){
 window.WBP_ANDROID_CONTACTS_IMPORTED=async raw=>{
   try{
     const list=Array.isArray(raw)?raw:JSON.parse(String(raw||"[]"));
-    const imported=await saveImportedContacts(list);
-    toast((window.WBP_T?.("Contacts imported")||"Contacts imported")+": "+imported);
+    const result=await saveImportedContacts(list);
+    showImportResult(result);
   }catch(e){
     console.warn("native contact import",e);
     toast(window.WBP_T?.("Unable to import phone contacts.")||"Unable to import phone contacts.");
