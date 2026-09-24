@@ -505,6 +505,18 @@ const X={
 "no_notifications":["Sem notificações.","Keine Benachrichtigungen.","Nessuna notifica.","لا توجد إشعارات.","暂无通知。","कोई सूचना नहीं।","কোনো নোটিফিকেশন নেই।","Нет уведомлений.","Bildirim yok.","通知はありません。","알림이 없습니다."]
 };
 
+
+Object.assign(D,{
+"invite":["Envite","Inviter","Invite","Invitar"],
+"join_invite":["Vin jwenn mwen sou Whatsapp Business Pro","Rejoignez-moi sur Whatsapp Business Pro","Join me on Whatsapp Business Pro","Únete a mí en Whatsapp Business Pro"],
+"invite_link_copied":["Lyen envitasyon kopye.","Lien d’invitation copié.","Invitation link copied.","Enlace de invitación copiado."]
+});
+Object.assign(X,{
+"invite":["Convidar","Einladen","Invita","دعوة","邀请","आमंत्रित करें","আমন্ত্রণ","Пригласить","Davet et","招待","초대"],
+"join_invite":["Junte-se a mim no Whatsapp Business Pro","Komm zu Whatsapp Business Pro","Unisciti a me su Whatsapp Business Pro","انضم إليّ على Whatsapp Business Pro","加入我的 Whatsapp Business Pro","Whatsapp Business Pro पर मेरे साथ जुड़ें","Whatsapp Business Pro-তে আমার সাথে যোগ দিন","Присоединяйтесь ко мне в Whatsapp Business Pro","Whatsapp Business Pro'ya katıl","Whatsapp Business Pro に参加してください","Whatsapp Business Pro에서 함께하세요"],
+"invite_link_copied":["Link de convite copiado.","Einladungslink kopiert.","Link di invito copiato.","تم نسخ رابط الدعوة.","邀请链接已复制。","आमंत्रण लिंक कॉपी किया गया।","আমন্ত্রণ লিঙ্ক কপি হয়েছে।","Ссылка приглашения скопирована.","Davet bağlantısı kopyalandı.","招待リンクをコピーしました。","초대 링크가 복사되었습니다."]
+});
+
 const reverse=new Map();
 for(const [key,vals] of Object.entries(D)){
   vals.forEach(v=>{if(v)reverse.set(v.trim(),key)});
@@ -513,6 +525,9 @@ for(const [key,vals] of Object.entries(X)){
   vals.forEach(v=>{if(v)reverse.set(v.trim(),key)});
 }
 for(const [src,key] of Object.entries(extraAliases))reverse.set(src,key);
+reverse.set("Inviter","invite");
+reverse.set("Join me on Whatsapp Business Pro","join_invite");
+reverse.set("Invitation link copied.","invite_link_copied");
 reverse.set("Pa gen discussion pou filtè sa a.","no_chats");
 reverse.set("No chats for this filter.","no_chats");
 
