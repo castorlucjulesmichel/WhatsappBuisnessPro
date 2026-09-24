@@ -603,6 +603,16 @@ Object.assign(X,{
 "vcf_import_failed":["Não foi possível importar o arquivo VCF.","VCF-Datei konnte nicht importiert werden.","Impossibile importare il file VCF.","تعذر استيراد ملف VCF.","无法导入 VCF 文件。","VCF फ़ाइल आयात नहीं की जा सकी।","VCF ফাইল আমদানি করা যায়নি।","Не удалось импортировать VCF-файл.","VCF dosyası içe aktarılamadı.","VCFファイルをインポートできませんでした。","VCF 파일을 가져올 수 없습니다."]
 });
 
+
+Object.assign(D,{
+"sync_contacts":["Senkronize kontak yo","Synchroniser les contacts","Sync contacts","Sincronizar contactos"],
+"sync_contacts_hint":["Bay aksè ak kontak ou vle ajoute yo.","Autorisez l’accès aux contacts que vous souhaitez ajouter.","Allow access to the contacts you want to add.","Permite el acceso a los contactos que deseas agregar."]
+});
+Object.assign(X,{
+"sync_contacts":["Sincronizar contatos","Kontakte synchronisieren","Sincronizza contatti","مزامنة جهات الاتصال","同步联系人","संपर्क सिंक करें","কন্ট্যাক্ট সিঙ্ক করুন","Синхронизировать контакты","Kişileri senkronize et","連絡先を同期","연락처 동기화"],
+"sync_contacts_hint":["Permita acesso aos contatos que deseja adicionar.","Erlauben Sie den Zugriff auf die Kontakte, die Sie hinzufügen möchten.","Consenti l’accesso ai contatti che vuoi aggiungere.","اسمح بالوصول إلى جهات الاتصال التي تريد إضافتها.","允许访问你想添加的联系人。","जिन संपर्कों को जोड़ना चाहते हैं, उनकी अनुमति दें।","যে কন্ট্যাক্ট যোগ করতে চান সেগুলোর অনুমতি দিন।","Разрешите доступ к контактам, которые хотите добавить.","Eklemek istediğiniz kişilere erişime izin verin.","追加したい連絡先へのアクセスを許可してください。","추가할 연락처에 대한 접근을 허용하세요."]
+});
+
 const reverse=new Map();
 for(const [key,vals] of Object.entries(D)){
   vals.forEach(v=>{if(v)reverse.set(v.trim(),key)});
@@ -612,6 +622,8 @@ for(const [key,vals] of Object.entries(X)){
 }
 for(const [src,key] of Object.entries(extraAliases))reverse.set(src,key);
 reverse.set("Inviter","invite");
+reverse.set("Synchroniser les contacts","sync_contacts");
+reverse.set("Autorisez l’accès aux contacts que vous souhaitez ajouter.","sync_contacts_hint");
 reverse.set("Join me on Whatsapp Business Pro","join_invite");
 reverse.set("Invitation link copied.","invite_link_copied");
 reverse.set("Select all","select_all");
