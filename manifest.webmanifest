@@ -1,1 +1,16 @@
-{"name":"Whatssap Business Pro","short_name":"Whatssap Pro","start_url":"./","display":"standalone","background_color":"#f2f6f5","theme_color":"#075e54","icons":[]}
+{
+  "name": "Whatsapp Business Pro",
+  "short_name": "Whatsapp Pro",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f2f6f5",
+  "theme_color": "#075e54",
+  "icons": [
+    {
+      "src": "assets/logo.webp",
+      "sizes": "192x192",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    }
+  ]
+}
