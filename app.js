@@ -9,9 +9,11 @@ const configured=()=>firebaseConfig.apiKey && !String(firebaseConfig.apiKey).inc
 const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 const toast=t=>{const e=$("#toast");e.textContent=t;e.classList.add("show");setTimeout(()=>e.classList.remove("show"),2300)};
 const norm=s=>String(s||"").trim().toLowerCase().replace(/[^a-z0-9_.-]/g,"");
+const normalizeMobile=v=>{let p=String(v||"").trim().replace(/[^0-9+]/g,"");if(p.startsWith("00"))p="+"+p.slice(2);return p};
+const validMobile=p=>/^\+[1-9]\d{7,14}$/.test(normalizeMobile(p));
 const safe=s=>String(s||"file").replace(/[^a-zA-Z0-9._-]/g,"_");
 const money=(n,c)=>Number(n||0).toLocaleString(undefined,{maximumFractionDigits:2})+" "+(c||"HTG");
-const S={user:null,profile:{},chatId:null,chatRows:[],chatFilter:"all",products:[],clips:[],boosts:[],cart:[],unsubs:[]};
+const S={user:null,profile:{},account:{},chatId:null,chatRows:[],chatFilter:"all",products:[],clips:[],boosts:[],cart:[],unsubs:[]};
 
 if(!configured()){
   $("#authScreen").classList.add("hidden");
@@ -85,6 +87,18 @@ async function signInGoogle(){
 $("#googleSignInBtn")?.addEventListener("click",signInGoogle);
 getRedirectResult(auth).catch(e=>console.error("Google redirect",e));
 $("#logout").onclick=()=>signOut(auth);
+$("#phoneSetupLogout")?.addEventListener("click",()=>signOut(auth));
+$("#saveMobilePhoneBtn")?.addEventListener("click",async()=>{
+  if(!S.user)return;
+  const phone=normalizeMobile($("#mobilePhoneSetup")?.value||"");
+  if(!validMobile(phone))return toast("Mete nimewo a ak kòd peyi a, egzanp +509XXXXXXXX.");
+  try{
+    await setDoc(doc(db,"users",S.user.uid),{phone,updatedAt:serverTimestamp()},{merge:true});
+    location.reload();
+  }catch(e){
+    console.error(e);toast("Nimewo a pa t sove.");
+  }
+});
 
 async function ensureUser(u){
   const r=doc(db,"users",u.uid),s=await getDoc(r);
@@ -98,10 +112,13 @@ async function ensureUser(u){
   return true;
 }
 async function loadProfile(){
-  const s=await getDoc(doc(db,"publicProfiles",S.user.uid));S.profile=s.exists()?s.data():{};
+  const [s,a]=await Promise.all([getDoc(doc(db,"publicProfiles",S.user.uid)),getDoc(doc(db,"users",S.user.uid))]);
+  S.profile=s.exists()?s.data():{};
+  S.account=a.exists()?a.data():{};
   $("#displayName").value=S.profile.displayName||"";$("#username").value=S.profile.username||"";$("#bio").value=S.profile.bio||"";$("#country").value=S.profile.country||"";$("#birthYear").value=S.profile.birthYear||"";$("#role").value=S.profile.role||"buyer";
   $("#avatarPreview").src=S.profile.photoUrl||"";
   $("#headerUser").textContent=S.profile.displayName||S.profile.username||S.user.displayName||S.user.email||"User";
+  if($("#mobilePhoneProfile"))$("#mobilePhoneProfile").value=S.account.phone||"";
   if($("#profilePhoneDisplay"))$("#profilePhoneDisplay").textContent=S.user.email||S.user.displayName||"Compte Google";
 }
 async function upload(file,path,max,typePrefix){
@@ -112,10 +129,13 @@ async function upload(file,path,max,typePrefix){
   const up=await uploadBytes(rr,file,{contentType:file.type});return getDownloadURL(up.ref);
 }
 $("#profileForm").onsubmit=async e=>{e.preventDefault();try{
+  const mobile=normalizeMobile($("#mobilePhoneProfile")?.value||"");if(!validMobile(mobile))return toast("Mete yon nimewo mobil entènasyonal valab, egzanp +509XXXXXXXX.");
   const username=norm($("#username").value);if(username.length<3)return toast("Username dwe gen omwen 3 karaktè.");
   const q=query(collection(db,"publicProfiles"),where("username","==",username),limit(2)),m=await getDocs(q);
   if(m.docs.some(d=>d.id!==S.user.uid))return toast("Username sa deja itilize.");
   let photoUrl=S.profile.photoUrl||"";const f=$("#avatarFile").files[0];if(f)photoUrl=await upload(f,"whatssap-business-pro/avatars",8*1024*1024,"image/");
+  await setDoc(doc(db,"users",S.user.uid),{phone:mobile,updatedAt:serverTimestamp()},{merge:true});
+  S.account={...S.account,phone:mobile};window.dispatchEvent(new CustomEvent("wbp-phone-updated",{detail:{phone:mobile}}));
   await setDoc(doc(db,"publicProfiles",S.user.uid),{displayName:$("#displayName").value.trim()||username,username,bio:$("#bio").value.trim(),country:$("#country").value.trim(),birthYear:Number($("#birthYear").value||0),role:$("#role").value,photoUrl,updatedAt:serverTimestamp()},{merge:true});
   await setDoc(doc(db,"businesses",S.user.uid),{
     ownerId:S.user.uid,
@@ -339,9 +359,24 @@ window.WBP_TRANSLATE?.();
 
 onAuthStateChanged(auth,async u=>{
   clearOffs();S.user=u;
-  if(!u){$("#authScreen").classList.remove("hidden");$("#appShell").classList.add("hidden");return}
+  if(!u){
+    $("#authScreen").classList.remove("hidden");
+    $("#phoneSetupScreen")?.classList.add("hidden");
+    $("#appShell").classList.add("hidden");
+    return;
+  }
   if(!(await ensureUser(u)))return;
-  $("#authScreen").classList.add("hidden");$("#appShell").classList.remove("hidden");
+  const accountSnap=await getDoc(doc(db,"users",u.uid));
+  S.account=accountSnap.exists()?accountSnap.data():{};
+  $("#authScreen").classList.add("hidden");
+  if(!validMobile(S.account.phone||"")){
+    $("#appShell").classList.add("hidden");
+    $("#phoneSetupScreen")?.classList.remove("hidden");
+    if($("#mobilePhoneSetup"))$("#mobilePhoneSetup").value=S.account.phone||"";
+    return;
+  }
+  $("#phoneSetupScreen")?.classList.add("hidden");
+  $("#appShell").classList.remove("hidden");
   go("chat");
   await loadProfile();loadCart();await loadBusiness();
   watchProducts();watchBoosts();watchClips();watchChats();watchSupport();watchWallet();watchLevels();watchInvestments();watchOrders();
