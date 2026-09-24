@@ -1,6 +1,6 @@
 import {firebaseConfig,appSettings} from "./firebase-config.js";
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import {getAuth,onAuthStateChanged,signInWithPhoneNumber,RecaptchaVerifier,signOut} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {getAuth,onAuthStateChanged,signInWithPhoneNumber,RecaptchaVerifier,signOut,useDeviceLanguage} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {getFirestore,doc,getDoc,setDoc,addDoc,updateDoc,collection,query,where,onSnapshot,getDocs,orderBy,serverTimestamp,limit} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import {getStorage,ref,uploadBytes,getDownloadURL} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 
@@ -20,7 +20,7 @@ if(!configured()){
 }
 
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),storage=getStorage(app);
-auth.useDeviceLanguage();
+useDeviceLanguage(auth);
 
 function addOff(f){if(typeof f==="function")S.unsubs.push(f)}
 function clearOffs(){S.unsubs.forEach(f=>{try{f()}catch{}});S.unsubs=[]}
@@ -63,7 +63,7 @@ async function recaptcha(){
   window._wbpRc=new RecaptchaVerifier(auth,"recaptcha-container",{size:"normal"});
   await window._wbpRc.render();return window._wbpRc;
 }
-$("#sendOtp").onclick=async()=>{try{const p=$("#phone").value.trim();if(!p.startsWith("+"))return toast("Mete kòd peyi a, egzanp +509.");S.confirm=await signInWithPhoneNumber(auth,p,await recaptcha());$("#otpBox").classList.remove("hidden");toast("Kòd OTP voye.")}catch(e){console.error(e);toast("OTP pa t voye.");try{window._wbpRc?.clear();window._wbpRc=null}catch{}}};
+$("#sendOtp").onclick=async()=>{try{const p=$("#phone").value.trim();if(!p.startsWith("+"))return toast("Mete kòd peyi a, egzanp +509.");S.confirm=await signInWithPhoneNumber(auth,p,await recaptcha());$("#otpBox").classList.remove("hidden");toast("Kòd OTP voye.")}catch(e){console.error(e);toast("OTP pa t voye: "+(e.code||e.message||"erè Firebase"));try{window._wbpRc?.clear();window._wbpRc=null}catch{}}};
 $("#verifyOtp").onclick=async()=>{try{if(!S.confirm)return toast("Voye OTP an dabò.");await S.confirm.confirm($("#otp").value.trim())}catch(e){console.error(e);toast("Kòd la pa valab.")}};
 $("#logout").onclick=()=>signOut(auth);
 
