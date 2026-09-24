@@ -28,3 +28,34 @@
 .homeQuick button{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:20px}.homeQuick button span{font-size:13px}
 .page{padding-bottom:92px}
 @media(max-width:560px){.bottomNav button{font-size:9.5px}.bottomNav .navIcon{font-size:19px}.menuHeader h2{font-size:27px}.settingsItem{padding:15px 12px}.settingsText b{font-size:15px}.settingsText small{font-size:12px}}
+
+/* Settings UI */
+.settingsSearch{margin-bottom:14px}
+.settingsDetailHead{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.settingsDetailHead h3{margin:0}
+.settingPanel>label:not(.toggleRow){display:block;margin:12px 0 6px;color:var(--muted);font-size:13px}
+.toggleRow{display:flex!important;align-items:center;justify-content:space-between;gap:14px;padding:13px 0;border-bottom:1px solid var(--line);margin:0!important}
+.toggleRow>span{display:flex;flex-direction:column;gap:3px}
+.toggleRow small{color:var(--muted);font-size:12px}
+.toggleRow input[type="checkbox"]{width:46px;height:24px;accent-color:var(--green);flex:0 0 auto}
+.deviceRow{display:flex;gap:12px;align-items:center;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}
+.deviceRow>span{font-size:28px}.deviceRow>div{display:flex;flex-direction:column;gap:3px}.deviceRow small{color:var(--muted)}
+#customerLists .historyRow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+html[data-fontsize="small"]{font-size:14px}
+html[data-fontsize="normal"]{font-size:16px}
+html[data-fontsize="large"]{font-size:18px}
+html.highContrast{--text:#000;--muted:#333;--line:#8a8a8a}
+html.reduceMotion *,html.reduceMotion *::before,html.reduceMotion *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+html[data-theme="dark"]{--bg:#0f1715;--card:#17211e;--text:#eef6f3;--muted:#a8b6b1;--line:#2e3a36}
+html[data-theme="dark"] body{background:var(--bg);color:var(--text)}
+html[data-theme="dark"] header,html[data-theme="dark"] .bottomNav,html[data-theme="dark"] .settingsItem,html[data-theme="dark"] .notificationPanel,html[data-theme="dark"] .notificationHead{background:#17211ef2;color:var(--text)}
+html[data-theme="dark"] input,html[data-theme="dark"] textarea,html[data-theme="dark"] select{background:#111a17;color:var(--text);border-color:var(--line)}
+html[data-theme="dark"] .settingsItem:hover{background:#1e2a26}
+html[data-theme="dark"] .ghost{background:#24302c;color:var(--text)}
+html[data-theme="dark"] .card,html[data-theme="dark"] .metrics>div,html[data-theme="dark"] .balanceCard,html[data-theme="dark"] .product,html[data-theme="dark"] .level{background:var(--card);color:var(--text)}
+@media (prefers-color-scheme:dark){
+ html[data-theme="system"]{--bg:#0f1715;--card:#17211e;--text:#eef6f3;--muted:#a8b6b1;--line:#2e3a36}
+ html[data-theme="system"] body{background:var(--bg);color:var(--text)}
+ html[data-theme="system"] header,html[data-theme="system"] .bottomNav,html[data-theme="system"] .settingsItem{background:#17211ef2;color:var(--text)}
+ html[data-theme="system"] input,html[data-theme="system"] textarea,html[data-theme="system"] select{background:#111a17;color:var(--text);border-color:var(--line)}
+}
