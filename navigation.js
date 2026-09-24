@@ -16,6 +16,8 @@
     // Close transient overlays that could intercept touches.
     document.getElementById("notificationPanel")?.classList.add("hidden");
     document.querySelector("#chatPage .conversation")?.classList.remove("open");
+    document.getElementById("chatPage")?.classList.remove("chat-open");
+    document.body.classList.remove("chatConversationOpen");
 
     window.scrollTo({top:0, behavior:"auto"});
     return true;
