@@ -215,9 +215,9 @@
 
 <section id="marketPage" class="page">
  <div class="title"><div><button class="backLink ghost" data-go="tools">← Outils</button><h2>Marketplace</h2><p>Achat et vente de produits</p></div><div><button id="cartBtn">Panier <span id="cartCount">0</span></button><button id="sellBtn">+ Vann</button></div></div>
- <div id="sellBox" class="card hidden"><form id="productForm"><input id="pName" required placeholder="Non pwodwi"><div class="row"><input id="pPrice" type="number" min="0" step="0.01" required placeholder="Pri"><select id="pCurrency"></select></div><select id="pCategory"><option>Electronics</option><option>Fashion</option><option>Cosmetics</option><option>Food</option><option>Services</option><option>Other</option></select><input id="pStock" type="number" min="0" value="1" placeholder="Stock"><textarea id="pDesc" placeholder="Deskripsyon"></textarea><input id="pImage" type="file" accept="image/*"><button>Pibliye</button></form></div>
+ <div id="sellBox" class="card hidden"><form id="productForm"><input id="pName" required placeholder="Non pwodwi"><div class="row"><input id="pPrice" type="number" min="0" step="0.01" required placeholder="Pri"><select id="pCurrency"></select></div><select id="pCategory"><option value="Electronics">Electronics</option><option value="Fashion">Fashion</option><option value="Cosmetics">Cosmetics</option><option value="Food">Food</option><option value="Services">Services</option><option value="Other">Other</option></select><input id="pStock" type="number" min="0" value="1" placeholder="Stock"><textarea id="pDesc" placeholder="Deskripsyon"></textarea><input id="pImage" type="file" accept="image/*"><button>Pibliye</button></form></div>
  <div id="cartBox" class="card hidden"><h3>Panier</h3><div id="cartItems"></div><button id="checkoutBtn">Kreye kòmand</button></div>
- <div class="filters"><input id="marketSearch" placeholder="Chèche pwodwi..."><select id="marketCategory"><option value="">Tout kategori</option><option>Electronics</option><option>Fashion</option><option>Cosmetics</option><option>Food</option><option>Services</option><option>Other</option></select></div>
+ <div class="filters"><input id="marketSearch" placeholder="Chèche pwodwi..."><select id="marketCategory"><option value="">Tout kategori</option><option value="Electronics">Electronics</option><option value="Fashion">Fashion</option><option value="Cosmetics">Cosmetics</option><option value="Food">Food</option><option value="Services">Services</option><option value="Other">Other</option></select></div>
  <div id="productGrid" class="productGrid"></div>
 </section>
 
@@ -240,7 +240,7 @@
   <form id="walletRequestForm" class="card"><h3>Nouvo operasyon</h3>
    <select id="walletType"><option value="deposit">Depo</option><option value="withdrawal">Retrè</option><option value="transfer">Transfè</option><option value="payout">Payout</option></select>
    <div class="row"><input id="walletAmount" type="number" min="0" step="0.01" placeholder="Montan" required><select id="walletCurrency"></select></div>
-   <select id="walletMethod"><option>MonCash</option><option>NatCash</option><option>Bank Transfer</option><option>MoneyGram</option><option>Ria</option><option>Unitransfer</option><option>Cash</option></select>
+   <select id="walletMethod"><option value="MonCash">MonCash</option><option value="NatCash">NatCash</option><option value="Bank Transfer">Bank Transfer</option><option value="MoneyGram">MoneyGram</option><option value="Ria">Ria</option><option value="Unitransfer">Unitransfer</option><option value="Cash">Cash</option></select>
    <input id="walletDestination" placeholder="Nimewo / kont / destinasyon"><input id="walletReference" placeholder="Referans tranzaksyon">
    <label>Prèv (opsyonèl)</label><input id="walletProof" type="file" accept="image/*"><textarea id="walletNote" placeholder="Nòt"></textarea><button>Soumèt</button>
   </form>
@@ -480,14 +480,14 @@
  <button data-page="wallet"><span class="navIcon">💼</span><span>Portefeuille</span></button>
 </nav>
 </div>
-<script src="i18n.js?v=14"></script>
-<script src="navigation.js?v=14"></script>
-<script type="module" src="app.js?v=14"></script>
-<script type="module" src="status.js?v=14"></script>
-<script type="module" src="boost.js?v=14"></script>
-<script type="module" src="orders.js?v=14"></script>
-<script type="module" src="notifications.js?v=14"></script>
-<script type="module" src="settings.js?v=14"></script>
-<script type="module" src="chat-advanced.js?v=14"></script>
-<script type="module" src="contacts.js?v=14"></script>
+<script src="i18n.js?v=15"></script>
+<script src="navigation.js?v=15"></script>
+<script type="module" src="app.js?v=15"></script>
+<script type="module" src="status.js?v=15"></script>
+<script type="module" src="boost.js?v=15"></script>
+<script type="module" src="orders.js?v=15"></script>
+<script type="module" src="notifications.js?v=15"></script>
+<script type="module" src="settings.js?v=15"></script>
+<script type="module" src="chat-advanced.js?v=15"></script>
+<script type="module" src="contacts.js?v=15"></script>
 </body></html>
