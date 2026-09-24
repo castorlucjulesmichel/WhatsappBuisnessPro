@@ -309,9 +309,15 @@ async function reportCase(type,targetId,title){await addDoc(collection(db,"moder
 $("#assistantForm").onsubmit=e=>{e.preventDefault();const t=$("#assistantInput").value.trim();if(!t)return;const low=t.toLowerCase();let a="Mwen ka ede w ak chat, marketplace, wallet, envestisman, Business Pro ak boost.";if(low.includes("depo"))a="Ale nan Wallet pou fè depo/retrè. Pou Boost, ale Business Pro > Boost & Ads epi chwazi MonCash oswa NatCash.";else if(low.includes("boost")||low.includes("piblisite"))a="Nan Business Pro, depoze nan Ad Wallet an HTG oswa USD, chwazi pwodwi/clip, bidjè pa jou, dire ak odyans, epi voye boost la pou validasyon.";else if(low.includes("vann"))a="Ale Marketplace > + Vann pou mete pwodwi a.";$("#assistantMessages").innerHTML+=`<div class="msg me">${esc(t)}</div><div class="msg">${esc(a)}</div>`;$("#assistantInput").value=""};
 
 function watchOrders(){const q=query(collection(db,"orders"),where("buyerId","==",S.user.uid));addOff(onSnapshot(q,s=>$("#mOrders").textContent=s.size))}
-const dict={ht:{welcome:"Byenvini"},fr:{welcome:"Bienvenue"},en:{welcome:"Welcome"},es:{welcome:"Bienvenido"}};
-function applyLang(){const l=$("#lang").value;localStorage.setItem("wbp_lang",l);$$("[data-i18n]").forEach(e=>e.textContent=dict[l]?.[e.dataset.i18n]||dict.ht[e.dataset.i18n]||e.textContent)}
-$("#lang").value=localStorage.getItem("wbp_lang")||"ht";$("#lang").onchange=applyLang;applyLang();
+function applyLang(){
+  const l=$("#lang")?.value||localStorage.getItem("wbp_lang")||"ht";
+  window.WBP_SET_LANG?.(l);
+}
+if($("#lang")){
+  $("#lang").value=localStorage.getItem("wbp_lang")||"ht";
+  $("#lang").onchange=applyLang;
+}
+window.WBP_TRANSLATE?.();
 
 onAuthStateChanged(auth,async u=>{
   clearOffs();S.user=u;
