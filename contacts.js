@@ -40,6 +40,58 @@ function showPage(name){
   $("#"+name+"Page")?.classList.add("active");
   document.body.classList.toggle("waMainTab",name==="chat"||name==="calls");
 }
+
+function normalizePhone(v){
+  let p=String(v||"").trim().replace(/[^0-9+]/g,"");
+  if(p.startsWith("00"))p="+"+p.slice(2);
+  return p;
+}
+async function phoneDocId(phone){
+  const p=normalizePhone(phone);
+  try{
+    if(crypto?.subtle){
+      const bytes=new TextEncoder().encode(p);
+      const hash=await crypto.subtle.digest("SHA-256",bytes);
+      return "phone_"+[...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,"0")).join("").slice(0,32);
+    }
+  }catch{}
+  return "phone_"+p.replace(/[^0-9]/g,"");
+}
+async function importPhoneContacts(){
+  if(!user)return;
+  if(!("contacts" in navigator)||typeof navigator.contacts?.select!=="function"){
+    toast(window.WBP_T?.("Phone contacts are not supported in this browser. Open the app in Chrome on Android.")||"Phone contacts are not supported in this browser. Open the app in Chrome on Android.");
+    return;
+  }
+  try{
+    const selected=await navigator.contacts.select(["name","tel"],{multiple:true});
+    if(!selected?.length)return;
+    let imported=0;
+    for(const item of selected){
+      const name=String(item.name?.[0]||"Contact").trim()||"Contact";
+      const numbers=(item.tel||[]).map(normalizePhone).filter(Boolean);
+      for(const phone of numbers){
+        const existing=contacts.find(x=>normalizePhone(x.phone)===phone);
+        const id=existing?.id||await phoneDocId(phone);
+        await setDoc(doc(db,"users",user.uid,"contacts",id),{
+          contactUid:existing?.contactUid||"",
+          username:existing?.username||"",
+          displayName:name,
+          phone,
+          importedFromPhone:true,
+          updatedAt:serverTimestamp(),
+          createdAt:existing?.createdAt||serverTimestamp()
+        },{merge:true});
+        imported++;
+      }
+    }
+    toast((window.WBP_T?.("Contacts imported")||"Contacts imported")+": "+imported);
+  }catch(e){
+    if(e?.name==="AbortError")return;
+    console.warn("contact picker",e);
+    toast(window.WBP_T?.("Unable to import phone contacts.")||"Unable to import phone contacts.");
+  }
+}
 function render(){
   const q=($("#contactPickerSearch")?.value||"").trim().toLowerCase();
   const rows=contacts.filter(c=>!q||((c.displayName||"")+" "+(c.username||"")+" "+(c.phone||"")).toLowerCase().includes(q));
@@ -94,8 +146,9 @@ function watchContacts(){
     render();
   });
 }
-$("#newChatBtn")?.addEventListener("click",e=>{e.preventDefault();showPage("contactPicker")});
+$("#newChatBtn")?.addEventListener("click",async e=>{e.preventDefault();showPage("contactPicker");if(!contacts.length)await importPhoneContacts();});
 $("#pickerNewContactBtn")?.addEventListener("click",()=>showPage("newContact"));
+$("#importPhoneContactsBtn")?.addEventListener("click",importPhoneContacts);
 $("#pickerNewGroupBtn")?.addEventListener("click",()=>{showPage("chat");setTimeout(()=>$("#newGroupBox")?.classList.remove("hidden"),50)});
 $("#contactPickerSearchBtn")?.addEventListener("click",()=>$("#contactPickerSearch")?.classList.toggle("hidden"));
 $("#contactPickerSearch")?.addEventListener("input",render);
