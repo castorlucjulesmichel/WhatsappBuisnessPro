@@ -1,7 +1,7 @@
 import {firebaseConfig,appSettings} from "./firebase-config.js";
 import {initializeApp,getApps,getApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {getAuth,onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import {getFirestore,doc,getDoc,getDocs,setDoc,addDoc,updateDoc,collection,query,where,orderBy,limit,serverTimestamp,runTransaction} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import {getFirestore,doc,getDoc,getDocs,setDoc,addDoc,updateDoc,collection,query,where,orderBy,limit,serverTimestamp,runTransaction,onSnapshot} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
@@ -168,12 +168,10 @@ $("#openSupport").onclick=()=>{
   const uid=$("#supportUser").value;if(!uid)return toast("Chwazi itilizatè.");
   supportOff?.();
   const q=query(collection(db,"supportThreads",uid,"messages"),orderBy("createdAt","asc"),limit(300));
-  supportOff=onSnapshotCompat(q,rows=>{
+  supportOff=onSnapshot(q,s=>{
+    const rows=s.docs.map(d=>({id:d.id,...d.data()}));
     $("#supportAdminMessages").innerHTML=rows.map(m=>`<div class="msg ${m.senderId===admin.uid?"me":""}">${esc(m.text||"")}</div>`).join("");
     $("#supportAdminMessages").scrollTop=$("#supportAdminMessages").scrollHeight;
   });
 };
-function onSnapshotCompat(q,cb){
-  return import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js").then(({onSnapshot})=>onSnapshot(q,s=>cb(s.docs.map(d=>({id:d.id,...d.data()}))))).then(x=>x);
-}
 $("#supportAdminForm").onsubmit=async e=>{e.preventDefault();const uid=$("#supportUser").value,t=$("#supportAdminText").value.trim();if(!uid||!t)return;await addDoc(collection(db,"supportThreads",uid,"messages"),{senderId:admin.uid,text:t,createdAt:serverTimestamp()});await setDoc(doc(db,"supportThreads",uid),{userId:uid,updatedAt:serverTimestamp()},{merge:true});$("#supportAdminText").value=""};
