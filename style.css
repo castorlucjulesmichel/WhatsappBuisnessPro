@@ -13,3 +13,18 @@
 .notificationHead{display:flex;justify-content:space-between;align-items:center;position:sticky;top:-12px;background:#fff;padding:8px 0;border-bottom:1px solid var(--line)}
 .notificationItem{padding:11px 0;border-bottom:1px solid var(--line)}.notificationItem.unread{font-weight:700}.notificationItem small{display:block;color:var(--muted);font-weight:400}
 .orderCard{padding:12px 0;border-bottom:1px solid var(--line)}.orderItems{font-size:13px;color:var(--muted);margin:5px 0}
+
+/* WhatsApp-style five-tab navigation and tools menus */
+.bottomNav{position:fixed;left:0;right:0;bottom:0;z-index:50;display:grid;grid-template-columns:repeat(5,1fr);background:#fffffff7;backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px 4px max(6px,env(safe-area-inset-bottom))}
+.bottomNav button{min-width:0;background:transparent;color:#69746f;border:0;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 2px;font-size:11px;font-weight:600}
+.bottomNav button.active{color:var(--green);background:#e9f5f1}
+.bottomNav .navIcon{font-size:20px;line-height:1.1}
+.menuPage{max-width:760px}.menuHeader{display:flex;align-items:center;justify-content:space-between;margin:4px 0 18px}.menuHeader h2{font-size:30px;margin:0}.menuHeader p{color:var(--muted);margin:4px 0 0}
+.menuSectionTitle{font-size:15px;font-weight:800;margin:22px 4px 8px}
+.settingsList.card{padding:0;overflow:hidden;border-radius:16px}
+.settingsItem{width:100%;display:grid;grid-template-columns:34px 1fr 20px;align-items:center;gap:12px;text-align:left;background:#fff;color:var(--text);border:0;border-bottom:1px solid #edf1ef;border-radius:0;padding:16px 14px;font-weight:400}
+.settingsItem:last-child{border-bottom:0}.settingsItem:hover{background:#f7faf9}.settingsIcon{font-size:22px;text-align:center}.settingsText{display:flex;flex-direction:column;gap:3px}.settingsText b{font-size:16px;font-weight:650}.settingsText small{font-size:13px;line-height:1.35;color:var(--muted)}.chevron{font-size:26px;color:#9aa39f;font-weight:300}
+.backLink{padding:6px 9px;margin-bottom:7px;font-size:13px}.walletMenu{margin-top:12px}
+.homeQuick button{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:20px}.homeQuick button span{font-size:13px}
+.page{padding-bottom:92px}
+@media(max-width:560px){.bottomNav button{font-size:9.5px}.bottomNav .navIcon{font-size:19px}.menuHeader h2{font-size:27px}.settingsItem{padding:15px 12px}.settingsText b{font-size:15px}.settingsText small{font-size:12px}}
