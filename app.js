@@ -62,7 +62,7 @@ async function ensureUser(u){
 }
 async function loadProfile(){
   const s=await getDoc(doc(db,"publicProfiles",S.user.uid));S.profile=s.exists()?s.data():{};
-  $("#displayName").value=S.profile.displayName||"";$("#username").value=S.profile.username||"";$("#bio").value=S.profile.bio||"";$("#role").value=S.profile.role||"buyer";
+  $("#displayName").value=S.profile.displayName||"";$("#username").value=S.profile.username||"";$("#bio").value=S.profile.bio||"";$("#country").value=S.profile.country||"";$("#birthYear").value=S.profile.birthYear||"";$("#role").value=S.profile.role||"buyer";
   $("#avatarPreview").src=S.profile.photoUrl||"";
   $("#headerUser").textContent=S.profile.displayName||S.profile.username||S.user.phoneNumber||"User";
 }
@@ -78,7 +78,7 @@ $("#profileForm").onsubmit=async e=>{e.preventDefault();try{
   const q=query(collection(db,"publicProfiles"),where("username","==",username),limit(2)),m=await getDocs(q);
   if(m.docs.some(d=>d.id!==S.user.uid))return toast("Username sa deja itilize.");
   let photoUrl=S.profile.photoUrl||"";const f=$("#avatarFile").files[0];if(f)photoUrl=await upload(f,"whatssap-business-pro/avatars",8*1024*1024,"image/");
-  await setDoc(doc(db,"publicProfiles",S.user.uid),{displayName:$("#displayName").value.trim()||username,username,bio:$("#bio").value.trim(),role:$("#role").value,photoUrl,updatedAt:serverTimestamp()},{merge:true});
+  await setDoc(doc(db,"publicProfiles",S.user.uid),{displayName:$("#displayName").value.trim()||username,username,bio:$("#bio").value.trim(),country:$("#country").value.trim(),birthYear:Number($("#birthYear").value||0),role:$("#role").value,photoUrl,updatedAt:serverTimestamp()},{merge:true});
   await loadProfile();toast("Profil sove.");
 }catch(x){console.error(x);toast(x.message||"Profil pa t sove.");}};
 $("#shareLocation").onclick=()=>{if(!navigator.geolocation)return toast("Lokalizasyon pa disponib.");$("#locationStatus").textContent="Ap chèche...";navigator.geolocation.getCurrentPosition(async p=>{const loc={lat:p.coords.latitude,lng:p.coords.longitude,accuracy:p.coords.accuracy,sharedAt:serverTimestamp()};await setDoc(doc(db,"userSettings",S.user.uid),{location:loc},{merge:true});$("#locationStatus").textContent="Lokalizasyon pataje avèk presizyon "+Math.round(p.coords.accuracy)+" m.";toast("Lokalizasyon sove.")},()=>{$("#locationStatus").textContent="Pèmisyon lokalizasyon refize.";},{enableHighAccuracy:true,timeout:12000})};
