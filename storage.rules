@@ -20,6 +20,18 @@ service firebase.storage {
       allow write: if owner(uid) && request.resource.size < 8 * 1024 * 1024
         && request.resource.contentType.matches('image/.*');
     }
+
+    match /whatssap-business-pro/statuses/{uid}/{statusId}/{file} {
+      allow read: if signedIn()
+        && (
+          owner(uid)
+          || firestore.exists(/databases/(default)/documents/users/$(uid)/contacts/$(request.auth.uid))
+          || firestore.get(/databases/(default)/documents/statuses/$(statusId)).data.boostActive == true
+        );
+      allow write: if owner(uid)
+        && request.resource.size < 80 * 1024 * 1024
+        && (request.resource.contentType.matches('image/.*') || request.resource.contentType.matches('video/.*'));
+    }
     match /whatssap-business-pro/proofs/{uid}/{file} {
       allow read: if owner(uid) || admin();
       allow write: if owner(uid) && request.resource.size < 8 * 1024 * 1024
