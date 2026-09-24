@@ -158,9 +158,27 @@ function renderClips(){
 function watchClips(){addOff(onSnapshot(collection(db,"shortVideos"),s=>{S.clips=s.docs.map(d=>({id:d.id,...d.data()}));$("#mProducts");renderClips()}))}
 
 $("#newChatBtn").onclick=()=>$("#newChatBox").classList.toggle("hidden");
-$("#startChatBtn").onclick=async()=>{try{const un=norm($("#targetUsername").value),q=query(collection(db,"publicProfiles"),where("username","==",un),limit(1)),s=await getDocs(q);if(s.empty)return toast("Username pa jwenn.");const o=s.docs[0];if(o.id===S.user.uid)return toast("Ou pa ka chat ak tèt ou.");const ids=[S.user.uid,o.id].sort(),id=ids.join("__"),names={[S.user.uid]:S.profile.displayName||S.profile.username||"User",[o.id]:o.data().displayName||o.data().username||"User"};await setDoc(doc(db,"chats",id),{participants:ids,participantNames:names,lastMessage:"",updatedAt:serverTimestamp()},{merge:true});openChat(id,names[o.id]);$("#newChatBox").classList.add("hidden")}catch(x){console.error(x);toast("Chat la pa kreye.");}};
-function watchChats(){const q=query(collection(db,"chats"),where("participants","array-contains",S.user.uid));addOff(onSnapshot(q,s=>{const rows=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.updatedAt?.seconds||0)-(a.updatedAt?.seconds||0));$("#chatList").innerHTML=rows.map(c=>{const oid=c.participants.find(x=>x!==S.user.uid)||S.user.uid,n=c.participantNames?.[oid]||"Chat";return `<div class="chatItem" data-chat="${c.id}" data-name="${esc(n)}"><b>${esc(n)}</b><br><small>${esc(c.lastMessage||"")}</small></div>`}).join("")||'<div class="chatItem muted">Pa gen chat.</div>';$$("[data-chat]").forEach(x=>x.onclick=()=>openChat(x.dataset.chat,x.dataset.name))}))}
-function openChat(id,name){S.chatId=id;$("#chatTitle").innerHTML=esc(name)+' <button id="reportChatBtn" class="ghost">Rapòte</button>';$("#messageForm").classList.remove("hidden");$("#reportChatBtn").onclick=()=>reportChat(id,name);const q=query(collection(db,"chats",id,"messages"),orderBy("createdAt","asc"),limit(300));addOff(onSnapshot(q,s=>{$("#messages").innerHTML=s.docs.map(d=>{const m=d.data();return `<div class="msg ${m.senderId===S.user.uid?"me":""}">${esc(m.text||"")}</div>`}).join("");$("#messages").scrollTop=$("#messages").scrollHeight}))}
+$("#startChatBtn").onclick=async()=>{try{const un=norm($("#targetUsername").value),q=query(collection(db,"publicProfiles"),where("username","==",un),limit(1)),s=await getDocs(q);if(s.empty)return toast("Username pa jwenn.");const o=s.docs[0];if(o.id===S.user.uid)return toast("Ou pa ka chat ak tèt ou.");const ids=[S.user.uid,o.id].sort(),id=ids.join("__"),names={[S.user.uid]:S.profile.displayName||S.profile.username||"User",[o.id]:o.data().displayName||o.data().username||"User"};await setDoc(doc(db,"chats",id),{type:"direct",participants:ids,participantNames:names,lastMessage:"",updatedAt:serverTimestamp()},{merge:true});openChat(id,names[o.id]);$("#newChatBox").classList.add("hidden")}catch(x){console.error(x);toast("Chat la pa kreye.");}};
+function watchChats(){const q=query(collection(db,"chats"),where("participants","array-contains",S.user.uid));addOff(onSnapshot(q,s=>{const rows=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.updatedAt?.seconds||0)-(a.updatedAt?.seconds||0));$("#chatList").innerHTML=rows.map(c=>{const oid=c.participants.find(x=>x!==S.user.uid)||S.user.uid,n=c.type==="group"?(c.groupName||"Gwoup"):(c.participantNames?.[oid]||"Chat");return `<div class="chatItem" data-chat="${c.id}" data-name="${esc(n)}"><b>${c.type==="group"?"👥 ":""}${esc(n)}</b><br><small>${esc(c.lastMessage||"")}</small></div>`}).join("")||'<div class="chatItem muted">Pa gen chat.</div>';$$("[data-chat]").forEach(x=>x.onclick=()=>openChat(x.dataset.chat,x.dataset.name))}))}
+function messageContent(m){
+  if(m.type==="image"&&m.mediaUrl)return '<img class="chatMediaImage" src="'+esc(m.mediaUrl)+'" alt="">'+(m.text?'<div>'+esc(m.text)+'</div>':'');
+  if(m.type==="audio"&&m.mediaUrl)return '<audio class="chatAudio" controls src="'+esc(m.mediaUrl)+'"></audio>';
+  if(m.type==="document"&&m.mediaUrl)return '<a class="chatFile" href="'+esc(m.mediaUrl)+'" target="_blank" rel="noopener">📄 '+esc(m.fileName||"Dokiman")+'</a>'+(m.text?'<div>'+esc(m.text)+'</div>':'');
+  return esc(m.text||"");
+}
+function openChat(id,name){
+  S.chatId=id;window.WBP_CURRENT_CHAT=id;window.WBP_CURRENT_USER=S.user?.uid||"";
+  $("#chatTitle").innerHTML=esc(name)+' <button id="blockChatBtn" class="ghost">Bloke</button> <button id="reportChatBtn" class="ghost">Rapòte</button>';
+  $("#messageForm").classList.remove("hidden");
+  $("#reportChatBtn").onclick=()=>reportChat(id,name);
+  window.dispatchEvent(new CustomEvent("wbp-chat-open",{detail:{chatId:id,name}}));
+  const q=query(collection(db,"chats",id,"messages"),orderBy("createdAt","asc"),limit(300));
+  addOff(onSnapshot(q,s=>{
+    $("#messages").innerHTML=s.docs.map(d=>{const m=d.data();const receipt=Array.isArray(m.readBy)&&m.readBy.includes(S.user.uid)?" ✓✓":"";return '<div class="msg '+(m.senderId===S.user.uid?"me":"")+'">'+messageContent(m)+(m.senderId===S.user.uid?'<small class="msgReceipt">'+receipt+'</small>':'')+'</div>'}).join("");
+    $("#messages").scrollTop=$("#messages").scrollHeight;
+    window.dispatchEvent(new CustomEvent("wbp-messages-rendered",{detail:{chatId:id,messages:s.docs.map(d=>({id:d.id,...d.data()}))}}));
+  }))
+}
 $("#messageForm").onsubmit=async e=>{e.preventDefault();const t=$("#messageText").value.trim();if(!t||!S.chatId)return;await addDoc(collection(db,"chats",S.chatId,"messages"),{senderId:S.user.uid,text:t,createdAt:serverTimestamp()});await updateDoc(doc(db,"chats",S.chatId),{lastMessage:t.slice(0,120),updatedAt:serverTimestamp()});$("#messageText").value=""};
 async function reportChat(id,name){const q=query(collection(db,"chats",id,"messages"),orderBy("createdAt","desc"),limit(20)),s=await getDocs(q),excerpt=s.docs.reverse().map(d=>({senderId:d.data().senderId,text:d.data().text||""}));await addDoc(collection(db,"moderationCases"),{reporterId:S.user.uid,type:"chat",targetId:id,title:"Chat ak "+name,excerpt,status:"open",createdAt:serverTimestamp()});toast("Dènye mesaj yo pataje ak moderasyon.")}
 
