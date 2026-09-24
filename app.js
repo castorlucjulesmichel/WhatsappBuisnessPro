@@ -44,7 +44,7 @@ async function syncPhoneDirectory(phone,oldPhone="",meta={}){
 }
 const safe=s=>String(s||"file").replace(/[^a-zA-Z0-9._-]/g,"_");
 const money=(n,c)=>Number(n||0).toLocaleString(undefined,{maximumFractionDigits:2})+" "+(c||"HTG");
-const S={user:null,profile:{},account:{},chatId:null,chatOtherUid:null,chatOtherName:"",chatRows:[],chatFilter:"all",products:[],clips:[],boosts:[],cart:[],unsubs:[]};
+const S={user:null,profile:{},account:{},chatId:null,chatOtherUid:null,chatOtherName:"",chatPresenceOff:null,presenceTimer:null,chatRows:[],chatFilter:"all",products:[],clips:[],boosts:[],cart:[],unsubs:[]};
 
 if(!configured()){
   $("#authScreen").classList.add("hidden");
@@ -56,6 +56,58 @@ const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),s
 useDeviceLanguage(auth);
 
 function addOff(f){if(typeof f==="function")S.unsubs.push(f)}
+function presenceDate(v){
+  if(!v)return null;
+  if(typeof v?.toDate==="function")return v.toDate();
+  if(v instanceof Date)return v;
+  const d=new Date(v);
+  return Number.isNaN(d.getTime())?null:d;
+}
+function presenceText(data={}){
+  const seen=presenceDate(data.lastSeen);
+  const age=seen?Date.now()-seen.getTime():Infinity;
+  if(data.online===true&&age<60000)return "en ligne";
+  if(!seen)return "";
+  const now=new Date();
+  const hhmm=new Intl.DateTimeFormat("fr",{hour:"2-digit",minute:"2-digit"}).format(seen);
+  const sameDay=seen.getFullYear()===now.getFullYear()&&seen.getMonth()===now.getMonth()&&seen.getDate()===now.getDate();
+  if(sameDay)return "vu à "+hhmm;
+  const y=new Date(now);y.setDate(now.getDate()-1);
+  const yesterday=seen.getFullYear()===y.getFullYear()&&seen.getMonth()===y.getMonth()&&seen.getDate()===y.getDate();
+  if(yesterday)return "vu hier à "+hhmm;
+  const dm=new Intl.DateTimeFormat("fr",{day:"2-digit",month:"2-digit"}).format(seen);
+  return "vu le "+dm+" à "+hhmm;
+}
+async function writePresence(online){
+  if(!S.user)return;
+  try{
+    await setDoc(doc(db,"publicProfiles",S.user.uid),{
+      presenceOnline:online===true,
+      lastSeen:serverTimestamp()
+    },{merge:true});
+  }catch(e){console.warn("presence write",e?.code||e)}
+}
+function startPresence(){
+  clearInterval(S.presenceTimer);
+  if(!S.user)return;
+  writePresence(document.visibilityState==="visible");
+  S.presenceTimer=setInterval(()=>{
+    if(S.user)writePresence(document.visibilityState==="visible");
+  },25000);
+}
+function stopPresence(){
+  clearInterval(S.presenceTimer);S.presenceTimer=null;
+}
+function watchPeerPresence(uid){
+  S.chatPresenceOff?.();S.chatPresenceOff=null;
+  const statusEl=()=>$("#chatContactInfoBtn .waChatHeaderIdentity small");
+  if(!uid){const el=statusEl();if(el)el.textContent="";return}
+  S.chatPresenceOff=onSnapshot(doc(db,"publicProfiles",uid),snap=>{
+    const el=statusEl();if(!el)return;
+    const d=snap.exists()?snap.data():{};
+    el.textContent=presenceText({online:d.presenceOnline,lastSeen:d.lastSeen});
+  },err=>{console.warn("presence watch",err?.code||err);const el=statusEl();if(el)el.textContent=""});
+}
 function clearOffs(){S.unsubs.forEach(f=>{try{f()}catch{}});S.unsubs=[]}
 function go(name){
   document.body.classList.toggle("waMainTab",name==="chat"||name==="calls");
@@ -331,6 +383,7 @@ function closeChatView(){
   document.body.classList.remove("chatConversationOpen");
   $("#messageForm")?.classList.add("hidden");
   $("#chatMoreMenu")?.classList.add("hidden");
+  S.chatPresenceOff?.();S.chatPresenceOff=null;
   S.chatId=null;S.chatOtherUid=null;S.chatOtherName="";
   window.WBP_CURRENT_CHAT=null;
 }
@@ -402,7 +455,7 @@ async function openChat(id,name){
   const initial=esc((S.chatOtherName.trim()[0]||"?").toUpperCase());
   $("#chatTitle").innerHTML=
     '<button id="closeChatViewBtn" class="waChatBackBtn" type="button">←</button>'+
-    '<button id="chatContactInfoBtn" class="waChatContactBtn" type="button"><span class="waChatHeaderAvatar">'+initial+'</span><span class="waChatHeaderIdentity"><b>'+esc(S.chatOtherName)+'</b><small>en ligne</small></span></button>'+
+    '<button id="chatContactInfoBtn" class="waChatContactBtn" type="button"><span class="waChatHeaderAvatar">'+initial+'</span><span class="waChatHeaderIdentity"><b>'+esc(S.chatOtherName)+'</b><small></small></span></button>'+
     '<div class="waChatHeaderActions">'+
       '<button id="videoCallBtn" class="waChatHeaderIcon" type="button" aria-label="Appel vidéo">📹</button>'+
       '<button id="voiceCallBtn" class="waChatHeaderIcon" type="button" aria-label="Appel vocal">📞</button>'+
@@ -418,6 +471,7 @@ async function openChat(id,name){
       '<button id="chatMenuReportBtn" type="button">Signaler</button>'+
       '<button id="chatMenuBlockBtn" type="button">Bloquer</button>'+
     '</div>';
+  watchPeerPresence(S.chatOtherUid);
   $("#messageForm").classList.remove("hidden");
   if(S.chatOtherUid){
     getDoc(doc(db,"publicProfiles",S.chatOtherUid)).then(pSnap=>{
@@ -536,9 +590,17 @@ if($("#lang")){
 }
 window.WBP_TRANSLATE?.();
 
+document.addEventListener("visibilitychange",()=>{
+  if(S.user)writePresence(document.visibilityState==="visible");
+});
+window.addEventListener("pagehide",()=>{ if(S.user)writePresence(false); });
+window.addEventListener("beforeunload",()=>{ if(S.user)writePresence(false); });
+
 onAuthStateChanged(auth,async u=>{
   clearOffs();S.user=u;
   if(!u){
+    stopPresence();
+    S.chatPresenceOff?.();S.chatPresenceOff=null;
     $("#authScreen").classList.remove("hidden");
     $("#phoneSetupScreen")?.classList.add("hidden");
     $("#appShell").classList.add("hidden");
@@ -556,6 +618,7 @@ onAuthStateChanged(auth,async u=>{
   }
   $("#phoneSetupScreen")?.classList.add("hidden");
   $("#appShell").classList.remove("hidden");
+  startPresence();
   go("chat");
   await loadProfile();
   try{await syncPhoneDirectory(S.account.phone||"",S.account.phone||"",{displayName:S.profile.displayName||S.user.displayName||"",username:S.profile.username||""})}
