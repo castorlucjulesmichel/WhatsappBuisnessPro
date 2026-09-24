@@ -358,12 +358,29 @@ async function inviteContact(name,phone){
 }
 async function startChat(uid,name){
   if(!user||!uid)return;
-  const me=await getDoc(doc(db,"publicProfiles",user.uid));
-  const ids=[user.uid,uid].sort(),id=ids.join("__");
-  const names={[user.uid]:me.data()?.displayName||me.data()?.username||user.phoneNumber||"User",[uid]:name||"Contact"};
-  await setDoc(doc(db,"chats",id),{type:"direct",participants:ids,participantNames:names,lastMessage:"",updatedAt:serverTimestamp()},{merge:true});
-  showPage("chat");
-  setTimeout(()=>document.querySelector('[data-chat="'+id+'"]')?.click(),250);
+  try{
+    const me=await getDoc(doc(db,"publicProfiles",user.uid));
+    const ids=[user.uid,uid].sort(),id=ids.join("__");
+    const myName=me.data()?.displayName||me.data()?.username||"User";
+    const contactName=name||"Contact";
+    const names={[user.uid]:myName,[uid]:contactName};
+    await setDoc(doc(db,"chats",id),{type:"direct",participants:ids,participantNames:names,lastMessage:"",updatedAt:serverTimestamp()},{merge:true});
+
+    if(typeof window.WBP_ROUTE==="function")window.WBP_ROUTE("chat");
+    else showPage("chat");
+
+    requestAnimationFrame(()=>{
+      if(typeof window.WBP_OPEN_CHAT==="function")window.WBP_OPEN_CHAT(id,contactName);
+      else{
+        const row=document.querySelector('[data-chat="'+id+'"]');
+        if(row)row.click();
+        else toast(window.WBP_T?.("Unable to open chat.")||"Unable to open chat.");
+      }
+    });
+  }catch(e){
+    console.error("start contact chat",e);
+    toast(window.WBP_T?.("Unable to open chat.")||"Unable to open chat.");
+  }
 }
 function watchContacts(){
   off?.();
