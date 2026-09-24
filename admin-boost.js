@@ -90,9 +90,21 @@ if(configured()){
          const currency=c.currency||"HTG",need=Number(c.totalBudget||0),have=Number(balances[currency]||0);
          if(!(need>0)||have<need) throw new Error("Ad Wallet itilizatè a pa gen ase lajan.");
          balances[currency]=have-need;
-         const end=new Date(Date.now()+Number(c.days||1)*86400000);
+         let end=new Date(Date.now()+Number(c.days||1)*86400000);
+         let statusRef=null;
+         if(c.targetType==="status"){
+           statusRef=doc(db,"statuses",c.targetId);
+           const ss=await tx.get(statusRef);
+           if(!ss.exists()) throw new Error("Status la pa jwenn.");
+           const sd=ss.data(),statusExpiry=sd.expiresAt?.toDate?.();
+           if(!statusExpiry || statusExpiry.getTime()<=Date.now()) throw new Error("Status la deja ekspire.");
+           if(statusExpiry<end) end=statusExpiry;
+         }
          tx.update(uref,{adBalances:balances,updatedAt:serverTimestamp()});
          tx.update(cref,{status:"active",reviewedBy:admin.uid,reviewedAt:serverTimestamp(),startedAt:serverTimestamp(),endsAt:Timestamp.fromDate(end)});
+         if(statusRef){
+           tx.update(statusRef,{boostActive:true,boostAudience:c.audience||{mode:"automatic"},boostEndsAt:Timestamp.fromDate(end),boostCampaignId:id});
+         }
        });
        toast("Boost valide epi aktive.");
        return;
@@ -102,11 +114,28 @@ if(configured()){
        toast("Boost rejte."); return;
      }
      if(action==="pause"){
-       await updateDoc(doc(db,"adCampaigns",id),{status:"paused",pausedAt:serverTimestamp(),pausedBy:admin.uid});
+       await runTransaction(db,async tx=>{
+         const cref=doc(db,"adCampaigns",id),cs=await tx.get(cref);
+         if(!cs.exists()) throw new Error("Kanpay pa jwenn.");
+         const c=cs.data();
+         tx.update(cref,{status:"paused",pausedAt:serverTimestamp(),pausedBy:admin.uid});
+         if(c.targetType==="status") tx.update(doc(db,"statuses",c.targetId),{boostActive:false});
+       });
        toast("Boost an poz."); return;
      }
      if(action==="resume"){
-       await updateDoc(doc(db,"adCampaigns",id),{status:"active",resumedAt:serverTimestamp(),resumedBy:admin.uid});
+       await runTransaction(db,async tx=>{
+         const cref=doc(db,"adCampaigns",id),cs=await tx.get(cref);
+         if(!cs.exists()) throw new Error("Kanpay pa jwenn.");
+         const c=cs.data();
+         if(c.endsAt?.toDate?.()?.getTime()<=Date.now()) throw new Error("Kanpay la fini.");
+         tx.update(cref,{status:"active",resumedAt:serverTimestamp(),resumedBy:admin.uid});
+         if(c.targetType==="status"){
+           const sr=doc(db,"statuses",c.targetId),ss=await tx.get(sr);
+           if(!ss.exists() || ss.data().expiresAt?.toDate?.()?.getTime()<=Date.now()) throw new Error("Status la ekspire.");
+           tx.update(sr,{boostActive:true,boostAudience:c.audience||{mode:"automatic"},boostEndsAt:c.endsAt,boostCampaignId:id});
+         }
+       });
        toast("Boost reprann."); return;
      }
    }catch(e){console.error(e);toast(e.message||"Kanpay la pa t ka trete.");}
