@@ -45,14 +45,41 @@ function render(){
   const rows=contacts.filter(c=>!q||((c.displayName||"")+" "+(c.username||"")+" "+(c.phone||"")).toLowerCase().includes(q));
   if($("#contactCountLabel"))$("#contactCountLabel").textContent=window.WBP_T?.(contacts.length+" contacts")||contacts.length+" contacts";
   const box=$("#contactPickerList");if(!box)return;
-  box.innerHTML=rows.length?rows.map(c=>`<button class="waContactPerson" data-contact-uid="${esc(c.contactUid||"")}" data-contact-name="${esc(c.displayName||c.username||c.phone||"Contact")}">
-    <span class="waPersonAvatar">${esc((c.displayName||c.username||"?").charAt(0).toUpperCase())}</span>
-    <span><b>${esc(c.displayName||c.username||c.phone||"Contact")}</b><small>${esc(c.username?("@"+c.username):(c.phone||""))}</small></span>
-  </button>`).join(""):'<p class="muted">Aucun contact pour le moment.</p>';
-  $$("[data-contact-uid]").forEach(b=>b.onclick=()=>startChat(b.dataset.contactUid,b.dataset.contactName));
+  box.innerHTML=rows.length?rows.map(c=>{
+    const name=esc(c.displayName||c.username||c.phone||"Contact");
+    const subtitle=esc(c.phone||(c.username?("@"+c.username):""));
+    const avatar=esc((c.displayName||c.username||"?").charAt(0).toUpperCase());
+    if(c.contactUid){
+      return `<button class="waContactPerson" data-contact-uid="${esc(c.contactUid)}" data-contact-name="${name}">
+        <span class="waPersonAvatar">${avatar}</span>
+        <span><b>${name}</b><small>${subtitle}</small></span>
+      </button>`;
+    }
+    return `<div class="waContactPerson waContactInviteRow">
+      <span class="waPersonAvatar">${avatar}</span>
+      <span><b>${name}</b><small>${subtitle}</small></span>
+      <button class="waInviteBtn" type="button" data-invite-name="${name}" data-invite-phone="${esc(c.phone||"")}">${esc(window.WBP_T?.("Inviter")||"Inviter")}</button>
+    </div>`;
+  }).join(""):'<p class="muted">'+esc(window.WBP_T?.("Aucun contact pour le moment.")||"Aucun contact pour le moment.")+'</p>';
+  $("[data-contact-uid]").forEach(b=>b.onclick=()=>startChat(b.dataset.contactUid,b.dataset.contactName));
+  $("[data-invite-name]").forEach(b=>b.onclick=()=>inviteContact(b.dataset.inviteName,b.dataset.invitePhone));
+}
+async function inviteContact(name,phone){
+  const url=location.origin+location.pathname;
+  const text=(window.WBP_T?.("Join me on Whatsapp Business Pro")||"Join me on Whatsapp Business Pro")+"\n"+url;
+  try{
+    if(navigator.share){
+      await navigator.share({title:"Whatsapp Business Pro",text,url});
+      return;
+    }
+    await navigator.clipboard.writeText(text);
+    toast(window.WBP_T?.("Invitation link copied.")||"Invitation link copied.");
+  }catch(e){
+    if(e?.name!=="AbortError")toast(window.WBP_T?.("Invitation link copied.")||"Invitation link copied.");
+  }
 }
 async function startChat(uid,name){
-  if(!user||!uid)return toast(window.WBP_T?.("Ce contact n’est pas encore inscrit dans l’application.")||"Ce contact n’est pas encore inscrit dans l’application.");
+  if(!user||!uid)return;
   const me=await getDoc(doc(db,"publicProfiles",user.uid));
   const ids=[user.uid,uid].sort(),id=ids.join("__");
   const names={[user.uid]:me.data()?.displayName||me.data()?.username||user.phoneNumber||"User",[uid]:name||"Contact"};
@@ -72,6 +99,7 @@ $("#pickerNewContactBtn")?.addEventListener("click",()=>showPage("newContact"));
 $("#pickerNewGroupBtn")?.addEventListener("click",()=>{showPage("chat");setTimeout(()=>$("#newGroupBox")?.classList.remove("hidden"),50)});
 $("#contactPickerSearchBtn")?.addEventListener("click",()=>$("#contactPickerSearch")?.classList.toggle("hidden"));
 $("#contactPickerSearch")?.addEventListener("input",render);
+window.addEventListener("wbp-language-changed",render);
 $("#newContactForm")?.addEventListener("submit",async e=>{
   e.preventDefault();
   if(!user)return;
