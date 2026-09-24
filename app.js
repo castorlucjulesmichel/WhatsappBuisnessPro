@@ -1,7 +1,7 @@
 import {firebaseConfig,appSettings} from "./firebase-config.js";
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {getAuth,onAuthStateChanged,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,signOut,useDeviceLanguage} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import {getFirestore,doc,getDoc,setDoc,addDoc,updateDoc,collection,query,where,onSnapshot,getDocs,orderBy,serverTimestamp,limit} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import {getFirestore,doc,getDoc,setDoc,addDoc,updateDoc,deleteDoc,collection,query,where,onSnapshot,getDocs,orderBy,serverTimestamp,limit} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import {getStorage,ref,uploadBytes,getDownloadURL} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
@@ -11,6 +11,37 @@ const toast=t=>{const e=$("#toast");e.textContent=t;e.classList.add("show");setT
 const norm=s=>String(s||"").trim().toLowerCase().replace(/[^a-z0-9_.-]/g,"");
 const normalizeMobile=v=>{let p=String(v||"").trim().replace(/[^0-9+]/g,"");if(p.startsWith("00"))p="+"+p.slice(2);return p};
 const validMobile=p=>/^\+[1-9]\d{7,14}$/.test(normalizeMobile(p));
+async function phoneLookupId(phone){
+  const p=normalizeMobile(phone);
+  if(!p)return "";
+  const bytes=new TextEncoder().encode(p);
+  const hash=await crypto.subtle.digest("SHA-256",bytes);
+  return "phone_"+[...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,"0")).join("").slice(0,32);
+}
+async function syncPhoneDirectory(phone,oldPhone="",meta={}){
+  if(!S.user||!validMobile(phone))return;
+  const newId=await phoneLookupId(phone);
+  const refNew=doc(db,"phoneDirectory",newId);
+  const existing=await getDoc(refNew);
+  if(existing.exists()&&existing.data()?.uid&&existing.data().uid!==S.user.uid){
+    const err=new Error("Ce numéro est déjà associé à un autre compte.");
+    err.code="phone/already-in-use";
+    throw err;
+  }
+  await setDoc(refNew,{
+    uid:S.user.uid,
+    displayName:meta.displayName||S.profile?.displayName||S.user.displayName||"",
+    username:meta.username||S.profile?.username||"",
+    updatedAt:serverTimestamp()
+  },{merge:true});
+  const old=normalizeMobile(oldPhone);
+  if(old&&old!==normalizeMobile(phone)){
+    try{
+      const oldId=await phoneLookupId(old),oldRef=doc(db,"phoneDirectory",oldId),oldSnap=await getDoc(oldRef);
+      if(oldSnap.exists()&&oldSnap.data()?.uid===S.user.uid)await deleteDoc(oldRef);
+    }catch(e){console.warn("old phone directory cleanup",e)}
+  }
+}
 const safe=s=>String(s||"file").replace(/[^a-zA-Z0-9._-]/g,"_");
 const money=(n,c)=>Number(n||0).toLocaleString(undefined,{maximumFractionDigits:2})+" "+(c||"HTG");
 const S={user:null,profile:{},account:{},chatId:null,chatRows:[],chatFilter:"all",products:[],clips:[],boosts:[],cart:[],unsubs:[]};
@@ -93,6 +124,11 @@ $("#saveMobilePhoneBtn")?.addEventListener("click",async()=>{
   const phone=normalizeMobile($("#mobilePhoneSetup")?.value||"");
   if(!validMobile(phone))return toast("Mete nimewo a ak kòd peyi a, egzanp +509XXXXXXXX.");
   try{
+    try{await syncPhoneDirectory(phone,"",{displayName:S.user.displayName||""})}
+    catch(e){
+      if(e?.code==="phone/already-in-use")return toast(e.message);
+      console.warn("phone directory setup",e);
+    }
     await setDoc(doc(db,"users",S.user.uid),{phone,updatedAt:serverTimestamp()},{merge:true});
     location.reload();
   }catch(e){
@@ -130,10 +166,17 @@ async function upload(file,path,max,typePrefix){
 }
 $("#profileForm").onsubmit=async e=>{e.preventDefault();try{
   const mobile=normalizeMobile($("#mobilePhoneProfile")?.value||"");if(!validMobile(mobile))return toast("Mete yon nimewo mobil entènasyonal valab, egzanp +509XXXXXXXX.");
+  const previousMobile=S.account.phone||"";
   const username=norm($("#username").value);if(username.length<3)return toast("Username dwe gen omwen 3 karaktè.");
   const q=query(collection(db,"publicProfiles"),where("username","==",username),limit(2)),m=await getDocs(q);
   if(m.docs.some(d=>d.id!==S.user.uid))return toast("Username sa deja itilize.");
   let photoUrl=S.profile.photoUrl||"";const f=$("#avatarFile").files[0];if(f)photoUrl=await upload(f,"whatssap-business-pro/avatars",8*1024*1024,"image/");
+  try{
+    await syncPhoneDirectory(mobile,previousMobile,{displayName:$("#displayName").value.trim()||username,username});
+  }catch(e){
+    if(e?.code==="phone/already-in-use")return toast(e.message);
+    console.warn("phone directory profile",e);
+  }
   await setDoc(doc(db,"users",S.user.uid),{phone:mobile,updatedAt:serverTimestamp()},{merge:true});
   S.account={...S.account,phone:mobile};window.dispatchEvent(new CustomEvent("wbp-phone-updated",{detail:{phone:mobile}}));
   await setDoc(doc(db,"publicProfiles",S.user.uid),{displayName:$("#displayName").value.trim()||username,username,bio:$("#bio").value.trim(),country:$("#country").value.trim(),birthYear:Number($("#birthYear").value||0),role:$("#role").value,photoUrl,updatedAt:serverTimestamp()},{merge:true});
@@ -378,7 +421,10 @@ onAuthStateChanged(auth,async u=>{
   $("#phoneSetupScreen")?.classList.add("hidden");
   $("#appShell").classList.remove("hidden");
   go("chat");
-  await loadProfile();loadCart();await loadBusiness();
+  await loadProfile();
+  try{await syncPhoneDirectory(S.account.phone||"",S.account.phone||"",{displayName:S.profile.displayName||S.user.displayName||"",username:S.profile.username||""})}
+  catch(e){console.warn("phone directory login sync",e)}
+  loadCart();await loadBusiness();
   watchProducts();watchBoosts();watchClips();watchChats();watchSupport();watchWallet();watchLevels();watchInvestments();watchOrders();
 });
 
