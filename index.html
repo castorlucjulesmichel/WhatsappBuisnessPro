@@ -18,7 +18,7 @@
 
 <div id="appShell" class="hidden">
 <header><div><b>Whatssap Business Pro</b><small id="headerUser">Konekte</small></div>
-<div class="headerActions"><select id="lang"><option value="ht">HT</option><option value="fr">FR</option><option value="en">EN</option><option value="es">ES</option></select><button id="logout" class="ghost">Soti</button></div></header>
+<div class="headerActions"><button id="notificationBtn" class="ghost">🔔 <span id="notificationBadge" class="badge hidden">0</span></button><select id="lang"><option value="ht">HT</option><option value="fr">FR</option><option value="en">EN</option><option value="es">ES</option></select><button id="logout" class="ghost">Soti</button></div></header>
 
 <main>
 <section id="homePage" class="page active">
@@ -26,7 +26,7 @@
  <div class="metrics"><div><b id="mBalance">0 HTG</b><span>Balans</span></div><div><b id="mProducts">0</b><span>Pwodwi</span></div><div><b id="mOrders">0</b><span>Kòmand</span></div><div><b id="mInvest">0</b><span>Envestisman</span></div></div>
  <div class="quickGrid">
   <button data-go="chat">💬 Chat</button><button data-go="status">⭕ Status</button><button data-go="market">🛍️ Marketplace</button><button data-go="clips">▶ Clips</button>
-  <button data-go="wallet">💳 Wallet</button><button data-go="invest">📈 Envestisman</button><button data-go="business">🏪 Business</button>
+  <button data-go="wallet">💳 Wallet</button><button data-go="orders">📦 Kòmand</button><button data-go="stats">📊 Statistik</button><button data-go="invest">📈 Envestisman</button><button data-go="business">🏪 Business</button>
  </div>
 </section>
 
@@ -84,6 +84,23 @@
  <div class="card"><h3>Istorik operasyon</h3><div id="operationHistory"></div></div>
 </section>
 
+<section id="ordersPage" class="page">
+ <div class="title"><div><h2>Kòmand & Vant</h2><p>Suivi kòmand kòm achtè ak kòm vandè</p></div></div>
+ <div class="card"><h3>Kòmand mwen kòm achtè</h3><div id="buyerOrders"></div></div>
+ <div class="card"><h3>Vant mwen kòm vandè</h3><div id="sellerOrders"></div></div>
+</section>
+
+<section id="statsPage" class="page">
+ <div class="title"><div><h2>Statistik</h2><p>Rezime aktivite biznis ou</p></div></div>
+ <div class="metrics">
+  <div><b id="statProducts">0</b><span>Pwodwi</span></div>
+  <div><b id="statSales">0</b><span>Vant</span></div>
+  <div><b id="statRevenue">0 HTG</b><span>Revni</span></div>
+  <div><b id="statOrders">0</b><span>Kòmand</span></div>
+ </div>
+ <div class="card"><h3>Vant pa deviz</h3><div id="salesByCurrency"></div></div>
+</section>
+
 <section id="investPage" class="page">
  <div class="title"><div><h2>Envestisman</h2><p>Nivo, demann ak suivi</p></div></div>
  <div id="investmentLevels" class="levelGrid"></div>
@@ -121,6 +138,10 @@
  </div>
 </section>
 
+<section id="notificationPanel" class="notificationPanel hidden">
+      <div class="notificationHead"><h3>Notifikasyon</h3><button id="closeNotifications" class="ghost">×</button></div>
+      <div id="notificationList"></div>
+    </section>
 <section id="profilePage" class="page">
  <div class="title"><div><h2>Profil</h2><p>Kont, lang, foto ak lokalizasyon</p></div></div>
  <form id="profileForm" class="card profileCard"><img id="avatarPreview" class="avatar" alt=""><input id="avatarFile" type="file" accept="image/*"><input id="displayName" placeholder="Non piblik"><input id="username" placeholder="Username"><div class="row"><input id="country" placeholder="Peyi (egzanp: Haiti)"><input id="birthYear" type="number" min="1900" max="2100" placeholder="Ane nesans"></div><select id="role"><option value="buyer">Achtè</option><option value="seller">Vandè</option><option value="business">Business</option><option value="investor">Envestisè</option></select><textarea id="bio" placeholder="Bio"></textarea><button>Sove profil</button></form>
@@ -130,10 +151,12 @@
 </main>
 
 <nav>
-<button data-page="home" class="active">🏠<span>Akèy</span></button><button data-page="chat">💬<span>Chat</span></button><button data-page="status">⭕<span>Status</span></button><button data-page="market">🛍️<span>Market</span></button><button data-page="clips">▶️<span>Clips</span></button><button data-page="wallet">💳<span>Wallet</span></button><button data-page="invest">📈<span>Invest</span></button><button data-page="business">🏪<span>Business</span></button><button data-page="profile">👤<span>Profil</span></button>
+<button data-page="home" class="active">🏠<span>Akèy</span></button><button data-page="chat">💬<span>Chat</span></button><button data-page="status">⭕<span>Status</span></button><button data-page="market">🛍️<span>Market</span></button><button data-page="clips">▶️<span>Clips</span></button><button data-page="wallet">💳<span>Wallet</span></button><button data-page="orders">📦<span>Kòmand</span></button><button data-page="stats">📊<span>Stats</span></button><button data-page="invest">📈<span>Invest</span></button><button data-page="business">🏪<span>Business</span></button><button data-page="profile">👤<span>Profil</span></button>
 </nav>
 </div>
 <script type="module" src="app.js"></script>
 <script type="module" src="status.js"></script>
 <script type="module" src="boost.js"></script>
+<script type="module" src="orders.js"></script>
+<script type="module" src="notifications.js"></script>
 </body></html>
