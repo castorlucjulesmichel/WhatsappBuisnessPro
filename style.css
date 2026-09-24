@@ -206,3 +206,8 @@ html[data-theme="dark"] .nativeContactRow{border-color:var(--line)}
 
 .waContactSelfRow{cursor:default}
 .waSelfBadge{justify-self:end;color:#119b61;font-weight:800;font-size:15px;padding:8px 4px}
+
+.googleSignInBtn{display:flex;align-items:center;justify-content:center;gap:12px;background:#fff!important;color:#202124!important;border:1px solid #dadce0!important;box-shadow:0 1px 2px #00000014;font-weight:700}
+.googleSignInBtn:hover{background:#f8f9fa!important}
+.googleG{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#fff;color:#4285f4;font-size:20px;font-weight:900;border:1px solid #e2e5e8}
+.authHint{text-align:center;font-size:13px;line-height:1.4;margin:12px 4px 0}
