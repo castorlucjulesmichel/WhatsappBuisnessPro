@@ -8,7 +8,7 @@ const toast=t=>{const e=$("#toast");if(!e)return;e.textContent=t;e.classList.add
 const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 const norm=s=>String(s||"").trim().toLowerCase().replace(/[^a-z0-9_.-]/g,"");
 const configured=()=>firebaseConfig.apiKey&&!String(firebaseConfig.apiKey).includes("YOUR_");
-let auth=null,db=null,user=null,contacts=[],off=null;
+let auth=null,db=null,user=null,contacts=[],off=null,nativePhoneContacts=[],nativeSelectedContacts=new Set();
 
 const COUNTRY_CODES = [
 ["HT","+509"],["US","+1"],["CA","+1"],["FR","+33"],["GB","+44"],["ES","+34"],["DO","+1809"],["DO","+1829"],["DO","+1849"],
@@ -161,6 +161,98 @@ window.WBP_ANDROID_CONTACTS_DENIED=()=>{
 function nativeContactsAvailable(){
   try{return !!window.AndroidContacts?.isAvailable?.()}catch{return false}
 }
+function nativeSelectorSupported(){
+  try{
+    return nativeContactsAvailable() && typeof window.AndroidContacts?.openContactSelector==="function";
+  }catch{return false}
+}
+function openNativeContactSelector(){
+  if(!nativeSelectorSupported())return false;
+  window.AndroidContacts.openContactSelector();
+  return true;
+}
+function closeNativeContactSelector(){
+  $("#nativeContactSelector")?.classList.add("hidden");
+  $("#nativeContactSelector")?.setAttribute("aria-hidden","true");
+}
+function nativeSelectionLabel(){
+  const n=nativeSelectedContacts.size;
+  const l=window.WBP_GET_LANG?.()||"ht";
+  if(l==="fr")return n+" sélectionné"+(n>1?"s":"");
+  if(l==="es")return n+" seleccionado"+(n===1?"":"s");
+  if(l==="en")return n+" selected";
+  return n+" chwazi";
+}
+function renderNativePhoneContacts(){
+  const box=$("#nativeContactList");if(!box)return;
+  const q=($("#nativeContactSearch")?.value||"").trim().toLowerCase();
+  const rows=nativePhoneContacts.filter(x=>!q||((x.name||"")+" "+(x.phone||"")).toLowerCase().includes(q));
+  box.innerHTML=rows.map(item=>{
+    const key=esc(item.phone);
+    const checked=nativeSelectedContacts.has(item.phone)?" checked":"";
+    const avatar=esc((item.name||"?").charAt(0).toUpperCase());
+    return `<label class="nativeContactRow">
+      <input type="checkbox" data-native-phone="${key}"${checked}>
+      <span class="waPersonAvatar">${avatar}</span>
+      <span class="nativeContactText"><b>${esc(item.name||"Contact")}</b><small>${esc(item.phone||"")}</small></span>
+    </label>`;
+  }).join("")||'<p class="muted">'+esc(window.WBP_T?.("Aucun contact pour le moment.")||"Aucun contact pour le moment.")+'</p>';
+
+  $("[data-native-phone]").forEach(cb=>cb.onchange=()=>{
+    cb.checked?nativeSelectedContacts.add(cb.dataset.nativePhone):nativeSelectedContacts.delete(cb.dataset.nativePhone);
+    updateNativeSelectorControls();
+  });
+  updateNativeSelectorControls();
+}
+function updateNativeSelectorControls(){
+  const all=nativePhoneContacts.length>0&&nativeSelectedContacts.size===nativePhoneContacts.length;
+  if($("#nativeSelectAllBtn"))$("#nativeSelectAllBtn").textContent=window.WBP_T?.(all?"Deselect all":"Select all")||(all?"Deselect all":"Select all");
+  if($("#nativeContactSelectionCount"))$("#nativeContactSelectionCount").textContent=nativeSelectionLabel();
+  if($("#importNativeSelectedBtn")){
+    $("#importNativeSelectedBtn").disabled=nativeSelectedContacts.size===0;
+    $("#importNativeSelectedBtn").textContent=(window.WBP_T?.("Import")||"Import")+" ("+nativeSelectedContacts.size+")";
+  }
+}
+window.WBP_ANDROID_CONTACTS_FOR_SELECTION=raw=>{
+  try{
+    const list=Array.isArray(raw)?raw:JSON.parse(String(raw||"[]"));
+    const unique=new Map();
+    for(const item of list){
+      const phone=normalizePhone(item?.phone||"");
+      if(!phone)continue;
+      if(!unique.has(phone))unique.set(phone,{name:String(item?.name||"Contact").trim()||"Contact",phone});
+    }
+    nativePhoneContacts=[...unique.values()];
+    nativeSelectedContacts.clear();
+    $("#nativeContactSearch")&&( $("#nativeContactSearch").value="" );
+    $("#nativeContactSelector")?.classList.remove("hidden");
+    $("#nativeContactSelector")?.setAttribute("aria-hidden","false");
+    renderNativePhoneContacts();
+  }catch(e){
+    console.warn("native selector",e);
+    toast(window.WBP_T?.("Unable to import phone contacts.")||"Unable to import phone contacts.");
+  }
+};
+$("#nativeSelectAllBtn")?.addEventListener("click",()=>{
+  const all=nativePhoneContacts.length>0&&nativeSelectedContacts.size===nativePhoneContacts.length;
+  nativeSelectedContacts.clear();
+  if(!all)nativePhoneContacts.forEach(x=>nativeSelectedContacts.add(x.phone));
+  renderNativePhoneContacts();
+});
+$("#closeNativeContactSelector")?.addEventListener("click",closeNativeContactSelector);
+$("#nativeContactSearch")?.addEventListener("input",renderNativePhoneContacts);
+$("#importNativeSelectedBtn")?.addEventListener("click",async()=>{
+  const selected=nativePhoneContacts.filter(x=>nativeSelectedContacts.has(x.phone));
+  if(!selected.length)return;
+  $("#importNativeSelectedBtn").disabled=true;
+  const result=await saveImportedContacts(selected);
+  showImportResult(result);
+  closeNativeContactSelector();
+});
+window.addEventListener("wbp-language-changed",()=>{
+  if(!$("#nativeContactSelector")?.classList.contains("hidden"))renderNativePhoneContacts();
+});
+
 function render(){
   const q=($("#contactPickerSearch")?.value||"").trim().toLowerCase();
   const rows=contacts.filter(c=>!q||((c.displayName||"")+" "+(c.username||"")+" "+(c.phone||"")).toLowerCase().includes(q));
@@ -186,11 +278,7 @@ function render(){
   $$("[data-invite-name]").forEach(b=>b.onclick=()=>inviteContact(b.dataset.inviteName,b.dataset.invitePhone));
 }
 $("#selectAllContactsBtn")?.addEventListener("click",async()=>{
-  if(nativeContactsAvailable()){
-    toast(window.WBP_T?.("Android will ask for Contacts permission, then import all contacts.")||"Android will ask for Contacts permission, then import all contacts.");
-    window.AndroidContacts.importAllContacts();
-    return;
-  }
+  if(openNativeContactSelector())return;
   toast(window.WBP_T?.("On the web, Android requires you to choose the contacts to share.")||"On the web, Android requires you to choose the contacts to share.");
   await importPhoneContacts();
 });
@@ -226,12 +314,12 @@ function watchContacts(){
 }
 $("#newChatBtn")?.addEventListener("click",async e=>{e.preventDefault();showPage("contactPicker");if(!contacts.length)await importPhoneContacts();});
 $("#pickerNewContactBtn")?.addEventListener("click",()=>showPage("newContact"));
-$("#importPhoneContactsBtn")?.addEventListener("click",importPhoneContacts);
+$("#importPhoneContactsBtn")?.addEventListener("click",async()=>{if(openNativeContactSelector())return;await importPhoneContacts();});
 function updateAndroidImportHint(){
   const hint=$("#selectAllContactsHint");
   if(!hint)return;
-  hint.textContent=nativeContactsAvailable()
-    ? (window.WBP_T?.("Select all will import all contacts after Android permission.")||"Select all will import all contacts after Android permission.")
+  hint.textContent=nativeSelectorSupported()
+    ? (window.WBP_T?.("Open the contact list, use Select all at the top, then Import.")||"Open the contact list, use Select all at the top, then Import.")
     : (window.WBP_T?.("On the web, Android requires you to choose the contacts to share.")||"On the web, Android requires you to choose the contacts to share.");
 }
 setTimeout(updateAndroidImportHint,250);
