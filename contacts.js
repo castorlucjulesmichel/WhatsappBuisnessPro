@@ -91,12 +91,14 @@ async function saveImportedContacts(items){
       const ref=doc(db,"users",user.uid,"contacts",item.id);
       const snap=await getDoc(ref);
       if(snap.exists())return "skipped";
+      const isSelfPhone=normalizePhone(user?.phoneNumber||"")===item.phone;
       await setDoc(ref,{
-        contactUid:"",
+        contactUid:isSelfPhone?user.uid:"",
         username:"",
         displayName:item.name,
         phone:item.phone,
         importedFromPhone:true,
+        isSelfContact:isSelfPhone,
         createdAt:serverTimestamp(),
         updatedAt:serverTimestamp()
       });
@@ -262,6 +264,14 @@ function render(){
     const name=esc(c.displayName||c.username||c.phone||"Contact");
     const subtitle=esc(c.phone||(c.username?("@"+c.username):""));
     const avatar=esc((c.displayName||c.username||"?").charAt(0).toUpperCase());
+    const isSelf=!!user && normalizePhone(c.phone||"")===normalizePhone(user.phoneNumber||"");
+    if(isSelf){
+      return `<div class="waContactPerson waContactSelfRow">
+        <span class="waPersonAvatar">${avatar}</span>
+        <span><b>${name}</b><small>${subtitle}</small></span>
+        <span class="waSelfBadge">${esc(window.WBP_T?.("Vous")||"Vous")}</span>
+      </div>`;
+    }
     if(c.contactUid){
       return `<button class="waContactPerson" data-contact-uid="${esc(c.contactUid)}" data-contact-name="${name}">
         <span class="waPersonAvatar">${avatar}</span>
