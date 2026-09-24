@@ -33,8 +33,7 @@ service cloud.firestore {
 
       match /contacts/{contactUid} {
         allow read: if isSelf(uid);
-        allow create, delete: if isSelf(uid) && active();
-        allow update: if false;
+        allow create, update, delete: if isSelf(uid) && active();
       }
 
       match /blocks/{blockedUid} {
