@@ -32,6 +32,27 @@ service firebase.storage {
         && request.resource.size < 80 * 1024 * 1024
         && (request.resource.contentType.matches('image/.*') || request.resource.contentType.matches('video/.*'));
     }
+
+    match /whatssap-business-pro/chat-media/{uid}/{chatId}/{file} {
+      allow read: if signedIn()
+        && request.auth.uid in firestore.get(/databases/(default)/documents/chats/$(chatId)).data.participants;
+      allow create: if owner(uid)
+        && request.auth.uid in firestore.get(/databases/(default)/documents/chats/$(chatId)).data.participants
+        && request.resource.size < 25 * 1024 * 1024
+        && (
+          request.resource.contentType.matches('image/.*')
+          || request.resource.contentType.matches('audio/.*')
+          || request.resource.contentType == 'application/pdf'
+          || request.resource.contentType.matches('text/.*')
+          || request.resource.contentType == 'application/msword'
+          || request.resource.contentType == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+          || request.resource.contentType == 'application/vnd.ms-excel'
+          || request.resource.contentType == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        );
+      allow update: if false;
+      allow delete: if owner(uid);
+    }
+
     match /whatssap-business-pro/proofs/{uid}/{file} {
       allow read: if owner(uid) || admin();
       allow write: if owner(uid) && request.resource.size < 8 * 1024 * 1024
