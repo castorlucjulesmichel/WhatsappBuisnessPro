@@ -80,10 +80,34 @@
      <input id="chatAttachment" class="hidden" type="file" accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt">
      <input id="messageText" maxlength="2000" placeholder="Ekri mesaj...">
      <button id="voiceBtn" type="button" class="ghost" title="Mesaj vokal">🎤</button>
-     <button>Voye</button>
+     <button id="sendMessageBtn" type="submit" aria-label="Envoyer">➤</button>
    </form>
    <div id="voiceStatus" class="voiceStatus hidden"></div>
   </section></div>
+</section>
+
+<section id="chatContactInfoPanel" class="chatContactInfoPanel hidden" aria-hidden="true">
+ <div class="chatInfoHead">
+  <button id="closeChatContactInfo" class="waBackBtn" type="button">←</button>
+  <h2>Info du contact</h2>
+ </div>
+ <div class="chatInfoBody">
+  <img id="chatInfoAvatar" class="chatInfoAvatar" alt="">
+  <div id="chatInfoFallbackAvatar" class="chatInfoFallbackAvatar">?</div>
+  <h2 id="chatInfoName">Contact</h2>
+  <p id="chatInfoUsername" class="muted"></p>
+  <div class="chatInfoActions">
+   <button id="chatInfoMessageBtn" type="button">💬<small>Message</small></button>
+   <button id="chatInfoVoiceBtn" type="button">📞<small>Appel</small></button>
+   <button id="chatInfoVideoBtn" type="button">📹<small>Vidéo</small></button>
+  </div>
+  <div class="card chatInfoDetails">
+   <p><b>Téléphone</b><span id="chatInfoPhone">—</span></p>
+   <p><b>À propos</b><span id="chatInfoBio">—</span></p>
+   <p><b>Pays / adresse</b><span id="chatInfoCountry">—</span></p>
+   <p><b>Type de compte</b><span id="chatInfoRole">—</span></p>
+  </div>
+ </div>
 </section>
 
 <section id="callsPage" class="page whatsappCallsPage">
