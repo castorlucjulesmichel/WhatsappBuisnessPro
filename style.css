@@ -59,3 +59,17 @@ html[data-theme="dark"] .card,html[data-theme="dark"] .metrics>div,html[data-the
  html[data-theme="system"] header,html[data-theme="system"] .bottomNav,html[data-theme="system"] .settingsItem{background:#17211ef2;color:var(--text)}
  html[data-theme="system"] input,html[data-theme="system"] textarea,html[data-theme="system"] select{background:#111a17;color:var(--text);border-color:var(--line)}
 }
+
+/* Brand and advanced chat */
+.brandLogo{width:110px;height:110px;border-radius:28px;object-fit:cover;display:block;margin:0 0 12px;box-shadow:0 12px 35px #075e5444}
+.headerBrand{display:flex!important;align-items:center;gap:10px}
+.headerLogo{width:38px;height:38px;border-radius:11px;object-fit:cover;box-shadow:0 4px 14px #075e5433}
+.headerBrand>div{display:grid}.headerBrand b{line-height:1.1}.headerBrand small{margin-top:2px}
+.typingIndicator{padding:6px 12px;font-size:12px;color:var(--green);font-style:italic;border-bottom:1px solid var(--line)}
+.voiceStatus{padding:8px 12px;background:#eef8f4;color:var(--green);font-size:12px;border-top:1px solid var(--line)}
+.chatMediaImage{display:block;max-width:min(320px,100%);max-height:320px;border-radius:12px;object-fit:cover;margin-bottom:5px}
+.chatAudio{width:min(320px,100%);height:38px}
+.chatFile{display:inline-flex;align-items:center;gap:7px;padding:9px 10px;border-radius:10px;background:#eef3f1;color:var(--text);text-decoration:none;font-weight:700}
+.msgReceipt{display:block;text-align:right;font-size:10px;color:#4e9f87;margin-top:3px}
+#messageForm{align-items:center}#messageForm #attachBtn,#messageForm #voiceBtn{flex:0 0 auto;padding:9px 10px}#messageForm>button:last-child{flex:0 0 auto}
+@media(max-width:560px){.brandLogo{width:92px;height:92px}.headerLogo{width:34px;height:34px}.headerBrand b{font-size:13px}.headerActions{gap:4px}.headerActions button,.headerActions select{padding:8px}}
