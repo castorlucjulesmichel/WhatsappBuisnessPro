@@ -565,6 +565,16 @@ Object.assign(D,{
 "web_contact_limit":["Sou Web la, Android mande w chwazi kontak ou vle pataje yo.","Sur le Web, Android vous demande de choisir les contacts à partager.","On the web, Android requires you to choose the contacts to share.","En la web, Android requiere que elijas los contactos que deseas compartir."]
 });
 
+
+Object.assign(D,{
+"already_present":["Deja la","Déjà présent","Already present","Ya presente"],
+"failed":["Echwe","Échec","Failed","Fallidos"]
+});
+Object.assign(X,{
+"already_present":["Já presente","Bereits vorhanden","Già presente","موجود بالفعل","已存在","पहले से मौजूद","আগেই আছে","Уже есть","Zaten mevcut","既に存在","이미 있음"],
+"failed":["Falhou","Fehlgeschlagen","Non riusciti","فشل","失败","विफल","ব্যর্থ","Ошибка","Başarısız","失敗","실패"]
+});
+
 const reverse=new Map();
 for(const [key,vals] of Object.entries(D)){
   vals.forEach(v=>{if(v)reverse.set(v.trim(),key)});
@@ -587,6 +597,8 @@ reverse.set("Contacts permission was denied.","contacts_permission_denied");
 reverse.set("Android will ask for Contacts permission, then import all contacts.","native_import_all");
 reverse.set("Select all will import all contacts after Android permission.","native_select_all_hint");
 reverse.set("On the web, Android requires you to choose the contacts to share.","web_contact_limit");
+reverse.set("Already present","already_present");
+reverse.set("Failed","failed");
 reverse.set("Pa gen discussion pou filtè sa a.","no_chats");
 reverse.set("No chats for this filter.","no_chats");
 
