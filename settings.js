@@ -50,7 +50,12 @@ if(configured()){
 }
 
 function languageLabel(v){
-  return {ht:"Kreyòl",fr:"Français",en:"English",es:"Español"}[v]||"Kreyòl";
+  return {
+    ht:"Kreyòl",fr:"Français",en:"English",es:"Español",
+    pt:"Português",de:"Deutsch",it:"Italiano",ar:"العربية",
+    zh:"中文",hi:"हिन्दी",bn:"বাংলা",ru:"Русский",
+    tr:"Türkçe",ja:"日本語",ko:"한국어"
+  }[v]||"Kreyòl";
 }
 function applyVisualPrefs(){
   document.documentElement.dataset.theme=prefs.theme||"system";
