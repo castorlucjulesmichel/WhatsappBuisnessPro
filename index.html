@@ -93,7 +93,12 @@
  <button class="waContactAction" id="pickerNewGroupBtn" type="button"><span class="waRoundIcon">👥＋</span><b>Nouveau groupe</b></button>
  <button class="waContactAction" id="pickerNewContactBtn" type="button"><span class="waRoundIcon">👤＋</span><b>Nouveau contact</b><span class="waQrMini">▦</span></button>
  <button class="waContactAction waImportContactsAction" id="importPhoneContactsBtn" type="button"><span class="waRoundIcon">📇</span><span><b>Importer mes contacts</b><small>Sélectionnez plusieurs contacts ou Tous dans le sélecteur du téléphone.</small></span><span class="chevron">›</span></button>
- <div class="waSubSectionLabel">Contacts sur Whatsapp Business Pro</div>
+ <div class="waBulkContactsBar">
+   <button id="selectAllContactsBtn" type="button">Tout sélectionner</button>
+   <button id="inviteSelectedContactsBtn" type="button" class="ghost" disabled>Inviter sélectionnés</button>
+   <span id="selectedContactsCount" class="muted">0 sélectionné</span>
+  </div>
+  <div class="waSubSectionLabel">Contacts sur Whatsapp Business Pro</div>
  <div id="contactPickerList" class="waContactList"><p class="muted">Aucun contact pour le moment.</p></div>
 </section>
 
