@@ -89,6 +89,7 @@ function fillControls(){
   setCheck("#customerActivitySetting",prefs.customerActivity);
   setCheck("#highContrastSetting",prefs.highContrast);
   setCheck("#reduceMotionSetting",prefs.reduceMotion);
+  prefs.language=localStorage.getItem("wbp_lang")||prefs.language||"ht";
   setValue("#settingsLanguage",prefs.language);
   if($("#settingsLanguageLabel"))$("#settingsLanguageLabel").textContent=languageLabel(prefs.language);
   renderLists();
@@ -193,7 +194,8 @@ for(const [sel,key,prop] of binds){
     prefs[key]=e.target[prop];
     if(key==="language"){
       localStorage.setItem("wbp_lang",prefs.language);
-      const lang=$("#lang");if(lang){lang.value=prefs.language;lang.dispatchEvent(new Event("change"))}
+      window.WBP_SET_LANG?.(prefs.language);
+      const lang=$("#lang");if(lang)lang.value=prefs.language;
       if($("#settingsLanguageLabel"))$("#settingsLanguageLabel").textContent=languageLabel(prefs.language);
     }
     await savePrefs();
