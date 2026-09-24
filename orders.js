@@ -27,13 +27,12 @@ if(configured()){
    if($("#statRevenue")){
      const htg=sums.HTG||0;$("#statRevenue").textContent=money(htg,"HTG");
    }
-   if($("#statProducts")){
-     onSnapshot(query(collection(db,"products"),where("sellerId","==",user.uid)),s=>$("#statProducts").textContent=s.size,{onlyOnce:true});
-   }
+   // Product count is maintained by a separate live listener.
  }
  onAuthStateChanged(auth,u=>{
    clear();user=u;if(!u)return;
    offs.push(onSnapshot(query(collection(db,"orders"),where("buyerId","==",u.uid)),s=>{buy=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));render()}));
    offs.push(onSnapshot(query(collection(db,"orders"),where("sellerId","==",u.uid)),s=>{sell=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));render()}));
+   offs.push(onSnapshot(query(collection(db,"products"),where("sellerId","==",u.uid)),s=>{if($("#statProducts"))$("#statProducts").textContent=s.size;}));
  });
 }
