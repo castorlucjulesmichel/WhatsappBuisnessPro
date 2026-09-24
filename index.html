@@ -87,6 +87,27 @@
  <div id="callsList" class="waCallsList"><p class="muted">Aucun appel récent.</p></div>
 </section>
 
+<section id="contactPickerPage" class="page waSubPage">
+ <div class="waSubHead"><button class="waBackBtn" data-go="chat" type="button">←</button><div><h2>Sélectionner un contact</h2><small id="contactCountLabel">0 contact</small></div><button id="contactPickerSearchBtn" class="waIconBtn" type="button">⌕</button><button class="waIconBtn" type="button">⋮</button></div>
+ <input id="contactPickerSearch" class="waSubSearch hidden" placeholder="Rechercher un contact...">
+ <button class="waContactAction" id="pickerNewGroupBtn" type="button"><span class="waRoundIcon">👥＋</span><b>Nouveau groupe</b></button>
+ <button class="waContactAction" id="pickerNewContactBtn" type="button"><span class="waRoundIcon">👤＋</span><b>Nouveau contact</b><span class="waQrMini">▦</span></button>
+ <div class="waSubSectionLabel">Contacts sur Whatsapp Business Pro</div>
+ <div id="contactPickerList" class="waContactList"><p class="muted">Aucun contact pour le moment.</p></div>
+</section>
+
+<section id="newContactPage" class="page waSubPage">
+ <div class="waSubHead"><button class="waBackBtn" data-go="contactPicker" type="button">←</button><div><h2>Nouveau contact</h2></div><span class="waQrMini">▦</span></div>
+ <form id="newContactForm" class="waContactForm">
+  <div class="waFieldRow"><span>👤</span><input id="contactFirstName" placeholder="Prénom"></div>
+  <div class="waFieldRow"><span></span><input id="contactLastName" placeholder="Nom"></div>
+  <div class="waFieldRow"><span>@</span><input id="contactProfileName" placeholder="Nom de profil / username" required></div>
+  <div class="waFieldRow waPhoneRow"><span>☎</span><select id="contactCountryCode"><option value="+509">HT +509</option><option value="+1">US/CA +1</option><option value="+33">FR +33</option><option value="+1">DO +1</option></select><input id="contactPhone" inputmode="tel" placeholder="Téléphone"></div>
+  <label class="toggleRow waSyncRow"><span><b>Synchroniser le contact sur le téléphone</b><small>Sur le Web/PWA, ce réglage est enregistré comme préférence uniquement.</small></span><input id="contactSyncPhone" type="checkbox"></label>
+  <button id="saveContactBtn" class="waSaveWide" type="submit">Enregistrer</button>
+ </form>
+</section>
+
 <section id="actusPage" class="page menuPage">
  <div class="menuHeader"><div><h2>Actus</h2><p>Status, vidéos courtes et contenus sponsorisés</p></div></div>
  <div class="settingsList card">
@@ -282,119 +303,133 @@
  </div>
 </section>
 
-<section id="settingsPage" class="page menuPage">
- <div class="menuHeader">
-  <div><button class="backLink ghost" data-go="tools">← Outils</button><h2>Paramètres</h2></div>
-  <button id="settingsSearchBtn" class="ghost" type="button">🔍</button>
+<section id="settingsPage" class="page menuPage waSettingsPage">
+ <div class="waSubHead">
+  <button class="waBackBtn" data-go="tools" type="button">←</button>
+  <div><h2>Paramètres</h2></div>
+  <button id="settingsSearchBtn" class="waIconBtn" type="button">⌕</button>
  </div>
- <input id="settingsSearch" class="settingsSearch hidden" placeholder="Rechercher dans les paramètres...">
+ <input id="settingsSearch" class="waSubSearch hidden" placeholder="Rechercher dans les paramètres...">
 
- <div class="settingsList card" id="settingsMenuList">
-  <button class="settingsItem" data-setting-target="devices">
-   <span class="settingsIcon">🖥️</span><span class="settingsText"><b>Appareils connectés</b><small>Sessions ouvertes sur vos appareils</small></span><span class="chevron">›</span>
-  </button>
-  <button class="settingsItem" data-setting-target="account">
-   <span class="settingsIcon">🔑</span><span class="settingsText"><b>Compte</b><small>Sécurité, numéro et informations du compte</small></span><span class="chevron">›</span>
-  </button>
-  <button class="settingsItem" data-setting-target="privacy">
-   <span class="settingsIcon">🔒</span><span class="settingsText"><b>Confidentialité</b><small>Comptes bloqués, accusés de lecture, messages éphémères</small></span><span class="chevron">›</span>
-  </button>
-  <button class="settingsItem" data-setting-target="lists">
-   <span class="settingsIcon">🗂️</span><span class="settingsText"><b>Listes</b><small>Gérez vos contacts et groupes de clients</small></span><span class="chevron">›</span>
-  </button>
-  <button class="settingsItem" data-setting-target="chats">
-   <span class="settingsIcon">💬</span><span class="settingsText"><b>Discussions</b><small>Thème, fond d’écran et options d’affichage</small></span><span class="chevron">›</span>
-  </button>
-  <button class="settingsItem" data-setting-target="notifications">
-   <span class="settingsIcon">🔔</span><span class="settingsText"><b>Notifications</b><small>Messages, groupes, appels et alertes business</small></span><span class="chevron">›</span>
-  </button>
-  <button class="settingsItem" data-setting-target="storage">
-   <span class="settingsIcon">◔</span><span class="settingsText"><b>Stockage et données</b><small>Utilisation réseau et téléchargement automatique</small></span><span class="chevron">›</span>
-  </button>
-  <button class="settingsItem" data-setting-target="customerActivity">
-   <span class="settingsIcon">↔️</span><span class="settingsText"><b>Activité de votre clientèle</b><small>Contrôlez les données utilisées pour personnaliser vos publicités</small></span><span class="chevron">›</span>
-  </button>
-  <button class="settingsItem" id="settingsSocialBtn" type="button">
-   <span class="settingsIcon">🔗</span><span class="settingsText"><b>Facebook et Instagram</b><small>Associez vos comptes pour toucher une clientèle plus large</small></span><span class="chevron">›</span>
-  </button>
-  <button class="settingsItem" data-setting-target="accessibility">
-   <span class="settingsIcon">♿</span><span class="settingsText"><b>Accessibilité</b><small>Contraste, taille du texte et animations</small></span><span class="chevron">›</span>
-  </button>
-  <button class="settingsItem" data-setting-target="language">
-   <span class="settingsIcon">🌐</span><span class="settingsText"><b>Langue de l’application</b><small id="settingsLanguageLabel">Kreyòl</small></span><span class="chevron">›</span>
-  </button>
-  <button class="settingsItem" data-setting-target="help">
-   <span class="settingsIcon">❔</span><span class="settingsText"><b>Aide et commentaires</b><small>Assistance, politique de confidentialité et commentaires</small></span><span class="chevron">›</span>
-  </button>
-  <button class="settingsItem" id="inviteContactBtn" type="button">
-   <span class="settingsIcon">👥</span><span class="settingsText"><b>Inviter un contact</b><small>Partager le lien de Whatsapp Business Pro</small></span><span class="chevron">›</span>
-  </button>
+ <button class="waSettingsProfile" id="settingsProfileCard" type="button">
+  <img id="settingsAvatar" src="assets/logo.webp" alt="">
+  <div><b id="settingsDisplayName">Mon profil</b><small id="settingsAbout">Whatsapp Business Pro</small></div>
+  <span class="waQrMini">▦</span>
+ </button>
+
+ <div class="settingsList" id="settingsMenuList">
+  <button class="settingsItem" data-setting-target="devices"><span class="settingsIcon">🖥️</span><span class="settingsText"><b>Appareils connectés</b><small>Utilisez Whatsapp Business Pro sur d’autres appareils</small></span><span class="chevron">›</span></button>
+  <button class="settingsItem" data-setting-target="account"><span class="settingsIcon">🔑</span><span class="settingsText"><b>Compte</b><small>Sécurité, numéro et informations du compte</small></span><span class="chevron">›</span></button>
+  <button class="settingsItem" data-setting-target="privacy"><span class="settingsIcon">🔒</span><span class="settingsText"><b>Confidentialité</b><small>Présence, photo, statut, groupes et confirmations</small></span><span class="chevron">›</span></button>
+  <button class="settingsItem" data-setting-target="lists"><span class="settingsIcon">🗂️</span><span class="settingsText"><b>Listes</b><small>Non lues, favoris, groupes et listes personnalisées</small></span><span class="chevron">›</span></button>
+  <button class="settingsItem" data-setting-target="chats"><span class="settingsIcon">💬</span><span class="settingsText"><b>Discussions</b><small>Thèmes, médias, police, stickers et archives</small></span><span class="chevron">›</span></button>
+  <button class="settingsItem" data-setting-target="notifications"><span class="settingsIcon">🔔</span><span class="settingsText"><b>Notifications</b><small>Messages, appels, statut et réactions</small></span><span class="chevron">›</span></button>
+  <button class="settingsItem" data-setting-target="storage"><span class="settingsIcon">◔</span><span class="settingsText"><b>Stockage et données</b><small>Réseau et téléchargement automatique</small></span><span class="chevron">›</span></button>
+  <button class="settingsItem" data-setting-target="customerActivity"><span class="settingsIcon">↔️</span><span class="settingsText"><b>Activité de votre clientèle</b><small>Données commerciales utilisées pour vos campagnes</small></span><span class="chevron">›</span></button>
+  <button class="settingsItem" id="settingsSocialBtn" type="button"><span class="settingsIcon">🔗</span><span class="settingsText"><b>Facebook et Instagram</b><small>Connexion via API officielle lorsqu’elle sera activée</small></span><span class="chevron">›</span></button>
+  <button class="settingsItem" data-setting-target="accessibility"><span class="settingsIcon">♿</span><span class="settingsText"><b>Accessibilité</b><small>Contraste, texte et animations</small></span><span class="chevron">›</span></button>
+  <button class="settingsItem" data-setting-target="language"><span class="settingsIcon">🌐</span><span class="settingsText"><b>Langue de l’application</b><small id="settingsLanguageLabel">Kreyòl</small></span><span class="chevron">›</span></button>
+  <button class="settingsItem" data-setting-target="help"><span class="settingsIcon">❔</span><span class="settingsText"><b>Aide et commentaires</b><small>Assistance et informations</small></span><span class="chevron">›</span></button>
+  <button class="settingsItem" id="inviteContactBtn" type="button"><span class="settingsIcon">👥</span><span class="settingsText"><b>Inviter un contact</b><small>Partager le lien de Whatsapp Business Pro</small></span><span class="chevron">›</span></button>
  </div>
 
- <div id="settingsDetail" class="card hidden">
-  <div class="settingsDetailHead"><button id="settingsBackBtn" class="ghost" type="button">←</button><h3 id="settingsDetailTitle">Paramètres</h3></div>
+ <div id="settingsDetail" class="hidden waSettingsDetail">
+  <div class="settingsDetailHead"><button id="settingsBackBtn" class="waBackBtn" type="button">←</button><h2 id="settingsDetailTitle">Paramètres</h2></div>
 
   <div class="settingPanel hidden" data-setting-panel="devices">
-   <p class="muted">Appareil actuel</p>
    <div class="deviceRow"><span>📱</span><div><b id="currentDeviceName">Navigateur actuel</b><small id="currentDeviceInfo">Session active</small></div></div>
-   <p class="muted">La gestion complète de plusieurs appareils sera disponible quand le suivi des sessions backend sera activé.</p>
+   <p class="muted">La gestion multi-appareils complète nécessite un suivi de sessions côté serveur. Cette page affiche uniquement la session Web actuelle.</p>
   </div>
 
   <div class="settingPanel hidden" data-setting-panel="account">
-   <p><b>Numéro connecté :</b> <span id="settingsPhone">—</span></p>
-   <button id="openProfileFromSettings" type="button">Modifier le profil</button>
-   <button id="logoutFromSettings" class="danger" type="button">Déconnexion</button>
+   <div class="waSectionTitle">Connexion et sécurité</div>
+   <button class="waSettingRow" type="button" data-info-msg="Les clés d’accès nécessitent WebAuthn et seront activées dans une étape dédiée."><span>👥🔑</span><div><b>Clés d’accès</b></div></button>
+   <button class="waSettingRow" type="button" data-info-msg="Whatsapp Business Pro utilise actuellement Firebase Phone Auth. Aucun mot de passe n’est requis."><span>***</span><div><b>Mot de passe</b><small>Non utilisé avec la connexion par téléphone</small></div></button>
+   <button class="waSettingRow" type="button" data-info-msg="L’ajout d’une adresse e-mail de récupération sera disponible après activation du fournisseur e-mail Firebase."><span>✉️</span><div><b>Adresse e-mail</b></div></button>
+   <label class="toggleRow"><span><b>Vérification en deux étapes</b><small>Préférence de sécurité enregistrée</small></span><input id="twoStepSetting" type="checkbox"></label>
+   <label class="toggleRow"><span><b>Notifications de sécurité</b><small>Afficher les changements importants du compte</small></span><input id="securityNotificationsSetting" type="checkbox" checked></label>
+   <div class="waSectionTitle">Votre compte</div>
+   <button class="waSettingRow" id="openProfileFromSettings" type="button"><span>@</span><div><b>Nom de profil</b></div><span>›</span></button>
+   <button class="waSettingRow" type="button" data-info-msg="Le changement de numéro nécessite une nouvelle vérification OTP."><span>☎️↗</span><div><b>Changer de numéro de téléphone</b><small id="settingsPhone">—</small></div></button>
+   <button class="waSettingRow" type="button" data-info-msg="Une fonction d’export des données sera ajoutée côté serveur."><span>📄</span><div><b>Demander les infos du compte</b></div></button>
+   <button class="waSettingRow dangerText" type="button" data-info-msg="La suppression définitive exige une confirmation sécurisée côté serveur."><span>🗑️</span><div><b>Supprimer le compte</b></div></button>
+   <button id="logoutFromSettings" class="danger waFullBtn" type="button">Déconnexion</button>
   </div>
 
   <div class="settingPanel hidden" data-setting-panel="privacy">
-   <label class="toggleRow"><span><b>Accusés de lecture</b><small>Afficher quand un message a été lu</small></span><input id="readReceiptsSetting" type="checkbox" checked></label>
-   <label class="toggleRow"><span><b>Messages éphémères par défaut</b><small>Supprimer automatiquement les nouveaux messages après 24 h</small></span><input id="defaultDisappearingSetting" type="checkbox"></label>
-   <label class="toggleRow"><span><b>Afficher mon statut en ligne</b><small>Permettre aux contacts de voir votre présence</small></span><input id="onlineVisibilitySetting" type="checkbox" checked></label>
+   <div class="waSectionTitle">Qui peut voir mes infos personnelles</div>
+   <label class="waSelectRow"><span><b>Présence en ligne</b><small>Choisir qui peut voir votre présence</small></span><select id="onlinePresenceSetting"><option value="contacts">Mes contacts</option><option value="everyone">Tout le monde</option><option value="nobody">Personne</option></select></label>
+   <label class="waSelectRow"><span><b>Photo de profil</b></span><select id="profilePhotoPrivacySetting"><option value="everyone">Tout le monde</option><option value="contacts">Mes contacts</option><option value="nobody">Personne</option></select></label>
+   <label class="waSelectRow"><span><b>Infos</b></span><select id="aboutPrivacySetting"><option value="everyone">Tout le monde</option><option value="contacts">Mes contacts</option><option value="nobody">Personne</option></select></label>
+   <label class="waSelectRow"><span><b>Statut</b></span><select id="statusPrivacySetting"><option value="contacts">Mes contacts</option><option value="selected">Contacts sélectionnés</option></select></label>
+   <label class="toggleRow"><span><b>Confirmations de lecture</b><small>Désactivez pour ne plus envoyer ni recevoir les confirmations dans les chats individuels</small></span><input id="readReceiptsSetting" type="checkbox" checked></label>
+   <div class="waSectionTitle">Messages éphémères</div>
+   <label class="waSelectRow"><span><b>Délai avant disparition</b><small>Nouveaux messages des nouvelles discussions</small></span><select id="disappearingDurationSetting"><option value="off">Désactivé</option><option value="24h">24 heures</option><option value="7d">7 jours</option><option value="90d">90 jours</option></select></label>
+   <label class="waSelectRow"><span><b>Groupes</b></span><select id="groupsPrivacySetting"><option value="everyone">Tout le monde</option><option value="contacts">Mes contacts</option></select></label>
   </div>
 
   <div class="settingPanel hidden" data-setting-panel="lists">
-   <p>Vos listes servent à organiser vos contacts professionnels.</p>
-   <input id="newListName" placeholder="Nom de la liste">
-   <button id="createListBtn" type="button">Créer une liste</button>
+   <div class="waListsHero"><div class="waListsArt">▤ ♥ ＋</div><p>Concentrez-vous sur les personnes qui comptent le plus.<br>Envoyez et partagez en toute simplicité.</p></div>
+   <div class="waCreateListRow"><input id="newListName" placeholder="Nom de la liste personnalisée"><button id="createListBtn" type="button">＋ Créer</button></div>
+   <div class="waSectionTitle">Automatisation</div>
+   <label class="toggleRow"><span><b>Listes créées automatiquement</b><small>Organisez vos discussions selon leur activité</small></span><input id="autoListsSetting" type="checkbox"></label>
+   <div class="waSectionTitle">Vos listes</div>
+   <div class="waPresetList"><span>▤</span><div><b>Non lues</b><small>Liste prédéfinie</small></div></div>
+   <div class="waPresetList"><span>♡</span><div><b>Favoris</b><small>Ajoutez des personnes ou des groupes</small></div></div>
+   <div class="waPresetList"><span>👥</span><div><b>Groupes</b><small>Liste prédéfinie</small></div></div>
    <div id="customerLists"></div>
   </div>
 
   <div class="settingPanel hidden" data-setting-panel="chats">
-   <label>Thème</label>
-   <select id="themeSetting"><option value="system">Système</option><option value="light">Clair</option><option value="dark">Sombre</option></select>
-   <label>Taille du texte</label>
-   <select id="fontSizeSetting"><option value="small">Petit</option><option value="normal">Normal</option><option value="large">Grand</option></select>
+   <div class="waSectionTitle">Affichage</div>
+   <label class="waSelectRow"><span><b>Thème</b><small>Thème par défaut du système</small></span><select id="themeSetting"><option value="system">Système</option><option value="light">Clair</option><option value="dark">Sombre</option></select></label>
+   <button class="waSettingRow" type="button" data-info-msg="Les thèmes par conversation seront ajoutés ultérieurement."><span>🎨</span><div><b>Thème de discussion par défaut</b></div></button>
+   <div class="waSectionTitle">Paramètres des discussions</div>
+   <label class="toggleRow"><span><b>Entrée pour envoyer</b><small>La touche Entrée enverra votre message</small></span><input id="enterToSendSetting" type="checkbox"></label>
+   <label class="toggleRow"><span><b>Visibilité des médias</b><small>Afficher les médias téléchargés dans la galerie lorsque le navigateur le permet</small></span><input id="mediaVisibilitySetting" type="checkbox" checked></label>
+   <label class="waSelectRow"><span><b>Taille de la police</b></span><select id="fontSizeSetting"><option value="small">Petite</option><option value="normal">Moyenne</option><option value="large">Grande</option></select></label>
+   <label class="toggleRow"><span><b>Suggestions de stickers</b><small>Afficher des suggestions pendant la rédaction</small></span><input id="stickerSuggestionsSetting" type="checkbox" checked></label>
+   <div class="waSectionTitle">Discussions archivées</div>
+   <label class="toggleRow"><span><b>Maintenir les discussions archivées</b><small>Les discussions archivées restent archivées lors de nouveaux messages</small></span><input id="keepArchivedSetting" type="checkbox" checked></label>
   </div>
 
   <div class="settingPanel hidden" data-setting-panel="notifications">
-   <label class="toggleRow"><span><b>Messages</b><small>Notifications de nouveaux messages</small></span><input id="messageNotificationsSetting" type="checkbox" checked></label>
+   <label class="toggleRow"><span><b>Son des messages</b><small>Préférence de son pour messages entrants et sortants</small></span><input id="messageSoundSetting" type="checkbox" checked></label>
+   <label class="toggleRow"><span><b>Rappels</b><small>Rappels de messages non lus et statuts non vus</small></span><input id="remindersSetting" type="checkbox" checked></label>
+   <div class="waSectionTitle">Messages</div>
+   <button class="waSettingRow" type="button" data-info-msg="Le navigateur choisit le son système; un son personnalisé nécessite des permissions et une implémentation dédiée."><span>🔊</span><div><b>Son de notification</b><small>Par défaut du navigateur</small></div></button>
+   <button class="waSettingRow" type="button" data-info-msg="La vibration dépend de l’appareil et des permissions du navigateur."><span>📳</span><div><b>Vibreur</b><small>Par défaut</small></div></button>
+   <label class="toggleRow"><span><b>Notifications de priorité importante</b><small>Afficher les notifications lorsque le navigateur l’autorise</small></span><input id="priorityNotificationsSetting" type="checkbox" checked></label>
+   <label class="toggleRow"><span><b>Notifications des réactions</b><small>Afficher les notifications pour les réactions aux messages</small></span><input id="reactionNotificationsSetting" type="checkbox" checked></label>
+   <div class="waSectionTitle">Appels</div>
+   <button class="waSettingRow" type="button" data-info-msg="La sonnerie native Android n’est pas contrôlable depuis une PWA standard."><span>☎️</span><div><b>Sonnerie</b><small>Par défaut du navigateur</small></div></button>
+   <div class="waSectionTitle">Statut</div>
+   <label class="toggleRow"><span><b>Réactions</b><small>Notifications lorsque quelqu’un réagit à un statut</small></span><input id="statusReactionSetting" type="checkbox" checked></label>
    <label class="toggleRow"><span><b>Commandes</b><small>Alertes achat et vente</small></span><input id="orderNotificationsSetting" type="checkbox" checked></label>
    <label class="toggleRow"><span><b>Boost et publicités</b><small>Alertes de campagne et dépôt Ads</small></span><input id="adNotificationsSetting" type="checkbox" checked></label>
   </div>
 
   <div class="settingPanel hidden" data-setting-panel="storage">
-   <label>Téléchargement automatique</label>
-   <select id="autoDownloadSetting"><option value="wifi">Wi-Fi uniquement</option><option value="always">Wi-Fi et données mobiles</option><option value="never">Jamais</option></select>
-   <label class="toggleRow"><span><b>Économiseur de données vidéo</b><small>Réduire la qualité automatique des clips sur réseau mobile</small></span><input id="dataSaverSetting" type="checkbox"></label>
+   <label class="waSelectRow"><span><b>Téléchargement automatique</b></span><select id="autoDownloadSetting"><option value="wifi">Wi-Fi uniquement</option><option value="always">Wi-Fi et données mobiles</option><option value="never">Jamais</option></select></label>
+   <label class="toggleRow"><span><b>Économiseur de données vidéo</b><small>Réduire l’utilisation de données pour les clips</small></span><input id="dataSaverSetting" type="checkbox"></label>
   </div>
 
   <div class="settingPanel hidden" data-setting-panel="customerActivity">
-   <label class="toggleRow"><span><b>Partager l’activité clientèle</b><small>Utiliser les interactions Marketplace/Business pour améliorer vos propres campagnes</small></span><input id="customerActivitySetting" type="checkbox"></label>
-   <p class="muted">Ce réglage ne donne pas accès aux conversations privées. Il concerne uniquement les interactions commerciales dans Whatsapp Business Pro.</p>
+   <label class="toggleRow"><span><b>Partager l’activité clientèle</b><small>Utiliser les interactions Marketplace/Business pour améliorer vos campagnes</small></span><input id="customerActivitySetting" type="checkbox"></label>
+   <p class="muted">Ce réglage ne donne pas accès aux conversations privées.</p>
   </div>
 
   <div class="settingPanel hidden" data-setting-panel="accessibility">
-   <label class="toggleRow"><span><b>Contraste élevé</b><small>Améliorer la lisibilité de l’interface</small></span><input id="highContrastSetting" type="checkbox"></label>
-   <label class="toggleRow"><span><b>Réduire les animations</b><small>Limiter les effets visuels</small></span><input id="reduceMotionSetting" type="checkbox"></label>
+   <label class="toggleRow"><span><b>Contraste élevé</b></span><input id="highContrastSetting" type="checkbox"></label>
+   <label class="toggleRow"><span><b>Réduire les animations</b></span><input id="reduceMotionSetting" type="checkbox"></label>
   </div>
 
   <div class="settingPanel hidden" data-setting-panel="language">
-   <label>Langue</label>
-   <select id="settingsLanguage"><option value="ht">Kreyòl</option><option value="fr">Français</option><option value="en">English</option><option value="es">Español</option></select>
+   <label class="waSelectRow"><span><b>Langue</b></span><select id="settingsLanguage"><option value="ht">Kreyòl</option><option value="fr">Français</option><option value="en">English</option><option value="es">Español</option></select></label>
   </div>
 
   <div class="settingPanel hidden" data-setting-panel="help">
-   <button id="openSupportFromSettings" type="button">Contacter l’assistance</button>
+   <button id="openSupportFromSettings" class="waFullBtn" type="button">Contacter l’assistance</button>
    <p class="muted">Politique de confidentialité et conditions d’utilisation seront ajoutées avant publication publique.</p>
   </div>
  </div>
@@ -404,12 +439,37 @@
       <div class="notificationHead"><h3>Notifikasyon</h3><button id="closeNotifications" class="ghost">×</button></div>
       <div id="notificationList"></div>
     </section>
-<section id="profilePage" class="page">
- <div class="title"><div><button class="backLink ghost" data-go="tools">← Outils</button><h2>Profil</h2><p>Kont, lang, foto ak lokalizasyon</p></div></div>
- <form id="profileForm" class="card profileCard"><img id="avatarPreview" class="avatar" alt=""><input id="avatarFile" type="file" accept="image/*"><input id="displayName" placeholder="Non piblik"><input id="username" placeholder="Username"><div class="row"><input id="country" placeholder="Peyi (egzanp: Haiti)"><input id="birthYear" type="number" min="1900" max="2100" placeholder="Ane nesans"></div><select id="role"><option value="buyer">Achtè</option><option value="seller">Vandè</option><option value="business">Business</option><option value="investor">Envestisè</option></select><textarea id="bio" placeholder="Bio"></textarea><button>Sove profil</button></form>
- <div class="card"><h3>Lokalizasyon</h3><p id="locationStatus" class="muted">Pa pataje.</p><button id="shareLocation">Pataje lokalizasyon aktyèl</button></div>
- <div class="card"><h3>Asistans vityèl</h3><div id="assistantMessages" class="assistantMessages"></div><form id="assistantForm" class="row"><input id="assistantInput" placeholder="Poze yon kestyon..."><button>Voye</button></form></div>
+<section id="profilePage" class="page waProfilePage">
+ <div class="waSubHead"><button class="waBackBtn" data-go="tools" type="button">←</button><div><h2>Modifier le profil</h2></div><button class="waIconBtn" type="button">↗</button><button class="waIconBtn" type="button">👤</button></div>
+ <form id="profileForm" class="waBusinessProfileForm">
+  <div class="waProfileHero">
+   <img id="avatarPreview" class="waProfileAvatar" alt="">
+   <label class="waCameraFab">📷<input id="avatarFile" type="file" accept="image/*" hidden></label>
+  </div>
+  <p class="waPublicNote">Votre profil est public dans Whatsapp Business Pro.</p>
+  <div class="waSectionTitle">Informations sur l’entreprise</div>
+  <label class="waProfileField"><span>👤</span><input id="displayName" placeholder="Nom de l’entreprise / nom public"></label>
+  <label class="waProfileField"><span>@</span><input id="username" placeholder="Nom de profil"></label>
+  <label class="waProfileField"><span>◫</span><select id="role"><option value="buyer">Acheteur</option><option value="seller">Vendeur</option><option value="business">Autre entreprise</option><option value="investor">Investisseur</option></select></label>
+  <label class="waProfileField"><span>🕘</span><input id="businessHoursProfile" placeholder="Ajouter les horaires"></label>
+  <label class="waProfileField"><span>📄</span><textarea id="bio" placeholder="Description"></textarea></label>
+  <label class="waProfileField"><span>📍</span><input id="country" placeholder="Pays / adresse"></label>
+  <input id="birthYear" type="number" min="1900" max="2100" placeholder="Année de naissance" class="hidden">
+  <div class="waSectionTitle">Produits et services</div>
+  <button type="button" class="waSettingRow" data-go="market" data-market-mode="sell"><span>▦</span><div><b>Catalogue</b></div><span>›</span></button>
+  <div class="waSectionTitle">Liens</div>
+  <label class="waProfileField"><span>🌐</span><input id="businessWebsiteProfile" type="url" placeholder="Site Web"></label>
+  <label class="waProfileField"><span>◎</span><input id="instagramProfile" placeholder="Instagram"></label>
+  <label class="waProfileField"><span>ⓕ</span><input id="facebookProfile" placeholder="Facebook"></label>
+  <div class="waSectionTitle">Coordonnées</div>
+  <label class="waProfileField"><span>✉️</span><input id="businessEmailProfile" type="email" placeholder="Adresse e-mail professionnelle"></label>
+  <p class="waProfilePhone">☎️ <span id="profilePhoneDisplay">Numéro Firebase</span></p>
+  <button type="submit" class="waSaveWide">Enregistrer le profil</button>
+ </form>
+ <div class="card"><h3>Localisation</h3><p id="locationStatus" class="muted">Non partagée.</p><button id="shareLocation">Partager la localisation actuelle</button></div>
+ <div class="card"><h3>Assistant virtuel</h3><div id="assistantMessages" class="assistantMessages"></div><form id="assistantForm" class="row"><input id="assistantInput" placeholder="Posez une question..."><button>Envoyer</button></form></div>
 </section>
+
 </main>
 
 <nav class="bottomNav">
