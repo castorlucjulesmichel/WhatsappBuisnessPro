@@ -575,6 +575,18 @@ Object.assign(X,{
 "failed":["Falhou","Fehlgeschlagen","Non riusciti","فشل","失败","विफल","ব্যর্থ","Ошибка","Başarısız","失敗","실패"]
 });
 
+
+Object.assign(D,{
+"select_contacts":["Chwazi kontak","Sélectionner des contacts","Select contacts","Seleccionar contactos"],
+"import_action":["Enpòte","Importer","Import","Importar"],
+"native_picker_hint":["Louvri lis kontak la, peze Chwazi tout anlè, epi Enpòte.","Ouvrez la liste de contacts, utilisez Tout sélectionner en haut, puis Importer.","Open the contact list, use Select all at the top, then Import.","Abre la lista de contactos, usa Seleccionar todo arriba y luego Importar."]
+});
+Object.assign(X,{
+"select_contacts":["Selecionar contatos","Kontakte auswählen","Seleziona contatti","تحديد جهات الاتصال","选择联系人","संपर्क चुनें","কন্ট্যাক্ট নির্বাচন","Выбрать контакты","Kişileri seç","連絡先を選択","연락처 선택"],
+"import_action":["Importar","Importieren","Importa","استيراد","导入","आयात करें","আমদানি","Импортировать","İçe aktar","インポート","가져오기"],
+"native_picker_hint":["Abra a lista, use Selecionar tudo no topo e depois Importar.","Öffnen Sie die Kontaktliste, wählen Sie oben Alle auswählen und dann Importieren.","Apri la lista, usa Seleziona tutto in alto e poi Importa.","افتح قائمة جهات الاتصال، اختر تحديد الكل في الأعلى ثم استيراد.","打开联系人列表，点击顶部的全选，然后导入。","संपर्क सूची खोलें, ऊपर सभी चुनें दबाएँ, फिर आयात करें।","কন্ট্যাক্ট তালিকা খুলুন, উপরে সব নির্বাচন করুন, তারপর আমদানি করুন।","Откройте список контактов, нажмите Выбрать всё сверху, затем Импортировать.","Kişi listesini açın, üstte Tümünü seç deyin, sonra İçe aktarın.","連絡先一覧を開き、上部のすべて選択を押してからインポートします。","연락처 목록을 열고 상단의 전체 선택을 누른 다음 가져오기를 누르세요."]
+});
+
 const reverse=new Map();
 for(const [key,vals] of Object.entries(D)){
   vals.forEach(v=>{if(v)reverse.set(v.trim(),key)});
@@ -599,6 +611,10 @@ reverse.set("Select all will import all contacts after Android permission.","nat
 reverse.set("On the web, Android requires you to choose the contacts to share.","web_contact_limit");
 reverse.set("Already present","already_present");
 reverse.set("Failed","failed");
+reverse.set("Sélectionner des contacts","select_contacts");
+reverse.set("Import","import_action");
+reverse.set("Importer","import_action");
+reverse.set("Open the contact list, use Select all at the top, then Import.","native_picker_hint");
 reverse.set("Pa gen discussion pou filtè sa a.","no_chats");
 reverse.set("No chats for this filter.","no_chats");
 
