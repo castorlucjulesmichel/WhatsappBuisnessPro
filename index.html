@@ -74,7 +74,6 @@
    </form>
    <div id="voiceStatus" class="voiceStatus hidden"></div>
   </section></div>
- <div class="card"><h3>🔐 Chat sipò / Admin</h3><div id="supportMessages" class="supportMessages"></div><form id="supportForm" class="row"><input id="supportText" placeholder="Ekri administrasyon..."><button>Voye</button></form></div>
 </section>
 
 <section id="callsPage" class="page whatsappCallsPage">
@@ -201,7 +200,7 @@
 
  <div class="menuSectionTitle">Assistance</div>
  <div class="settingsList card">
-  <button class="settingsItem" data-go="chat">
+  <button class="settingsItem" data-go="settings" data-settings-section="help">
    <span class="settingsIcon">❔</span>
    <span class="settingsText"><b>Aide et commentaires</b><small>Contactez l’assistance depuis le chat sécurisé</small></span><span class="chevron">›</span>
   </button>
@@ -445,7 +444,15 @@
   </div>
 
   <div class="settingPanel hidden" data-setting-panel="help">
-   <button id="openSupportFromSettings" class="waFullBtn" type="button">Contacter l’assistance</button>
+   <div class="supportHelpIntro">
+    <h3>🔐 Chat assistance / Admin</h3>
+    <p class="muted">Cette conversation d’assistance est disponible uniquement dans Aide et commentaires.</p>
+   </div>
+   <div id="supportMessages" class="supportMessages supportHelpMessages"></div>
+   <form id="supportForm" class="supportHelpForm">
+    <input id="supportText" maxlength="2000" placeholder="Écrire à l’administration...">
+    <button type="submit">Envoyer</button>
+   </form>
    <p class="muted">Politique de confidentialité et conditions d’utilisation seront ajoutées avant publication publique.</p>
   </div>
  </div>
