@@ -216,7 +216,6 @@ $("#createListBtn")?.addEventListener("click",async()=>{
   input.value="";renderLists();await savePrefs();toast("Lis kreye.");
 });
 $("#openProfileFromSettings")?.addEventListener("click",()=>document.querySelector('[data-go="profile"]')?.click());
-$("#openSupportFromSettings")?.addEventListener("click",()=>document.querySelector('nav button[data-page="chat"]')?.click());
 $("#logoutFromSettings")?.addEventListener("click",()=>auth&&signOut(auth));
 $("#settingsSocialBtn")?.addEventListener("click",()=>toast("Facebook/Instagram ap aktive lè API Meta yo konekte."));
 $("#inviteContactBtn")?.addEventListener("click",async()=>{
