@@ -21,7 +21,7 @@ import java.util.Map;
 public class MainActivity extends Activity {
     private static final int CONTACTS_PERMISSION_REQUEST = 501;
     private static final String APP_URL =
-            "https://castorlucjulesmichel.github.io/WhatsappBuisnessPro/?android=1";
+            "https://castorlucjulesmichel.github.io/WhatsappBuisnessPro/?android=1&v=26";
     private static final String TRUSTED_HOST = "castorlucjulesmichel.github.io";
 
     private WebView webView;
