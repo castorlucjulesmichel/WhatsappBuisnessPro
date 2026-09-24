@@ -563,12 +563,42 @@ async function openChat(id,name){
   }))
 }
 window.WBP_OPEN_CHAT=(id,name)=>openChat(id,name);
+async function ensureCurrentChatExists(){
+  if(!S.user||!S.chatId)return false;
+  let snap=null;
+  try{snap=await getDoc(doc(db,"chats",S.chatId))}catch{}
+  if(snap?.exists())return true;
+  if(!S.chatOtherUid)return false;
+  const ids=[S.user.uid,S.chatOtherUid].sort();
+  const names={
+    [S.user.uid]:S.profile.displayName||S.profile.username||S.user.displayName||"User",
+    [S.chatOtherUid]:S.chatOtherName||"Contact"
+  };
+  try{
+    await setDoc(doc(db,"chats",S.chatId),{
+      type:"direct",
+      participants:ids,
+      participantNames:names,
+      lastMessage:"",
+      updatedAt:serverTimestamp()
+    });
+    return true;
+  }catch(e){
+    console.error("ensure current chat",e);
+    return false;
+  }
+}
+
 $("#messageForm").onsubmit=async e=>{
   e.preventDefault();
   const input=$("#messageText");
   const btn=$("#sendMessageBtn");
   const t=input?.value.trim()||"";
   if(!t||!S.chatId||!S.user)return;
+  if(!(await ensureCurrentChatExists())){
+    toast("Chat la poko pare. Eseye ankò.");
+    return;
+  }
   const messages=$("#messages");
   const tempId="pending_"+Date.now();
   if(btn)btn.disabled=true;
