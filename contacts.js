@@ -364,7 +364,11 @@ async function startChat(uid,name){
     const myName=me.data()?.displayName||me.data()?.username||"User";
     const contactName=name||"Contact";
     const names={[user.uid]:myName,[uid]:contactName};
-    await setDoc(doc(db,"chats",id),{type:"direct",participants:ids,participantNames:names,lastMessage:"",updatedAt:serverTimestamp()},{merge:true});
+    const chatRef=doc(db,"chats",id);
+    const existingChat=await getDoc(chatRef);
+    if(!existingChat.exists()){
+      await setDoc(chatRef,{type:"direct",participants:ids,participantNames:names,lastMessage:"",updatedAt:serverTimestamp()});
+    }
 
     if(typeof window.WBP_ROUTE==="function")window.WBP_ROUTE("chat");
     else showPage("chat");
