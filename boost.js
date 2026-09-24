@@ -47,16 +47,22 @@ function watchWallet(){
 }
 
 function watchTargets(){
-  let products=[],clips=[];
+  let products=[],clips=[],statuses=[];
   const render=()=>{
     ownItems=[
       ...products.map(x=>({id:x.id,type:"product",label:"🛍️ "+(x.name||"Pwodwi")})),
-      ...clips.map(x=>({id:x.id,type:"clip",label:"▶️ "+(x.caption||"Clip")}))
+      ...clips.map(x=>({id:x.id,type:"clip",label:"▶️ "+(x.caption||"Clip")})),
+      ...statuses.map(x=>({id:x.id,type:"status",label:"⭕ "+((x.text||"Status").slice(0,45))}))
     ];
-    if($("#boostTarget")) $("#boostTarget").innerHTML='<option value="">Chwazi pwodwi oswa clip...</option>'+ownItems.map(x=>`<option value="${x.type}:${x.id}">${esc(x.label)}</option>`).join("");
+    if($("#boostTarget")) $("#boostTarget").innerHTML='<option value="">Chwazi pwodwi, clip oswa status...</option>'+ownItems.map(x=>`<option value="${x.type}:${x.id}">${esc(x.label)}</option>`).join("");
   };
   unsubs.push(onSnapshot(query(collection(db,"products"),where("sellerId","==",user.uid)),s=>{products=s.docs.map(d=>({id:d.id,...d.data()}));render()}));
   unsubs.push(onSnapshot(query(collection(db,"shortVideos"),where("ownerId","==",user.uid)),s=>{clips=s.docs.map(d=>({id:d.id,...d.data()}));render()}));
+  unsubs.push(onSnapshot(query(collection(db,"statuses"),where("ownerId","==",user.uid)),s=>{
+    const now=Date.now();
+    statuses=s.docs.map(d=>({id:d.id,...d.data()})).filter(x=>(x.expiresAt?.toMillis?.()||0)>now);
+    render();
+  }));
 }
 
 function watchBoosts(){
@@ -90,6 +96,7 @@ $("#boostForm")?.addEventListener("submit",async e=>{
   if(!item) return toast("Chwazi sa w ap bouste.");
   const dailyBudget=Number($("#boostDailyBudget").value),days=Number($("#boostDays").value),currency=$("#boostCurrency").value;
   if(!(dailyBudget>0)||!(days>=1&&days<=90)||!["HTG","USD"].includes(currency)) return toast("Verifye bidjè ak dire.");
+  if(item.type==="status" && days!==1) return toast("Yon Status dire 24 èdtan; Boost Status la dwe 1 jou.");
   const audience=$("#boostAudience").value;
   let audienceData={mode:audience};
   if(audience==="custom"){
