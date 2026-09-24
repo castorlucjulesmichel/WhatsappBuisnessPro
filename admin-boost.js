@@ -51,8 +51,11 @@ if(configured()){
          const balances={...(us.data().adBalances||{})};
          balances[d.currency]=Number(balances[d.currency]||0)+Number(d.amount||0);
          tx.update(uref,{adBalances:balances,updatedAt:serverTimestamp()});
+         tx.set(doc(collection(db,"walletTransactions")),{userId:d.userId,type:"ad_topup",amount:Number(d.amount||0),currency:d.currency,method:d.method||"",reference:d.reference||"",source:"boost",createdAt:serverTimestamp()});
+         tx.set(doc(collection(db,"notifications")),{recipientId:d.userId,title:"Depo Boost valide",message:"+ "+Number(d.amount||0)+" "+d.currency+" nan Ad Wallet",read:false,createdAt:serverTimestamp()});
        }
        tx.update(r,{status:decision,reviewedBy:admin.uid,reviewedAt:serverTimestamp()});
+       if(decision==="rejected") tx.set(doc(collection(db,"notifications")),{recipientId:d.userId,title:"Depo Boost rejte",message:"Demann depo "+Number(d.amount||0)+" "+d.currency+" pa valide.",read:false,createdAt:serverTimestamp()});
      });
      toast(decision==="approved"?"Depo ads valide.":"Depo ads rejte.");
    }catch(e){console.error(e);toast(e.message||"Operasyon echwe.");}
@@ -105,12 +108,15 @@ if(configured()){
          if(statusRef){
            tx.update(statusRef,{boostActive:true,boostAudience:c.audience||{mode:"automatic"},boostEndsAt:Timestamp.fromDate(end),boostCampaignId:id});
          }
+         tx.set(doc(collection(db,"notifications")),{recipientId:c.ownerId,title:"Boost aktive",message:(c.targetLabel||"Kontni")+" ap kouri jiska "+end.toLocaleString(),read:false,createdAt:serverTimestamp()});
        });
        toast("Boost valide epi aktive.");
        return;
      }
      if(action==="reject"){
-       await updateDoc(doc(db,"adCampaigns",id),{status:"rejected",reviewedBy:admin.uid,reviewedAt:serverTimestamp()});
+       const cref=doc(db,"adCampaigns",id),cs=await (await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js")).getDoc(cref);
+       await updateDoc(cref,{status:"rejected",reviewedBy:admin.uid,reviewedAt:serverTimestamp()});
+       if(cs.exists()) await (await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js")).addDoc(collection(db,"notifications"),{recipientId:cs.data().ownerId,title:"Boost rejte",message:cs.data().targetLabel||"Kanpay la pa valide.",read:false,createdAt:serverTimestamp()});
        toast("Boost rejte."); return;
      }
      if(action==="pause"){
