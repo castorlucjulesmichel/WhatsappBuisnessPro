@@ -66,12 +66,12 @@ function presenceDate(v){
 function presenceText(data={}){
   const seen=presenceDate(data.lastSeen);
   const age=seen?Date.now()-seen.getTime():Infinity;
-  if(data.online===true&&age<60000)return "en ligne";
+  if(data.online===true&&age<70000)return "en ligne";
   if(!seen)return "";
   const now=new Date();
   const hhmm=new Intl.DateTimeFormat("fr",{hour:"2-digit",minute:"2-digit"}).format(seen);
   const sameDay=seen.getFullYear()===now.getFullYear()&&seen.getMonth()===now.getMonth()&&seen.getDate()===now.getDate();
-  if(sameDay)return "vu à "+hhmm;
+  if(sameDay)return "vu aujourd’hui à "+hhmm;
   const y=new Date(now);y.setDate(now.getDate()-1);
   const yesterday=seen.getFullYear()===y.getFullYear()&&seen.getMonth()===y.getMonth()&&seen.getDate()===y.getDate();
   if(yesterday)return "vu hier à "+hhmm;
@@ -90,9 +90,9 @@ async function writePresence(online){
 function startPresence(){
   clearInterval(S.presenceTimer);
   if(!S.user)return;
-  writePresence(document.visibilityState==="visible");
+  writePresence(document.visibilityState==="visible"&&navigator.onLine);
   S.presenceTimer=setInterval(()=>{
-    if(S.user)writePresence(document.visibilityState==="visible");
+    if(S.user)writePresence(document.visibilityState==="visible"&&navigator.onLine);
   },25000);
 }
 function stopPresence(){
@@ -102,11 +102,20 @@ function watchPeerPresence(uid){
   S.chatPresenceOff?.();S.chatPresenceOff=null;
   const statusEl=()=>$("#chatContactInfoBtn .waChatHeaderIdentity small");
   if(!uid){const el=statusEl();if(el)el.textContent="";return}
-  S.chatPresenceOff=onSnapshot(doc(db,"publicProfiles",uid),snap=>{
+  let latest={};
+  const render=()=>{
     const el=statusEl();if(!el)return;
-    const d=snap.exists()?snap.data():{};
-    el.textContent=presenceText({online:d.presenceOnline,lastSeen:d.lastSeen});
-  },err=>{console.warn("presence watch",err?.code||err);const el=statusEl();if(el)el.textContent=""});
+    el.textContent=presenceText({online:latest.presenceOnline,lastSeen:latest.lastSeen});
+  };
+  const unsub=onSnapshot(doc(db,"publicProfiles",uid),snap=>{
+    latest=snap.exists()?snap.data():{};
+    render();
+  },err=>{
+    console.warn("presence watch",err?.code||err);
+    latest={};render();
+  });
+  const timer=setInterval(render,10000);
+  S.chatPresenceOff=()=>{try{unsub()}catch{}clearInterval(timer)};
 }
 function clearOffs(){S.unsubs.forEach(f=>{try{f()}catch{}});S.unsubs=[]}
 function go(name){
@@ -169,8 +178,8 @@ async function signInGoogle(){
 }
 $("#googleSignInBtn")?.addEventListener("click",signInGoogle);
 getRedirectResult(auth).catch(e=>console.error("Google redirect",e));
-$("#logout").onclick=()=>signOut(auth);
-$("#phoneSetupLogout")?.addEventListener("click",()=>signOut(auth));
+$("#logout").onclick=async()=>{await writePresence(false);stopPresence();await signOut(auth)};
+$("#phoneSetupLogout")?.addEventListener("click",async()=>{await writePresence(false);stopPresence();await signOut(auth)});
 $("#saveMobilePhoneBtn")?.addEventListener("click",async()=>{
   if(!S.user)return;
   const phone=normalizeMobile($("#mobilePhoneSetup")?.value||"");
@@ -591,8 +600,10 @@ if($("#lang")){
 window.WBP_TRANSLATE?.();
 
 document.addEventListener("visibilitychange",()=>{
-  if(S.user)writePresence(document.visibilityState==="visible");
+  if(S.user)writePresence(document.visibilityState==="visible"&&navigator.onLine);
 });
+window.addEventListener("online",()=>{if(S.user)writePresence(document.visibilityState==="visible")});
+window.addEventListener("offline",()=>{if(S.user)writePresence(false)});
 window.addEventListener("pagehide",()=>{ if(S.user)writePresence(false); });
 window.addEventListener("beforeunload",()=>{ if(S.user)writePresence(false); });
 
