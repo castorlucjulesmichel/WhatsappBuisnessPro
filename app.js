@@ -1,6 +1,6 @@
 import {firebaseConfig,appSettings} from "./firebase-config.js";
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import {getAuth,onAuthStateChanged,signInWithPhoneNumber,RecaptchaVerifier,signOut,useDeviceLanguage} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {getAuth,onAuthStateChanged,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,signOut,useDeviceLanguage} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {getFirestore,doc,getDoc,setDoc,addDoc,updateDoc,collection,query,where,onSnapshot,getDocs,orderBy,serverTimestamp,limit} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import {getStorage,ref,uploadBytes,getDownloadURL} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 
@@ -60,31 +60,49 @@ function fillCurrencies(){
 }
 fillCurrencies();
 
-async function recaptcha(){
-  if(window._wbpRc)return window._wbpRc;
-  window._wbpRc=new RecaptchaVerifier(auth,"recaptcha-container",{size:"normal"});
-  await window._wbpRc.render();return window._wbpRc;
+const googleProvider=new GoogleAuthProvider();
+googleProvider.setCustomParameters({prompt:"select_account"});
+
+async function signInGoogle(){
+  try{
+    await signInWithPopup(auth,googleProvider);
+  }catch(e){
+    console.error("Google sign-in",e);
+    if(["auth/popup-blocked","auth/popup-closed-by-user","auth/operation-not-supported-in-this-environment"].includes(e?.code)){
+      if(e?.code==="auth/popup-closed-by-user")return;
+      await signInWithRedirect(auth,googleProvider);
+      return;
+    }
+    if(e?.code==="auth/operation-not-allowed"){
+      return toast("Activez le fournisseur Google dans Firebase Authentication.");
+    }
+    if(e?.code==="auth/unauthorized-domain"){
+      return toast("Ajoutez ce domaine dans Firebase Authentication > Domaines autorisés.");
+    }
+    toast("Connexion Google impossible: "+(e?.code||e?.message||"erreur"));
+  }
 }
-$("#sendOtp").onclick=async()=>{try{const p=$("#phone").value.trim();if(!p.startsWith("+"))return toast("Mete kòd peyi a, egzanp +509.");S.confirm=await signInWithPhoneNumber(auth,p,await recaptcha());$("#otpBox").classList.remove("hidden");toast("Kòd OTP voye.")}catch(e){console.error(e);toast("OTP pa t voye: "+(e.code||e.message||"erè Firebase"));try{window._wbpRc?.clear();window._wbpRc=null}catch{}}};
-$("#verifyOtp").onclick=async()=>{try{if(!S.confirm)return toast("Voye OTP an dabò.");await S.confirm.confirm($("#otp").value.trim())}catch(e){console.error(e);toast("Kòd la pa valab.")}};
+$("#googleSignInBtn")?.addEventListener("click",signInGoogle);
+getRedirectResult(auth).catch(e=>console.error("Google redirect",e));
 $("#logout").onclick=()=>signOut(auth);
 
 async function ensureUser(u){
   const r=doc(db,"users",u.uid),s=await getDoc(r);
   if(!s.exists()){
     const wallet={},ads={HTG:0,USD:0};appSettings.currencies.forEach(c=>wallet[c]=0);
-    await setDoc(r,{phone:u.phoneNumber||"",blocked:false,walletBalances:wallet,adBalances:ads,createdAt:serverTimestamp()});
+    await setDoc(r,{phone:u.phoneNumber||"",email:u.email||"",authProvider:"google",displayName:u.displayName||"",blocked:false,walletBalances:wallet,adBalances:ads,createdAt:serverTimestamp()});
     return true;
   }
   if(s.data().blocked===true){toast("Kont sa bloke pa administrasyon.");await signOut(auth);return false}
+  await setDoc(r,{email:u.email||s.data().email||"",authProvider:"google",displayName:u.displayName||s.data().displayName||"",lastLoginAt:serverTimestamp()},{merge:true});
   return true;
 }
 async function loadProfile(){
   const s=await getDoc(doc(db,"publicProfiles",S.user.uid));S.profile=s.exists()?s.data():{};
   $("#displayName").value=S.profile.displayName||"";$("#username").value=S.profile.username||"";$("#bio").value=S.profile.bio||"";$("#country").value=S.profile.country||"";$("#birthYear").value=S.profile.birthYear||"";$("#role").value=S.profile.role||"buyer";
   $("#avatarPreview").src=S.profile.photoUrl||"";
-  $("#headerUser").textContent=S.profile.displayName||S.profile.username||S.user.phoneNumber||"User";
-  if($("#profilePhoneDisplay"))$("#profilePhoneDisplay").textContent=S.user.phoneNumber||"Numéro Firebase";
+  $("#headerUser").textContent=S.profile.displayName||S.profile.username||S.user.displayName||S.user.email||"User";
+  if($("#profilePhoneDisplay"))$("#profilePhoneDisplay").textContent=S.user.email||S.user.displayName||"Compte Google";
 }
 async function upload(file,path,max,typePrefix){
   if(!file)return "";
