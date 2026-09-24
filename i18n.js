@@ -635,6 +635,20 @@ Object.assign(X,{
 "google_password":["Gerenciado pela sua conta Google","Von Ihrem Google-Konto verwaltet","Gestito dal tuo account Google","تتم إدارته بواسطة حساب Google","由 Google 账号管理","आपके Google खाते द्वारा प्रबंधित","আপনার Google অ্যাকাউন্ট দ্বারা পরিচালিত","Управляется вашим аккаунтом Google","Google hesabınız tarafından yönetilir","Googleアカウントで管理","Google 계정에서 관리"]
 });
 
+
+Object.assign(D,{
+"mobile_required_title":["Nimewo telefòn mobil","Numéro de téléphone portable","Mobile phone number","Número de teléfono móvil"],
+"mobile_required_hint":["Ajoute nimewo mobil ou pou konplete kont ou. Pa gen OTP ni SMS k ap voye.","Ajoutez votre numéro mobile pour compléter votre compte. Aucun OTP ni SMS ne sera envoyé.","Add your mobile number to complete your account. No OTP or SMS will be sent.","Agrega tu número móvil para completar tu cuenta. No se enviará OTP ni SMS."],
+"continue_action":["Kontinye","Continuer","Continue","Continuar"],
+"mobile_unverified_info":["Nimewo mobil la obligatwa pou kont lan, men li pa verifye pa SMS.","Le numéro mobile est obligatoire pour le compte, mais il n’est pas vérifié par SMS.","A mobile number is required for the account, but it is not verified by SMS.","El número móvil es obligatorio para la cuenta, pero no se verifica por SMS."]
+});
+Object.assign(X,{
+"mobile_required_title":["Número de telefone","Mobiltelefonnummer","Numero di cellulare","رقم الهاتف المحمول","手机号码","मोबाइल फ़ोन नंबर","মোবাইল ফোন নম্বর","Номер мобильного телефона","Cep telefonu numarası","携帯電話番号","휴대전화 번호"],
+"mobile_required_hint":["Adicione seu número de celular para concluir a conta. Nenhum OTP ou SMS será enviado.","Fügen Sie Ihre Mobilnummer hinzu. Es wird kein OTP oder SMS gesendet.","Aggiungi il numero di cellulare. Non verranno inviati OTP o SMS.","أضف رقم هاتفك لإكمال الحساب. لن يتم إرسال OTP أو SMS.","添加手机号码以完成账户设置，不会发送 OTP 或短信。","अपना मोबाइल नंबर जोड़ें। कोई OTP या SMS नहीं भेजा जाएगा।","অ্যাকাউন্ট সম্পূর্ণ করতে মোবাইল নম্বর যোগ করুন। OTP বা SMS পাঠানো হবে না।","Добавьте мобильный номер. OTP и SMS отправляться не будут.","Hesabınızı tamamlamak için cep telefonu numaranızı ekleyin. OTP veya SMS gönderilmez.","アカウントを完成するため携帯番号を追加してください。OTPやSMSは送信されません。","계정을 완료하려면 휴대전화 번호를 추가하세요. OTP 또는 SMS는 전송되지 않습니다."],
+"continue_action":["Continuar","Weiter","Continua","متابعة","继续","जारी रखें","চালিয়ে যান","Продолжить","Devam et","続行","계속"],
+"mobile_unverified_info":["O número é obrigatório, mas não é verificado por SMS.","Die Mobilnummer ist erforderlich, wird aber nicht per SMS verifiziert.","Il numero mobile è obbligatorio, ma non viene verificato via SMS.","رقم الهاتف مطلوب للحساب لكنه لا يتم التحقق منه عبر SMS.","账户需要手机号码，但不会通过短信验证。","खाते के लिए मोबाइल नंबर आवश्यक है, लेकिन SMS से सत्यापित नहीं है।","অ্যাকাউন্টের জন্য মোবাইল নম্বর আবশ্যক, তবে SMS দিয়ে যাচাই করা হয় না।","Мобильный номер обязателен, но не проверяется по SMS.","Cep telefonu numarası zorunludur ancak SMS ile doğrulanmaz.","携帯番号は必須ですがSMS認証は行いません。","휴대전화 번호는 필수지만 SMS로 인증하지 않습니다."]
+});
+
 const reverse=new Map();
 for(const [key,vals] of Object.entries(D)){
   vals.forEach(v=>{if(v)reverse.set(v.trim(),key)});
@@ -645,6 +659,10 @@ for(const [key,vals] of Object.entries(X)){
 for(const [src,key] of Object.entries(extraAliases))reverse.set(src,key);
 reverse.set("Inviter","invite");
 reverse.set("Continuer avec Google","continue_google");
+reverse.set("Numéro de téléphone portable","mobile_required_title");
+reverse.set("Ajoutez votre numéro mobile pour compléter votre compte. Aucun OTP ni SMS ne sera envoyé.","mobile_required_hint");
+reverse.set("Continuer","continue_action");
+reverse.set("Le numéro mobile est obligatoire pour le compte, mais il n’est pas vérifié par SMS.","mobile_unverified_info");
 reverse.set("Connectez-vous avec votre compte Google. Aucun code OTP ni SMS n’est requis.","google_no_otp");
 reverse.set("Compte Google","google_account");
 reverse.set("Géré par votre compte Google","google_password");
