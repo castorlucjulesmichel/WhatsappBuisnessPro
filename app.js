@@ -439,7 +439,7 @@ async function openChat(id,name){
   $("#videoCallBtn").onclick=()=>callNotReady("video",S.chatOtherName);
   $("#voiceCallBtn").onclick=()=>callNotReady("voice",S.chatOtherName);
   $("#chatMoreBtn").onclick=()=>$("#chatMoreMenu").classList.toggle("hidden");
-  $("[data-chat-menu-info]").forEach(b=>b.onclick=()=>{toast(b.dataset.chatMenuInfo);$("#chatMoreMenu").classList.add("hidden")});
+  $$("[data-chat-menu-info]").forEach(b=>b.onclick=()=>{toast(b.dataset.chatMenuInfo);$("#chatMoreMenu").classList.add("hidden")});
   $("#chatMenuReportBtn").onclick=()=>{ $("#chatMoreMenu").classList.add("hidden");reportChat(id,S.chatOtherName); };
   $("#chatMenuBlockBtn").onclick=blockCurrentPeer;
   window.dispatchEvent(new CustomEvent("wbp-chat-open",{detail:{chatId:id,name:S.chatOtherName,uid:S.chatOtherUid}}));
@@ -451,7 +451,37 @@ async function openChat(id,name){
   }))
 }
 window.WBP_OPEN_CHAT=(id,name)=>openChat(id,name);
-$("#messageForm").onsubmit=async e=>{e.preventDefault();const t=$("#messageText").value.trim();if(!t||!S.chatId)return;await addDoc(collection(db,"chats",S.chatId,"messages"),{senderId:S.user.uid,type:"text",text:t,readBy:[S.user.uid],createdAt:serverTimestamp()});await updateDoc(doc(db,"chats",S.chatId),{lastMessage:t.slice(0,120),updatedAt:serverTimestamp()});$("#messageText").value=""};
+$("#messageForm").onsubmit=async e=>{
+  e.preventDefault();
+  const input=$("#messageText");
+  const btn=$("#sendMessageBtn");
+  const t=input?.value.trim()||"";
+  if(!t||!S.chatId||!S.user)return;
+  const messages=$("#messages");
+  const tempId="pending_"+Date.now();
+  if(btn)btn.disabled=true;
+  if(input)input.value="";
+  if(messages){
+    messages.insertAdjacentHTML("beforeend",'<div class="msg me pendingMsg" data-pending="'+tempId+'">'+esc(t)+'<small class="msgReceipt"> …</small></div>');
+    messages.scrollTop=messages.scrollHeight;
+  }
+  try{
+    await addDoc(collection(db,"chats",S.chatId,"messages"),{
+      senderId:S.user.uid,type:"text",text:t,readBy:[S.user.uid],createdAt:serverTimestamp()
+    });
+    await updateDoc(doc(db,"chats",S.chatId),{
+      lastMessage:t.slice(0,120),updatedAt:serverTimestamp()
+    });
+  }catch(err){
+    console.error("send message",err);
+    document.querySelector('[data-pending="'+tempId+'"]')?.remove();
+    if(input)input.value=t;
+    toast("Mesaj la pa t voye: "+(err?.code||err?.message||"erè"));
+  }finally{
+    if(btn)btn.disabled=false;
+    input?.focus();
+  }
+};
 async function reportChat(id,name){const q=query(collection(db,"chats",id,"messages"),orderBy("createdAt","desc"),limit(20)),s=await getDocs(q),excerpt=s.docs.reverse().map(d=>({senderId:d.data().senderId,text:d.data().text||""}));await addDoc(collection(db,"moderationCases"),{reporterId:S.user.uid,type:"chat",targetId:id,title:"Chat ak "+name,excerpt,status:"open",createdAt:serverTimestamp()});toast("Dènye mesaj yo pataje ak moderasyon.")}
 
 function watchSupport(){const r=doc(db,"supportThreads",S.user.uid);setDoc(r,{userId:S.user.uid,updatedAt:serverTimestamp()},{merge:true}).catch(()=>{});const q=query(collection(db,"supportThreads",S.user.uid,"messages"),orderBy("createdAt","asc"),limit(200));addOff(onSnapshot(q,s=>{$("#supportMessages").innerHTML=s.docs.map(d=>{const m=d.data();return `<div class="msg ${m.senderId===S.user.uid?"me":""}">${esc(m.text||"")}</div>`}).join("");$("#supportMessages").scrollTop=$("#supportMessages").scrollHeight}))}
