@@ -621,6 +621,20 @@ Object.assign(X,{
 "you_label":["Você","Sie","Tu","أنت","你","आप","আপনি","Вы","Siz","あなた","나"]
 });
 
+
+Object.assign(D,{
+"continue_google":["Kontinye ak Google","Continuer avec Google","Continue with Google","Continuar con Google"],
+"google_no_otp":["Konekte ak kont Google ou. Pa gen kòd OTP ni SMS ki nesesè.","Connectez-vous avec votre compte Google. Aucun code OTP ni SMS n’est requis.","Sign in with your Google account. No OTP code or SMS is required.","Inicia sesión con tu cuenta de Google. No se requiere código OTP ni SMS."],
+"google_account":["Kont Google","Compte Google","Google account","Cuenta de Google"],
+"google_password":["Google jere li","Géré par votre compte Google","Managed by your Google account","Gestionado por tu cuenta de Google"]
+});
+Object.assign(X,{
+"continue_google":["Continuar com Google","Mit Google fortfahren","Continua con Google","المتابعة باستخدام Google","使用 Google 继续","Google से जारी रखें","Google দিয়ে চালিয়ে যান","Продолжить с Google","Google ile devam et","Googleで続行","Google로 계속"],
+"google_no_otp":["Entre com sua conta Google. Nenhum OTP ou SMS é necessário.","Melden Sie sich mit Ihrem Google-Konto an. Kein OTP oder SMS erforderlich.","Accedi con il tuo account Google. Non servono OTP o SMS.","سجّل الدخول بحساب Google. لا يلزم رمز OTP أو رسالة SMS.","使用 Google 账号登录，无需 OTP 或短信。","Google खाते से साइन इन करें। OTP या SMS की आवश्यकता नहीं है।","Google অ্যাকাউন্ট দিয়ে সাইন ইন করুন। OTP বা SMS দরকার নেই।","Войдите через аккаунт Google. OTP и SMS не требуются.","Google hesabınızla giriş yapın. OTP veya SMS gerekmez.","Googleアカウントでログインします。OTPやSMSは不要です。","Google 계정으로 로그인하세요. OTP 또는 SMS가 필요하지 않습니다."],
+"google_account":["Conta Google","Google-Konto","Account Google","حساب Google","Google 账号","Google खाता","Google অ্যাকাউন্ট","Аккаунт Google","Google hesabı","Googleアカウント","Google 계정"],
+"google_password":["Gerenciado pela sua conta Google","Von Ihrem Google-Konto verwaltet","Gestito dal tuo account Google","تتم إدارته بواسطة حساب Google","由 Google 账号管理","आपके Google खाते द्वारा प्रबंधित","আপনার Google অ্যাকাউন্ট দ্বারা পরিচালিত","Управляется вашим аккаунтом Google","Google hesabınız tarafından yönetilir","Googleアカウントで管理","Google 계정에서 관리"]
+});
+
 const reverse=new Map();
 for(const [key,vals] of Object.entries(D)){
   vals.forEach(v=>{if(v)reverse.set(v.trim(),key)});
@@ -630,6 +644,10 @@ for(const [key,vals] of Object.entries(X)){
 }
 for(const [src,key] of Object.entries(extraAliases))reverse.set(src,key);
 reverse.set("Inviter","invite");
+reverse.set("Continuer avec Google","continue_google");
+reverse.set("Connectez-vous avec votre compte Google. Aucun code OTP ni SMS n’est requis.","google_no_otp");
+reverse.set("Compte Google","google_account");
+reverse.set("Géré par votre compte Google","google_password");
 reverse.set("Vous","you_label");
 reverse.set("Synchroniser les contacts","sync_contacts");
 reverse.set("Autorisez l’accès aux contacts que vous souhaitez ajouter.","sync_contacts_hint");
