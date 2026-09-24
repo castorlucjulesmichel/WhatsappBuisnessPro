@@ -557,6 +557,14 @@ Object.assign(X,{
 "android_confirm_contacts":["O Android pedirá que você confirme os contatos a compartilhar.","Android fordert Sie auf, die zu teilenden Kontakte zu bestätigen.","Android ti chiederà di confermare i contatti da condividere.","سيطلب منك Android تأكيد جهات الاتصال التي تريد مشاركتها.","Android 会要求你确认要分享的联系人。","Android आपसे साझा किए जाने वाले संपर्कों की पुष्टि करने को कहेगा।","Android আপনাকে শেয়ার করার কন্ট্যাক্ট নিশ্চিত করতে বলবে।","Android попросит подтвердить контакты для передачи.","Android paylaşılacak kişileri onaylamanızı isteyecek.","Android が共有する連絡先の確認を求めます。","Android에서 공유할 연락처를 확인하라는 메시지가 표시됩니다."]
 });
 
+
+Object.assign(D,{
+"contacts_permission_denied":["Pèmisyon kontak la refize.","L’autorisation d’accès aux contacts a été refusée.","Contacts permission was denied.","Se rechazó el permiso de contactos."],
+"native_import_all":["Android ap mande pèmisyon Contacts, epi l ap enpòte tout kontak yo.","Android demandera l’autorisation Contacts, puis importera tous les contacts.","Android will ask for Contacts permission, then import all contacts.","Android pedirá permiso para Contactos y luego importará todos los contactos."],
+"native_select_all_hint":["Tout sélectionner ap enpòte tout kontak apre pèmisyon Android.","Tout sélectionner importera tous les contacts après l’autorisation Android.","Select all will import all contacts after Android permission.","Seleccionar todo importará todos los contactos después del permiso de Android."],
+"web_contact_limit":["Sou Web la, Android mande w chwazi kontak ou vle pataje yo.","Sur le Web, Android vous demande de choisir les contacts à partager.","On the web, Android requires you to choose the contacts to share.","En la web, Android requiere que elijas los contactos que deseas compartir."]
+});
+
 const reverse=new Map();
 for(const [key,vals] of Object.entries(D)){
   vals.forEach(v=>{if(v)reverse.set(v.trim(),key)});
@@ -575,6 +583,10 @@ reverse.set("selected","selected");
 reverse.set("Unable to share invitations.","share_invites_failed");
 reverse.set("Android will ask you to confirm the contacts to share.","android_confirm_contacts");
 reverse.set("Android vous demandera de confirmer les contacts à partager.","android_confirm_contacts");
+reverse.set("Contacts permission was denied.","contacts_permission_denied");
+reverse.set("Android will ask for Contacts permission, then import all contacts.","native_import_all");
+reverse.set("Select all will import all contacts after Android permission.","native_select_all_hint");
+reverse.set("On the web, Android requires you to choose the contacts to share.","web_contact_limit");
 reverse.set("Pa gen discussion pou filtè sa a.","no_chats");
 reverse.set("No chats for this filter.","no_chats");
 
