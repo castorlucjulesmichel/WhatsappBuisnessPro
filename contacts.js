@@ -8,7 +8,7 @@ const toast=t=>{const e=$("#toast");if(!e)return;e.textContent=t;e.classList.add
 const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 const norm=s=>String(s||"").trim().toLowerCase().replace(/[^a-z0-9_.-]/g,"");
 const configured=()=>firebaseConfig.apiKey&&!String(firebaseConfig.apiKey).includes("YOUR_");
-let auth=null,db=null,user=null,contacts=[],off=null; const selectedContacts=new Set();
+let auth=null,db=null,user=null,contacts=[],off=null;
 
 const COUNTRY_CODES = [
 ["HT","+509"],["US","+1"],["CA","+1"],["FR","+33"],["GB","+44"],["ES","+34"],["DO","+1809"],["DO","+1829"],["DO","+1849"],
@@ -92,16 +92,6 @@ async function importPhoneContacts(){
     toast(window.WBP_T?.("Unable to import phone contacts.")||"Unable to import phone contacts.");
   }
 }
-function updateBulkBar(){
-  const n=selectedContacts.size;
-  if($("#selectedContactsCount"))$("#selectedContactsCount").textContent=n+" "+(window.WBP_T?.("selected")||"selected");
-  if($("#inviteSelectedContactsBtn")){
-    const pending=contacts.filter(x=>selectedContacts.has(x.id)&&!x.contactUid).length;
-    $("#inviteSelectedContactsBtn").disabled=pending===0;
-  }
-  const all=contacts.length>0&&contacts.every(x=>selectedContacts.has(x.id));
-  if($("#selectAllContactsBtn"))$("#selectAllContactsBtn").textContent=window.WBP_T?.(all?"Deselect all":"Select all")||(all?"Deselect all":"Select all");
-}
 function render(){
   const q=($("#contactPickerSearch")?.value||"").trim().toLowerCase();
   const rows=contacts.filter(c=>!q||((c.displayName||"")+" "+(c.username||"")+" "+(c.phone||"")).toLowerCase().includes(q));
@@ -111,19 +101,13 @@ function render(){
     const name=esc(c.displayName||c.username||c.phone||"Contact");
     const subtitle=esc(c.phone||(c.username?("@"+c.username):""));
     const avatar=esc((c.displayName||c.username||"?").charAt(0).toUpperCase());
-    const checked=selectedContacts.has(c.id)?" checked":"";
-    const select='<input class="waContactCheck" type="checkbox" data-select-contact="'+esc(c.id)+'"'+checked+'>';
     if(c.contactUid){
-      return `<div class="waContactPerson waSelectableContact">
-        ${select}
+      return `<button class="waContactPerson" data-contact-uid="${esc(c.contactUid)}" data-contact-name="${name}">
         <span class="waPersonAvatar">${avatar}</span>
-        <button class="waContactMainBtn" type="button" data-contact-uid="${esc(c.contactUid)}" data-contact-name="${name}">
-          <span><b>${name}</b><small>${subtitle}</small></span>
-        </button>
-      </div>`;
+        <span><b>${name}</b><small>${subtitle}</small></span>
+      </button>`;
     }
-    return `<div class="waContactPerson waContactInviteRow waSelectableContact">
-      ${select}
+    return `<div class="waContactPerson waContactInviteRow">
       <span class="waPersonAvatar">${avatar}</span>
       <span><b>${name}</b><small>${subtitle}</small></span>
       <button class="waInviteBtn" type="button" data-invite-name="${name}" data-invite-phone="${esc(c.phone||"")}">${esc(window.WBP_T?.("Inviter")||"Inviter")}</button>
@@ -131,28 +115,10 @@ function render(){
   }).join(""):'<p class="muted">'+esc(window.WBP_T?.("Aucun contact pour le moment.")||"Aucun contact pour le moment.")+'</p>';
   $$("[data-contact-uid]").forEach(b=>b.onclick=()=>startChat(b.dataset.contactUid,b.dataset.contactName));
   $$("[data-invite-name]").forEach(b=>b.onclick=()=>inviteContact(b.dataset.inviteName,b.dataset.invitePhone));
-  $$("[data-select-contact]").forEach(cb=>cb.onchange=()=>{
-    cb.checked?selectedContacts.add(cb.dataset.selectContact):selectedContacts.delete(cb.dataset.selectContact);
-    updateBulkBar();
-  });
-  updateBulkBar();
 }
-$("#selectAllContactsBtn")?.addEventListener("click",()=>{
-  const all=contacts.length>0&&contacts.every(x=>selectedContacts.has(x.id));
-  selectedContacts.clear();
-  if(!all)contacts.forEach(x=>selectedContacts.add(x.id));
-  render();
-});
-$("#inviteSelectedContactsBtn")?.addEventListener("click",async()=>{
-  const pending=contacts.filter(x=>selectedContacts.has(x.id)&&!x.contactUid);
-  if(!pending.length)return;
-  const url=location.origin+location.pathname;
-  const names=pending.slice(0,25).map(x=>x.displayName||x.phone||"Contact").join(", ");
-  const text=(window.WBP_T?.("Join me on Whatsapp Business Pro")||"Join me on Whatsapp Business Pro")+"\n"+url+"\n\n"+names;
-  try{
-    if(navigator.share)await navigator.share({title:"Whatsapp Business Pro",text,url});
-    else{await navigator.clipboard.writeText(text);toast(window.WBP_T?.("Invitation link copied.")||"Invitation link copied.");}
-  }catch(e){if(e?.name!=="AbortError")toast(window.WBP_T?.("Unable to share invitations.")||"Unable to share invitations.");}
+$("#selectAllContactsBtn")?.addEventListener("click",async()=>{
+  toast(window.WBP_T?.("Android will ask you to confirm the contacts to share.")||"Android will ask you to confirm the contacts to share.");
+  await importPhoneContacts();
 });
 async function inviteContact(name,phone){
   const url=location.origin+location.pathname;
