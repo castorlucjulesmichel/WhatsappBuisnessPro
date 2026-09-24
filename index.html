@@ -25,7 +25,7 @@
  <div class="hero"><h2 data-i18n="welcome">Byenvini</h2><p>Chat, biznis, marketplace, videyo, wallet ak envestisman nan yon sèl app.</p></div>
  <div class="metrics"><div><b id="mBalance">0 HTG</b><span>Balans</span></div><div><b id="mProducts">0</b><span>Pwodwi</span></div><div><b id="mOrders">0</b><span>Kòmand</span></div><div><b id="mInvest">0</b><span>Envestisman</span></div></div>
  <div class="quickGrid">
-  <button data-go="chat">💬 Chat</button><button data-go="market">🛍️ Marketplace</button><button data-go="clips">▶ Clips</button>
+  <button data-go="chat">💬 Chat</button><button data-go="status">⭕ Status</button><button data-go="market">🛍️ Marketplace</button><button data-go="clips">▶ Clips</button>
   <button data-go="wallet">💳 Wallet</button><button data-go="invest">📈 Envestisman</button><button data-go="business">🏪 Business</button>
  </div>
 </section>
@@ -36,6 +36,22 @@
  <div class="chatLayout"><aside id="chatList"></aside><section class="conversation"><div id="chatTitle" class="chatTitle">Chwazi yon chat</div><div id="messages"></div>
  <form id="messageForm" class="hidden"><input id="messageText" maxlength="2000" placeholder="Ekri mesaj..."><button>Voye</button></form></section></div>
  <div class="card"><h3>🔐 Chat sipò / Admin</h3><div id="supportMessages" class="supportMessages"></div><form id="supportForm" class="row"><input id="supportText" placeholder="Ekri administrasyon..."><button>Voye</button></form></div>
+</section>
+
+<section id="statusPage" class="page">
+ <div class="title"><div><h2>Status</h2><p>Status nòmal: kontak sèlman • Status Boost: odyans piblisite</p></div><button id="newStatusBtn">+ Status</button></div>
+ <form id="statusForm" class="card hidden">
+   <textarea id="statusText" maxlength="700" placeholder="Ekri yon status..."></textarea>
+   <input id="statusMedia" type="file" accept="image/*,video/*">
+   <button>Pibliye pou 24 èdtan</button>
+ </form>
+ <div class="card">
+   <h3>Kontak mwen</h3>
+   <div class="row"><input id="contactUsername" placeholder="Ajoute kontak ak username"><button id="addContactBtn" type="button">Ajoute</button></div>
+   <div id="contactList"></div>
+ </div>
+ <div class="card"><h3>Status kontak mwen</h3><div id="contactStatuses" class="statusFeed"></div></div>
+ <div class="card"><h3>Sponsored Status</h3><p class="muted">Status ki bouste epi ki koresponn ak odyans ou.</p><div id="sponsoredStatuses" class="statusFeed"></div></div>
 </section>
 
 <section id="marketPage" class="page">
@@ -91,7 +107,7 @@
   </form>
   <hr>
   <form id="boostForm">
-    <label>Sa w ap bouste</label><select id="boostTarget" required><option value="">Chwazi pwodwi oswa clip...</option></select>
+    <label>Sa w ap bouste</label><select id="boostTarget" required><option value="">Chwazi pwodwi, clip oswa status...</option></select>
     <label>Objektif</label><select id="boostGoal"><option value="messages">Plis mesaj</option><option value="sales">Plis vant</option><option value="reach">Plis moun wè li</option><option value="profile">Plis vizit profil</option></select>
     <label>Odyans</label><select id="boostAudience"><option value="automatic">Otomatik</option><option value="custom">Pèsonalize</option></select>
     <div id="customAudienceBox" class="hidden"><input id="boostCountry" placeholder="Peyi / zòn sib"><div class="row"><input id="boostAgeMin" type="number" min="18" max="65" value="18" placeholder="Laj min"><input id="boostAgeMax" type="number" min="18" max="65" value="65" placeholder="Laj max"></div></div>
@@ -107,15 +123,17 @@
 
 <section id="profilePage" class="page">
  <div class="title"><div><h2>Profil</h2><p>Kont, lang, foto ak lokalizasyon</p></div></div>
- <form id="profileForm" class="card profileCard"><img id="avatarPreview" class="avatar" alt=""><input id="avatarFile" type="file" accept="image/*"><input id="displayName" placeholder="Non piblik"><input id="username" placeholder="Username"><select id="role"><option value="buyer">Achtè</option><option value="seller">Vandè</option><option value="business">Business</option><option value="investor">Envestisè</option></select><textarea id="bio" placeholder="Bio"></textarea><button>Sove profil</button></form>
+ <form id="profileForm" class="card profileCard"><img id="avatarPreview" class="avatar" alt=""><input id="avatarFile" type="file" accept="image/*"><input id="displayName" placeholder="Non piblik"><input id="username" placeholder="Username"><div class="row"><input id="country" placeholder="Peyi (egzanp: Haiti)"><input id="birthYear" type="number" min="1900" max="2100" placeholder="Ane nesans"></div><select id="role"><option value="buyer">Achtè</option><option value="seller">Vandè</option><option value="business">Business</option><option value="investor">Envestisè</option></select><textarea id="bio" placeholder="Bio"></textarea><button>Sove profil</button></form>
  <div class="card"><h3>Lokalizasyon</h3><p id="locationStatus" class="muted">Pa pataje.</p><button id="shareLocation">Pataje lokalizasyon aktyèl</button></div>
  <div class="card"><h3>Asistans vityèl</h3><div id="assistantMessages" class="assistantMessages"></div><form id="assistantForm" class="row"><input id="assistantInput" placeholder="Poze yon kestyon..."><button>Voye</button></form></div>
 </section>
 </main>
 
 <nav>
-<button data-page="home" class="active">🏠<span>Akèy</span></button><button data-page="chat">💬<span>Chat</span></button><button data-page="market">🛍️<span>Market</span></button><button data-page="clips">▶️<span>Clips</span></button><button data-page="wallet">💳<span>Wallet</span></button><button data-page="invest">📈<span>Invest</span></button><button data-page="business">🏪<span>Business</span></button><button data-page="profile">👤<span>Profil</span></button>
+<button data-page="home" class="active">🏠<span>Akèy</span></button><button data-page="chat">💬<span>Chat</span></button><button data-page="status">⭕<span>Status</span></button><button data-page="market">🛍️<span>Market</span></button><button data-page="clips">▶️<span>Clips</span></button><button data-page="wallet">💳<span>Wallet</span></button><button data-page="invest">📈<span>Invest</span></button><button data-page="business">🏪<span>Business</span></button><button data-page="profile">👤<span>Profil</span></button>
 </nav>
 </div>
-<script type="module" src="app.js"></script>\n<script type="module" src="boost.js"></script>
+<script type="module" src="app.js"></script>
+<script type="module" src="status.js"></script>
+<script type="module" src="boost.js"></script>
 </body></html>
