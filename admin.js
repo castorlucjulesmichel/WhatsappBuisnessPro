@@ -25,7 +25,7 @@ $("#adminLogout").onclick=()=>signOut(auth);
 $("#refreshAdmin").onclick=()=>loadAll();
 $("#adminLogin").onclick=()=>location.href="./index.html";
 
-async function hasAdmin(u){if(!u)return false;const t=await u.getIdTokenResult(true);return t.claims.admin===true}
+async function hasAdmin(u){if(!u)return false;const s=await getDoc(doc(db,"admins",u.uid));return s.exists()&&s.data().active!==false}
 onAuthStateChanged(auth,async u=>{
   if(!u||!(await hasAdmin(u))){
     admin=null;$("#adminGate").classList.remove("hidden");$("#adminApp").classList.add("hidden");
