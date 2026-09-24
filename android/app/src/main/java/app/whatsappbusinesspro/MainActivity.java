@@ -25,7 +25,7 @@ public class MainActivity extends Activity {
     private static final String TRUSTED_HOST = "castorlucjulesmichel.github.io";
 
     private WebView webView;
-    private boolean pendingContactImport = false;
+    private int pendingContactsAction = 0; // 1=import all, 2=open custom selector
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,18 +63,26 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public void importAllContacts() {
-            runOnUiThread(() -> {
-                if (checkSelfPermission(Manifest.permission.READ_CONTACTS)
-                        == PackageManager.PERMISSION_GRANTED) {
-                    sendAllContactsToWeb();
-                } else {
-                    pendingContactImport = true;
-                    requestPermissions(
-                            new String[]{Manifest.permission.READ_CONTACTS},
-                            CONTACTS_PERMISSION_REQUEST
-                    );
-                }
-            });
+            runOnUiThread(() -> requestContactsAction(1));
+        }
+
+        @JavascriptInterface
+        public void openContactSelector() {
+            runOnUiThread(() -> requestContactsAction(2));
+        }
+    }
+
+    private void requestContactsAction(int action) {
+        if (checkSelfPermission(Manifest.permission.READ_CONTACTS)
+                == PackageManager.PERMISSION_GRANTED) {
+            if (action == 2) sendContactsForSelection();
+            else sendAllContactsToWeb();
+        } else {
+            pendingContactsAction = action;
+            requestPermissions(
+                    new String[]{Manifest.permission.READ_CONTACTS},
+                    CONTACTS_PERMISSION_REQUEST
+            );
         }
     }
 
@@ -90,16 +98,30 @@ public class MainActivity extends Activity {
         boolean granted = grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
 
-        if (granted && pendingContactImport) {
-            pendingContactImport = false;
-            sendAllContactsToWeb();
+        if (granted) {
+            int action = pendingContactsAction;
+            pendingContactsAction = 0;
+            if (action == 2) sendContactsForSelection();
+            else sendAllContactsToWeb();
         } else {
-            pendingContactImport = false;
+            pendingContactsAction = 0;
             webView.evaluateJavascript(
                     "window.WBP_ANDROID_CONTACTS_DENIED && window.WBP_ANDROID_CONTACTS_DENIED();",
                     null
             );
         }
+    }
+
+    private void sendContactsForSelection() {
+        new Thread(() -> {
+            JSONArray contacts = readContacts();
+            String payload = JSONObject.quote(contacts.toString());
+            runOnUiThread(() -> webView.evaluateJavascript(
+                    "window.WBP_ANDROID_CONTACTS_FOR_SELECTION && " +
+                    "window.WBP_ANDROID_CONTACTS_FOR_SELECTION(" + payload + ");",
+                    null
+            ));
+        }).start();
     }
 
     private void sendAllContactsToWeb() {
