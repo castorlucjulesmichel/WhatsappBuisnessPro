@@ -79,7 +79,29 @@
  <div class="businessGrid">
   <form id="businessForm" class="card"><h3>Pwofil biznis</h3><input id="businessName" placeholder="Non biznis"><textarea id="businessDescription" placeholder="Deskripsyon"></textarea><input id="businessHours" placeholder="Orè"><input id="businessWebsite" type="url" placeholder="Sit entènèt"><button>Sove</button></form>
   <form id="businessToolsForm" class="card"><h3>Zouti mesaj</h3><textarea id="greetingMessage" placeholder="Mesaj akey"></textarea><textarea id="awayMessage" placeholder="Mesaj absans"></textarea><textarea id="quickReplies" placeholder="/pri = Men pri yo..."></textarea><button>Sove zouti</button></form>
-  <form id="adForm" class="card"><h3>Piblisite</h3><input id="adProduct" placeholder="Pwodwi / sèvis"><input id="adCountry" placeholder="Peyi sib"><div class="row"><input id="adBudget" type="number" min="0" step="0.01" placeholder="Bidjè"><select id="adCurrency"></select></div><select id="adGoal"><option>Sales</option><option>Website visits</option><option>Messages</option><option>Awareness</option></select><textarea id="adDescription" placeholder="Deskripsyon kanpay"></textarea><button>Soumèt kanpay</button></form>
+  <div class="card"><h3>📣 Boost & Ads</h3>
+  <div class="metrics compact"><div><b id="adBalanceHTG">0 HTG</b><span>Ad Wallet HTG</span></div><div><b id="adBalanceUSD">0 USD</b><span>Ad Wallet USD</span></div></div>
+  <button id="toggleAdTopup" class="ghost">+ Depoze pou Boost</button>
+  <form id="adTopupForm" class="hidden">
+    <div class="row"><input id="adTopupAmount" type="number" min="1" step="0.01" placeholder="Montan" required><select id="adTopupCurrency"><option>HTG</option><option>USD</option></select></div>
+    <select id="adTopupMethod"><option>MonCash</option><option>NatCash</option></select>
+    <input id="adTopupReference" placeholder="Referans tranzaksyon">
+    <label>Prèv peman</label><input id="adTopupProof" type="file" accept="image/*">
+    <button>Voye demann depo</button>
+  </form>
+  <hr>
+  <form id="boostForm">
+    <label>Sa w ap bouste</label><select id="boostTarget" required><option value="">Chwazi pwodwi oswa clip...</option></select>
+    <label>Objektif</label><select id="boostGoal"><option value="messages">Plis mesaj</option><option value="sales">Plis vant</option><option value="reach">Plis moun wè li</option><option value="profile">Plis vizit profil</option></select>
+    <label>Odyans</label><select id="boostAudience"><option value="automatic">Otomatik</option><option value="custom">Pèsonalize</option></select>
+    <div id="customAudienceBox" class="hidden"><input id="boostCountry" placeholder="Peyi / zòn sib"><div class="row"><input id="boostAgeMin" type="number" min="18" max="65" value="18" placeholder="Laj min"><input id="boostAgeMax" type="number" min="18" max="65" value="65" placeholder="Laj max"></div></div>
+    <div class="row"><input id="boostDailyBudget" type="number" min="1" step="0.01" placeholder="Bidjè pa jou" required><select id="boostCurrency"><option>HTG</option><option>USD</option></select></div>
+    <input id="boostDays" type="number" min="1" max="90" value="3" placeholder="Dire (jou)">
+    <div class="boostSummary" id="boostSummary">Total: 0 HTG</div>
+    <button>Kreye Boost</button>
+  </form>
+  <div id="myBoosts"></div>
+ </div>
  </div>
 </section>
 
@@ -95,5 +117,5 @@
 <button data-page="home" class="active">🏠<span>Akèy</span></button><button data-page="chat">💬<span>Chat</span></button><button data-page="market">🛍️<span>Market</span></button><button data-page="clips">▶️<span>Clips</span></button><button data-page="wallet">💳<span>Wallet</span></button><button data-page="invest">📈<span>Invest</span></button><button data-page="business">🏪<span>Business</span></button><button data-page="profile">👤<span>Profil</span></button>
 </nav>
 </div>
-<script type="module" src="app.js"></script>
+<script type="module" src="app.js"></script>\n<script type="module" src="boost.js"></script>
 </body></html>
