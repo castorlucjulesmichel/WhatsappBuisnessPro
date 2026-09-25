@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#075e54"><title>Whatsapp Business Pro</title>
-<link rel="manifest" href="manifest.webmanifest"><link rel="icon" type="image/webp" href="assets/logo.webp"><link rel="apple-touch-icon" href="assets/logo.webp"><link rel="stylesheet" href="style.css?v=40">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" type="image/webp" href="assets/logo.webp"><link rel="apple-touch-icon" href="assets/logo.webp"><link rel="stylesheet" href="style.css?v=41">
 </head>
 <body>
 <div id="toast"></div>
@@ -276,8 +276,21 @@
 
 <section id="clipsPage" class="page">
  <div class="title"><div><h2>Vidéos</h2><p>Vidéos courtes comme sur TikTok</p></div><button id="clipBtn">+ Publier</button></div>
- <form id="clipForm" class="card hidden"><input id="clipFile" type="file" accept="video/*" required><textarea id="clipCaption" maxlength="500" placeholder="Caption"></textarea><button>Pibliye clip</button></form>
+ <form id="clipForm" class="card hidden">
+  <input id="clipFile" type="file" accept="video/*" required>
+  <textarea id="clipCaption" maxlength="500" placeholder="Caption, hashtags..."></textarea>
+  <select id="clipProduct"><option value="">Aucun produit associé</option></select>
+  <button>Publier la vidéo</button>
+ </form>
  <div id="clipFeed" class="clipFeed"></div>
+ <section id="clipCommentsPanel" class="clipCommentsPanel hidden" aria-hidden="true">
+  <div class="clipCommentsHead"><button id="closeClipComments" class="waBackBtn" type="button">←</button><h3>Commentaires</h3></div>
+  <div id="clipCommentsList" class="clipCommentsList"></div>
+  <form id="clipCommentForm" class="clipCommentForm">
+   <input id="clipCommentText" maxlength="500" placeholder="Ajouter un commentaire..." required>
+   <button type="submit">➤</button>
+  </form>
+ </section>
 </section>
 
 <section id="walletPage" class="page">
@@ -565,14 +578,14 @@
  <button data-page="profile"><span class="navIcon">👤</span><span>Profil</span></button>
 </nav>
 </div>
-<script src="i18n.js?v=40"></script>
-<script src="navigation.js?v=40"></script>
-<script type="module" src="app.js?v=40"></script>
-<script type="module" src="status.js?v=40"></script>
-<script type="module" src="boost.js?v=40"></script>
-<script type="module" src="orders.js?v=40"></script>
-<script type="module" src="notifications.js?v=40"></script>
-<script type="module" src="settings.js?v=40"></script>
-<script type="module" src="chat-advanced.js?v=40"></script>
-<script type="module" src="contacts.js?v=40"></script>
+<script src="i18n.js?v=41"></script>
+<script src="navigation.js?v=41"></script>
+<script type="module" src="app.js?v=41"></script>
+<script type="module" src="status.js?v=41"></script>
+<script type="module" src="boost.js?v=41"></script>
+<script type="module" src="orders.js?v=41"></script>
+<script type="module" src="notifications.js?v=41"></script>
+<script type="module" src="settings.js?v=41"></script>
+<script type="module" src="chat-advanced.js?v=41"></script>
+<script type="module" src="contacts.js?v=41"></script>
 </body></html>
