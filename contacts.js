@@ -395,26 +395,27 @@ async function ensureDirectChat(uid,name){
   const names={[user.uid]:myName,[uid]:contactName};
   const chatRef=doc(db,"chats",id);
 
-  try{
-    await setDoc(chatRef,{
-      type:"direct",
-      participants:ids,
-      participantNames:names,
-      lastMessage:"",
-      updatedAt:serverTimestamp()
-    });
-  }catch(writeErr){
-    if(writeErr?.code!=="permission-denied"&&writeErr?.code!=="already-exists")throw writeErr;
-    let existing=null;
-    try{existing=await getDoc(chatRef)}catch(readErr){throw writeErr}
-    if(!existing?.exists())throw writeErr;
+  let existing=null;
+  try{existing=await getDoc(chatRef)}catch(e){
+    if(e?.code!=="permission-denied")throw e;
+  }
+  if(existing?.exists()){
     const p=existing.data()?.participants||[];
     if(!p.includes(user.uid)||!p.includes(uid)){
       const e=new Error("Chat la pa gen bon patisipan yo.");
       e.code="chat/invalid-participants";
       throw e;
     }
+    return {id,contactName};
   }
+
+  await setDoc(chatRef,{
+    type:"direct",
+    participants:ids,
+    participantNames:names,
+    lastMessage:"",
+    updatedAt:serverTimestamp()
+  });
   return {id,contactName};
 }
 
