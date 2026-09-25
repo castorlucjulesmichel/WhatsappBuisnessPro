@@ -124,16 +124,17 @@ function go(name){
   $$("nav button").forEach(x=>x.classList.remove("active"));
   $("#"+name+"Page")?.classList.add("active");
   const parent={
-    status:"actus", clips:"actus",
-    contactPicker:"chat", newContact:"chat",
-    market:"tools", orders:"tools", stats:"tools", business:"tools", profile:"tools", settings:"tools",
-    invest:"wallet"
+    calls:"chat", contactPicker:"chat", newContact:"chat",
+    status:"clips",
+    orders:"create", stats:"create", business:"create", settings:"profile",
+    wallet:"create", invest:"create",
+    tools:"create"
   }[name] || name;
   document.querySelector('nav button[data-page="'+parent+'"]')?.classList.add("active");
 }
 $$("nav button[data-page]").forEach(b=>b.onclick=()=>go(b.dataset.page));
 $$("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
-$$("[data-market-mode]").forEach(b=>b.addEventListener("click",()=>{
+$("[data-market-mode]").forEach(b=>b.addEventListener("click",()=>{
   const sell=$("#sellBox");
   if(!sell)return;
   if(b.dataset.marketMode==="sell"){
@@ -141,6 +142,37 @@ $$("[data-market-mode]").forEach(b=>b.addEventListener("click",()=>{
     setTimeout(()=>sell.scrollIntoView({behavior:"smooth",block:"start"}),80);
   }else{
     sell.classList.add("hidden");
+  }
+}));
+
+function openWalletAction(type){
+  go("wallet");
+  if($("#walletType"))$("#walletType").value=type;
+  setTimeout(()=>{
+    $("#walletRequestForm")?.scrollIntoView({behavior:"smooth",block:"start"});
+    $("#walletAmount")?.focus();
+  },80);
+}
+$("[data-wallet-action]").forEach(b=>b.addEventListener("click",()=>openWalletAction(b.dataset.walletAction)));
+$("[data-create-action]").forEach(b=>b.addEventListener("click",()=>{
+  const action=b.dataset.createAction;
+  if(action==="product"){
+    go("market");$("#sellBox")?.classList.remove("hidden");
+    setTimeout(()=>$("#sellBox")?.scrollIntoView({behavior:"smooth",block:"start"}),80);
+  }else if(action==="video"){
+    go("clips");$("#clipForm")?.classList.remove("hidden");
+    setTimeout(()=>$("#clipForm")?.scrollIntoView({behavior:"smooth",block:"start"}),80);
+  }else if(action==="status"){
+    go("status");$("#statusForm")?.classList.remove("hidden");
+  }else if(action==="deposit"||action==="withdrawal"){
+    openWalletAction(action);
+  }else if(action==="boost"){
+    go("business");
+    setTimeout(()=>$("#boostForm")?.scrollIntoView({behavior:"smooth",block:"start"}),80);
+  }else if(action==="calls"){
+    go("calls");
+  }else if(action==="tools"){
+    go("tools");
   }
 }));
 $("#socialAccountsBtn")?.addEventListener("click",()=>toast("Connexion Facebook/Instagram ap disponib lè API sosyal yo konekte."));
@@ -260,8 +292,11 @@ $("#shareLocation").onclick=()=>{if(!navigator.geolocation)return toast("Lokaliz
 
 $("#sellBtn").onclick=()=>$("#sellBox").classList.toggle("hidden");
 $("#productForm").onsubmit=async e=>{e.preventDefault();try{
-  const f=$("#pImage").files[0],imageUrl=await upload(f,"whatssap-business-pro/products",8*1024*1024,"image/");
-  await addDoc(collection(db,"products"),{sellerId:S.user.uid,sellerUsername:S.profile.username||"",sellerName:S.profile.displayName||"",name:$("#pName").value.trim(),price:Number($("#pPrice").value),currency:$("#pCurrency").value,category:$("#pCategory").value,stock:Number($("#pStock").value||0),description:$("#pDesc").value.trim(),imageUrl,active:true,createdAt:serverTimestamp()});
+  const files=[...($("#pImage")?.files||[])].slice(0,6);
+  const imageUrls=[];
+  for(const f of files)imageUrls.push(await upload(f,"whatssap-business-pro/products",8*1024*1024,"image/"));
+  const imageUrl=imageUrls[0]||"";
+  await addDoc(collection(db,"products"),{sellerId:S.user.uid,sellerUsername:S.profile.username||"",sellerName:S.profile.displayName||"",name:$("#pName").value.trim(),price:Number($("#pPrice").value),currency:$("#pCurrency").value,category:$("#pCategory").value,stock:Number($("#pStock").value||0),description:$("#pDesc").value.trim(),imageUrl,imageUrls,active:true,createdAt:serverTimestamp()});
   e.target.reset();$("#sellBox").classList.add("hidden");toast("Pwodwi pibliye.");
 }catch(x){console.error(x);toast(x.message||"Pwodwi pa pibliye.");}};
 
@@ -630,9 +665,14 @@ function watchSupport(){const r=doc(db,"supportThreads",S.user.uid);setDoc(r,{us
 $("#supportForm").onsubmit=async e=>{e.preventDefault();const t=$("#supportText").value.trim();if(!t)return;await addDoc(collection(db,"supportThreads",S.user.uid,"messages"),{senderId:S.user.uid,text:t,createdAt:serverTimestamp()});await setDoc(doc(db,"supportThreads",S.user.uid),{userId:S.user.uid,userLabel:S.profile.displayName||S.profile.username||S.user.phoneNumber||"",updatedAt:serverTimestamp()},{merge:true});$("#supportText").value=""};
 
 $("#walletRequestForm").onsubmit=async e=>{e.preventDefault();try{
+  const type=$("#walletType").value,amount=Number($("#walletAmount").value),currency=$("#walletCurrency").value,method=$("#walletMethod").value;
+  const destination=$("#walletDestination").value.trim(),reference=$("#walletReference").value.trim();
+  if(!(amount>0))return toast("Montan an dwe pi gran pase 0.");
+  if(type==="withdrawal"&&!destination)return toast("Mete nimewo oswa kont kote retrè a dwe ale.");
   let proofUrl="";const f=$("#walletProof").files[0];if(f)proofUrl=await upload(f,"whatssap-business-pro/proofs",8*1024*1024,"image/");
-  await addDoc(collection(db,"financialRequests"),{userId:S.user.uid,type:$("#walletType").value,amount:Number($("#walletAmount").value),currency:$("#walletCurrency").value,method:$("#walletMethod").value,destination:$("#walletDestination").value.trim(),reference:$("#walletReference").value.trim(),proofUrl,note:$("#walletNote").value.trim(),status:"pending",createdAt:serverTimestamp()});
-  e.target.reset();toast("Demann operasyon voye.");
+  if(type==="deposit"&&!reference&&!proofUrl)return toast("Pou depo manyèl, mete referans tranzaksyon an oswa yon prèv peman.");
+  await addDoc(collection(db,"financialRequests"),{userId:S.user.uid,type,mode:"manual",amount,currency,method,destination,reference,proofUrl,note:$("#walletNote").value.trim(),status:"pending",createdAt:serverTimestamp()});
+  e.target.reset();toast(type==="deposit"?"Demann depo manyèl voye pou validasyon admin.":type==="withdrawal"?"Demann retrè manyèl voye pou validasyon admin.":"Demann operasyon voye.");
 }catch(x){console.error(x);toast(x.message||"Demann pa voye.");}};
 $("#exchangeForm").onsubmit=async e=>{e.preventDefault();const amount=Number($("#exchangeAmount").value),from=$("#exchangeFrom").value,to=$("#exchangeTo").value;if(!(amount>0)||from===to)return toast("Verifye echanj la.");await addDoc(collection(db,"exchangeRequests"),{userId:S.user.uid,amount,from,to,status:"pending",createdAt:serverTimestamp()});e.target.reset();toast("Demann echanj voye.")};
 function watchWallet(){
