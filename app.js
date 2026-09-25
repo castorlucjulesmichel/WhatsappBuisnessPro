@@ -134,7 +134,7 @@ function go(name){
 }
 $$("nav button[data-page]").forEach(b=>b.onclick=()=>go(b.dataset.page));
 $$("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
-$("[data-market-mode]").forEach(b=>b.addEventListener("click",()=>{
+$$("[data-market-mode]").forEach(b=>b.addEventListener("click",()=>{
   const sell=$("#sellBox");
   if(!sell)return;
   if(b.dataset.marketMode==="sell"){
@@ -153,8 +153,8 @@ function openWalletAction(type){
     $("#walletAmount")?.focus();
   },80);
 }
-$("[data-wallet-action]").forEach(b=>b.addEventListener("click",()=>openWalletAction(b.dataset.walletAction)));
-$("[data-create-action]").forEach(b=>b.addEventListener("click",()=>{
+$$("[data-wallet-action]").forEach(b=>b.addEventListener("click",()=>openWalletAction(b.dataset.walletAction)));
+$$("[data-create-action]").forEach(b=>b.addEventListener("click",()=>{
   const action=b.dataset.createAction;
   if(action==="product"){
     go("market");$("#sellBox")?.classList.remove("hidden");
@@ -308,7 +308,7 @@ function renderProducts(){
   $("#mProducts").textContent=list.length;
   $("#productGrid").innerHTML=list.length?list.map(p=>`<article class="product">${p.imageUrl?`<img src="${esc(p.imageUrl)}" alt="">`:""}<div class="productBody">${sponsored.has(p.id)?'<span class="status approved">Sponsored</span>':""}<h3>${esc(p.name)}</h3><p>${esc(p.description||"")}</p><b>${money(p.price,p.currency)}</b><div class="productActions"><button data-cart="${p.id}">Ajoute</button><button class="ghost" data-seller="${esc(p.sellerUsername||"")}">Chat</button></div></div></article>`).join(""):'<p class="muted">Pa gen pwodwi.</p>';
   $$("[data-cart]").forEach(b=>b.onclick=()=>addCart(b.dataset.cart));
-  $("[data-seller]").forEach(b=>b.onclick=async()=>{
+  $$("[data-seller]").forEach(b=>b.onclick=async()=>{
     const un=norm(b.dataset.seller||"");
     if(!un)return toast("Vandè a pa gen username.");
     try{
