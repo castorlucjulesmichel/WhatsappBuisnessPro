@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#075e54"><title>Whatsapp Business Pro</title>
-<link rel="manifest" href="manifest.webmanifest"><link rel="icon" type="image/webp" href="assets/logo.webp"><link rel="apple-touch-icon" href="assets/logo.webp"><link rel="stylesheet" href="style.css?v=39">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" type="image/webp" href="assets/logo.webp"><link rel="apple-touch-icon" href="assets/logo.webp"><link rel="stylesheet" href="style.css?v=40">
 </head>
 <body>
 <div id="toast"></div>
@@ -252,23 +252,41 @@
  <div class="card"><h3>Sponsored Status</h3><p class="muted">Status ki bouste epi ki koresponn ak odyans ou.</p><div id="sponsoredStatuses" class="statusFeed"></div></div>
 </section>
 
+<section id="createPage" class="page createHubPage">
+ <div class="menuHeader"><div><h2>Créer</h2><p>Publier, vendre, gérer l’argent et développer votre audience</p></div></div>
+ <div class="createHubGrid">
+  <button class="createHubCard" type="button" data-create-action="product"><span>🛍️</span><b>Publier un produit</b><small>Photos, prix, devise, stock et description</small></button>
+  <button class="createHubCard" type="button" data-create-action="video"><span>🎬</span><b>Publier une vidéo</b><small>Créer un clip court comme sur TikTok</small></button>
+  <button class="createHubCard" type="button" data-create-action="status"><span>⭕</span><b>Créer un statut</b><small>Texte, photo ou vidéo pendant 24 h</small></button>
+  <button class="createHubCard" type="button" data-create-action="deposit"><span>⬇️</span><b>Dépôt manuel</b><small>MonCash, NatCash, banque ou transfert</small></button>
+  <button class="createHubCard" type="button" data-create-action="withdrawal"><span>⬆️</span><b>Retrait manuel</b><small>Envoyer une demande à l’administration</small></button>
+  <button class="createHubCard" type="button" data-create-action="boost"><span>🚀</span><b>Boost & publicité</b><small>Booster produit, clip ou statut</small></button>
+  <button class="createHubCard" type="button" data-create-action="calls"><span>📞</span><b>Appels</b><small>Accéder aux appels et liens d’appel</small></button>
+  <button class="createHubCard" type="button" data-create-action="tools"><span>🧰</span><b>Outils Business</b><small>Commandes, statistiques, profil pro et paramètres</small></button>
+ </div>
+</section>
+
 <section id="marketPage" class="page">
- <div class="title"><div><button class="backLink ghost" data-go="tools">← Outils</button><h2>Marketplace</h2><p>Achat et vente de produits</p></div><div><button id="cartBtn">Panier <span id="cartCount">0</span></button><button id="sellBtn">+ Vann</button></div></div>
- <div id="sellBox" class="card hidden"><form id="productForm"><input id="pName" required placeholder="Non pwodwi"><div class="row"><input id="pPrice" type="number" min="0" step="0.01" required placeholder="Pri"><select id="pCurrency"></select></div><select id="pCategory"><option value="Electronics">Electronics</option><option value="Fashion">Fashion</option><option value="Cosmetics">Cosmetics</option><option value="Food">Food</option><option value="Services">Services</option><option value="Other">Other</option></select><input id="pStock" type="number" min="0" value="1" placeholder="Stock"><textarea id="pDesc" placeholder="Deskripsyon"></textarea><input id="pImage" type="file" accept="image/*"><button>Pibliye</button></form></div>
+ <div class="title"><div><h2>Marketplace</h2><p>Achat et vente de produits</p></div><div><button id="cartBtn">Panier <span id="cartCount">0</span></button><button id="sellBtn">+ Vendre</button></div></div>
+ <div id="sellBox" class="card hidden"><form id="productForm"><input id="pName" required placeholder="Non pwodwi"><div class="row"><input id="pPrice" type="number" min="0" step="0.01" required placeholder="Pri"><select id="pCurrency"></select></div><select id="pCategory"><option value="Electronics">Electronics</option><option value="Fashion">Fashion</option><option value="Cosmetics">Cosmetics</option><option value="Food">Food</option><option value="Services">Services</option><option value="Other">Other</option></select><input id="pStock" type="number" min="0" value="1" placeholder="Stock"><textarea id="pDesc" placeholder="Deskripsyon"></textarea><input id="pImage" type="file" accept="image/*" multiple><button>Pibliye</button></form></div>
  <div id="cartBox" class="card hidden"><h3>Panier</h3><div id="cartItems"></div><button id="checkoutBtn">Kreye kòmand</button></div>
  <div class="filters"><input id="marketSearch" placeholder="Chèche pwodwi..."><select id="marketCategory"><option value="">Tout kategori</option><option value="Electronics">Electronics</option><option value="Fashion">Fashion</option><option value="Cosmetics">Cosmetics</option><option value="Food">Food</option><option value="Services">Services</option><option value="Other">Other</option></select></div>
  <div id="productGrid" class="productGrid"></div>
 </section>
 
 <section id="clipsPage" class="page">
- <div class="title"><div><button class="backLink ghost" data-go="actus">← Actus</button><h2>Clips</h2><p>Espas videyo kout</p></div><button id="clipBtn">+ Pibliye</button></div>
+ <div class="title"><div><h2>Vidéos</h2><p>Vidéos courtes comme sur TikTok</p></div><button id="clipBtn">+ Publier</button></div>
  <form id="clipForm" class="card hidden"><input id="clipFile" type="file" accept="video/*" required><textarea id="clipCaption" maxlength="500" placeholder="Caption"></textarea><button>Pibliye clip</button></form>
  <div id="clipFeed" class="clipFeed"></div>
 </section>
 
 <section id="walletPage" class="page">
- <div class="title"><div><h2>Portefeuille</h2><p>Balances, dépôts, retraits, échanges et investissements</p></div></div>
+ <div class="title"><div><h2>Portefeuille</h2><p>Soldes, dépôt et retrait manuel, échange et investissements</p></div></div>
  <div id="walletBalances" class="balances"></div>
+ <div class="walletQuickActions">
+  <button type="button" data-wallet-action="deposit">⬇️ Dépôt manuel</button>
+  <button type="button" data-wallet-action="withdrawal">⬆️ Retrait manuel</button>
+ </div>
  <div class="settingsList card walletMenu">
   <button class="settingsItem" data-go="invest">
    <span class="settingsIcon">📈</span>
@@ -541,20 +559,20 @@
 
 <nav class="bottomNav">
  <button data-page="chat" class="active"><span class="navIcon">💬</span><span>Discussions</span></button>
- <button data-page="calls"><span class="navIcon">📞</span><span>Appels</span></button>
- <button data-page="actus"><span class="navIcon">⭕</span><span>Actus</span></button>
- <button data-page="tools"><span class="navIcon">🧰</span><span>Outils</span></button>
- <button data-page="wallet"><span class="navIcon">💼</span><span>Portefeuille</span></button>
+ <button data-page="market"><span class="navIcon">🛍️</span><span>Marché</span></button>
+ <button data-page="create" class="createNavBtn"><span class="navCreateIcon">＋</span><span>Créer</span></button>
+ <button data-page="clips"><span class="navIcon">🎬</span><span>Vidéos</span></button>
+ <button data-page="profile"><span class="navIcon">👤</span><span>Profil</span></button>
 </nav>
 </div>
-<script src="i18n.js?v=39"></script>
-<script src="navigation.js?v=39"></script>
-<script type="module" src="app.js?v=39"></script>
-<script type="module" src="status.js?v=39"></script>
-<script type="module" src="boost.js?v=39"></script>
-<script type="module" src="orders.js?v=39"></script>
-<script type="module" src="notifications.js?v=39"></script>
-<script type="module" src="settings.js?v=39"></script>
-<script type="module" src="chat-advanced.js?v=39"></script>
-<script type="module" src="contacts.js?v=39"></script>
+<script src="i18n.js?v=40"></script>
+<script src="navigation.js?v=40"></script>
+<script type="module" src="app.js?v=40"></script>
+<script type="module" src="status.js?v=40"></script>
+<script type="module" src="boost.js?v=40"></script>
+<script type="module" src="orders.js?v=40"></script>
+<script type="module" src="notifications.js?v=40"></script>
+<script type="module" src="settings.js?v=40"></script>
+<script type="module" src="chat-advanced.js?v=40"></script>
+<script type="module" src="contacts.js?v=40"></script>
 </body></html>
