@@ -84,6 +84,10 @@ function renderRequests(){
   ].sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
   $("#adminRequests").innerHTML=rows.map(r=>`<div class="adminRow"><b>${esc(r.kind)} • ${money(r.amount,r.currency||r.from)}</b><br>
     <span class="muted">${esc(label(r.userId))} • ${esc(r.method||((r.from||"")+" → "+(r.to||"")))} • ${esc(r.status||"pending")}</span>
+    ${r.mode==="manual"?'<div><span class="status">Manuel</span></div>':""}
+    ${r.destination?`<div class="muted">Destination: ${esc(r.destination)}</div>`:""}
+    ${r.reference?`<div class="muted">Référence: ${esc(r.reference)}</div>`:""}
+    ${r.note?`<div class="muted">Note: ${esc(r.note)}</div>`:""}
     ${r.proofUrl?`<div><a href="${esc(r.proofUrl)}" target="_blank" rel="noopener">Gade prèv</a></div>`:""}
     ${r.status==="pending"?`<div class="actions"><button data-request="${r.id}" data-src="${r.source}" data-decision="approved">Apwouve</button><button class="danger" data-request="${r.id}" data-src="${r.source}" data-decision="rejected">Rejte</button></div>`:""}
   </div>`).join("")||'<p class="muted">Pa gen demand.</p>';
