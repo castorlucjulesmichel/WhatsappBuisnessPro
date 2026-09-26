@@ -534,6 +534,7 @@ function closeChatView(){
   $("#chatPage .conversation")?.classList.remove("open");
   $("#chatPage")?.classList.remove("chat-open");
   document.body.classList.remove("chatConversationOpen");
+  document.documentElement.classList.remove("chatConversationOpen");
   $("#messageForm")?.classList.add("hidden");
   $("#chatMoreMenu")?.classList.add("hidden");
   S.chatPresenceOff?.();S.chatPresenceOff=null;
@@ -611,6 +612,7 @@ async function openChat(id,name){
   $("#chatPage .conversation")?.classList.add("open");
   $("#chatPage")?.classList.add("chat-open");
   document.body.classList.add("chatConversationOpen");
+  document.documentElement.classList.add("chatConversationOpen");
   const initial=esc((S.chatOtherName.trim()[0]||"?").toUpperCase());
   $("#chatTitle").innerHTML=
     '<button id="closeChatViewBtn" class="waChatBackBtn" type="button">←</button>'+
