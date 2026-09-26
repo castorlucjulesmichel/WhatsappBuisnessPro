@@ -2,7 +2,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn(){ return request.auth != null; }
-    function isAdmin(){ return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
+    function isAdmin(){ return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)) && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.active == true; }
     function isSelf(uid){ return signedIn() && request.auth.uid == uid; }
     function userDoc(){ return get(/databases/$(database)/documents/users/$(request.auth.uid)); }
     function active(){ return signedIn() && userDoc().data.blocked != true; }
@@ -152,7 +152,8 @@ service cloud.firestore {
       allow delete: if isAdmin() || (active() && resource.data.ownerId == request.auth.uid);
 
       match /views/{viewerUid} {
-        allow read: if resource.data.ownerId == request.auth.uid || isAdmin();
+        allow read: if isAdmin()
+          || (signedIn() && get(/databases/$(database)/documents/statuses/$(id)).data.ownerId == request.auth.uid);
         allow create: if isSelf(viewerUid);
         allow update, delete: if false;
       }
