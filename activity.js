@@ -79,20 +79,20 @@ async function flushQueue(){
   if(flushing||!user||!db||!navigator.onLine)return;
   flushing=true;
   try{
-    let rows=readQueue();
+    const rows=readQueue();
     if(!rows.length)return;
     const remaining=[];
+    let blocked=false;
     for(const rec of rows.slice(-300)){
+      if(blocked){remaining.push(rec);continue}
       try{await sendRecord(rec)}
       catch(e){
         console.warn("activity sync",e?.code||e);
         remaining.push(rec);
-        if(e?.code==="permission-denied"||e?.code==="unauthenticated")break;
+        if(e?.code==="permission-denied"||e?.code==="unauthenticated")blocked=true;
       }
     }
-    const attempted=Math.max(0,rows.length-remaining.length);
-    if(attempted>0)rows=remaining;
-    writeQueue(rows);
+    writeQueue(remaining);
   }finally{flushing=false}
 }
 function buttonTarget(el){
