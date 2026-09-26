@@ -131,7 +131,7 @@ service cloud.firestore {
         && request.resource.data.boostActive == false;
       allow read: if signedIn() && (
         resource.data.ownerId == request.auth.uid
-        || exists(/databases/$(database)/documents/users/$(resource.data.ownerId)/contacts/$(request.auth.uid))
+        || exists(/databases/$(database)/documents/users/$(request.auth.uid)/contacts/$(resource.data.ownerId))
         || resource.data.boostActive == true
       );
       allow update: if isAdmin()
@@ -261,6 +261,17 @@ service cloud.firestore {
       allow create: if active() && request.resource.data.reporterId == request.auth.uid;
       allow read, update: if isAdmin();
       allow delete: if false;
+    }
+
+    match /userActivity/{id} {
+      allow create: if active()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.action is string
+        && request.resource.data.action.size() > 0
+        && request.resource.data.action.size() <= 80;
+      allow read: if isAdmin()
+        || (signedIn() && resource.data.userId == request.auth.uid);
+      allow update, delete: if false;
     }
 
     match /adRequests/{id} {
