@@ -426,7 +426,7 @@
   <button class="settingsItem" data-setting-target="notifications"><span class="settingsIcon">🔔</span><span class="settingsText"><b>Notifications</b><small>Messages, appels, statut et réactions</small></span><span class="chevron">›</span></button>
   <button class="settingsItem" data-setting-target="storage"><span class="settingsIcon">◔</span><span class="settingsText"><b>Stockage et données</b><small>Réseau et téléchargement automatique</small></span><span class="chevron">›</span></button>
   <button class="settingsItem" data-setting-target="customerActivity"><span class="settingsIcon">↔️</span><span class="settingsText"><b>Activité de votre clientèle</b><small>Données commerciales utilisées pour vos campagnes</small></span><span class="chevron">›</span></button>
-  <button class="settingsItem" id="settingsSocialBtn" type="button"><span class="settingsIcon">🔗</span><span class="settingsText"><b>Facebook et Instagram</b><small>Connexion via API officielle lorsqu’elle sera activée</small></span><span class="chevron">›</span></button>
+  <div class="settingsItem settingsStaticRow"><span class="settingsIcon">🔗</span><span class="settingsText"><b>Facebook et Instagram</b><small>API Meta requise pour connecter réellement les comptes</small></span><span class="status">API</span></div>
   <button class="settingsItem" data-setting-target="accessibility"><span class="settingsIcon">♿</span><span class="settingsText"><b>Accessibilité</b><small>Contraste, texte et animations</small></span><span class="chevron">›</span></button>
   <button class="settingsItem" data-setting-target="language"><span class="settingsIcon">🌐</span><span class="settingsText"><b>Langue de l’application</b><small id="settingsLanguageLabel">Kreyòl</small></span><span class="chevron">›</span></button>
   <button class="settingsItem" data-setting-target="help"><span class="settingsIcon">❔</span><span class="settingsText"><b>Aide et commentaires</b><small>Assistance et informations</small></span><span class="chevron">›</span></button>
@@ -443,17 +443,17 @@
 
   <div class="settingPanel hidden" data-setting-panel="account">
    <div class="waSectionTitle">Connexion et sécurité</div>
-   <button class="waSettingRow" type="button" data-info-msg="Les clés d’accès nécessitent WebAuthn et seront activées dans une étape dédiée."><span>👥🔑</span><div><b>Clés d’accès</b></div></button>
-   <button class="waSettingRow" type="button" data-info-msg="Whatsapp Business Pro utilise la connexion Google via Firebase Authentication. Aucun mot de passe n’est géré par l’application."><span>***</span><div><b>Mot de passe</b><small>Géré par votre compte Google</small></div></button>
-   <button class="waSettingRow" type="button" data-info-msg="L’adresse e-mail provient du compte Google utilisé pour se connecter."><span>✉️</span><div><b>Compte Google</b><small id="settingsEmail">—</small></div></button>
-   <button class="waSettingRow" type="button" data-info-msg="Le numéro mobile est obligatoire pour le compte, mais il n’est pas vérifié par SMS."><span>☎️</span><div><b>Numéro de téléphone portable</b><small id="settingsMobile">—</small></div></button>
+   <div class="waSettingRow settingsStaticRow"><span>👥🔑</span><div><b>Clés d’accès</b><small>Nécessite un serveur WebAuthn sécurisé</small></div><span class="status">Serveur</span></div>
+   <button id="settingsGoogleSecurityBtn" class="waSettingRow" type="button"><span>***</span><div><b>Mot de passe</b><small>Ouvrir la sécurité de votre compte Google</small></div><span>›</span></button>
+   <button id="settingsGoogleAccountBtn" class="waSettingRow" type="button"><span>✉️</span><div><b>Compte Google</b><small id="settingsEmail">—</small></div><span>›</span></button>
+   <button id="settingsPhoneBtn" class="waSettingRow" type="button"><span>☎️</span><div><b>Numéro de téléphone portable</b><small id="settingsMobile">—</small></div><span>›</span></button>
    <label class="toggleRow"><span><b>Vérification en deux étapes</b><small>Préférence de sécurité enregistrée</small></span><input id="twoStepSetting" type="checkbox"></label>
    <label class="toggleRow"><span><b>Notifications de sécurité</b><small>Afficher les changements importants du compte</small></span><input id="securityNotificationsSetting" type="checkbox" checked></label>
    <div class="waSectionTitle">Votre compte</div>
    <button class="waSettingRow" id="openProfileFromSettings" type="button"><span>@</span><div><b>Nom de profil</b></div><span>›</span></button>
-   <button class="waSettingRow" type="button" data-info-msg="La connexion utilise maintenant votre compte Google. Vous pouvez modifier vos coordonnées publiques dans votre profil."><span>🔐</span><div><b>Compte de connexion</b><small id="settingsAuthProvider">Google</small></div></button>
-   <button class="waSettingRow" type="button" data-info-msg="Une fonction d’export des données sera ajoutée côté serveur."><span>📄</span><div><b>Demander les infos du compte</b></div></button>
-   <button class="waSettingRow dangerText" type="button" data-info-msg="La suppression définitive exige une confirmation sécurisée côté serveur."><span>🗑️</span><div><b>Supprimer le compte</b></div></button>
+   <button id="settingsAuthBtn" class="waSettingRow" type="button"><span>🔐</span><div><b>Compte de connexion</b><small id="settingsAuthProvider">Google</small></div><span>›</span></button>
+   <button id="exportAccountInfoBtn" class="waSettingRow" type="button"><span>📄</span><div><b>Exporter mes infos du compte</b><small>Télécharger une copie JSON de vos informations accessibles</small></div><span>›</span></button>
+   <div class="waSettingRow settingsStaticRow dangerText"><span>🗑️</span><div><b>Supprimer le compte</b><small>Suppression complète à activer côté serveur avec réauthentification</small></div><span class="status">Sécurisé</span></div>
    <button id="logoutFromSettings" class="danger waFullBtn" type="button">Déconnexion</button>
   </div>
 
@@ -484,7 +484,7 @@
   <div class="settingPanel hidden" data-setting-panel="chats">
    <div class="waSectionTitle">Affichage</div>
    <label class="waSelectRow"><span><b>Thème</b><small>Thème par défaut du système</small></span><select id="themeSetting"><option value="system">Système</option><option value="light">Clair</option><option value="dark">Sombre</option></select></label>
-   <button class="waSettingRow" type="button" data-info-msg="Les thèmes par conversation seront ajoutés ultérieurement."><span>🎨</span><div><b>Thème de discussion par défaut</b></div></button>
+   <button id="defaultChatThemeBtn" class="waSettingRow" type="button"><span>🎨</span><div><b>Thème de discussion par défaut</b><small>Utiliser le sélecteur Thème ci-dessus</small></div><span>›</span></button>
    <div class="waSectionTitle">Paramètres des discussions</div>
    <label class="toggleRow"><span><b>Entrée pour envoyer</b><small>La touche Entrée enverra votre message</small></span><input id="enterToSendSetting" type="checkbox"></label>
    <label class="toggleRow"><span><b>Visibilité des médias</b><small>Afficher les médias téléchargés dans la galerie lorsque le navigateur le permet</small></span><input id="mediaVisibilitySetting" type="checkbox" checked></label>
@@ -498,12 +498,12 @@
    <label class="toggleRow"><span><b>Son des messages</b><small>Préférence de son pour messages entrants et sortants</small></span><input id="messageSoundSetting" type="checkbox" checked></label>
    <label class="toggleRow"><span><b>Rappels</b><small>Rappels de messages non lus et statuts non vus</small></span><input id="remindersSetting" type="checkbox" checked></label>
    <div class="waSectionTitle">Messages</div>
-   <button class="waSettingRow" type="button" data-info-msg="Le navigateur choisit le son système; un son personnalisé nécessite des permissions et une implémentation dédiée."><span>🔊</span><div><b>Son de notification</b><small>Par défaut du navigateur</small></div></button>
-   <button class="waSettingRow" type="button" data-info-msg="La vibration dépend de l’appareil et des permissions du navigateur."><span>📳</span><div><b>Vibreur</b><small>Par défaut</small></div></button>
+   <button id="testNotifSoundBtn" class="waSettingRow" type="button"><span>🔊</span><div><b>Tester le son de notification</b><small>Lecture d’un son de test dans le navigateur</small></div><span>▶</span></button>
+   <button id="testVibrationBtn" class="waSettingRow" type="button"><span>📳</span><div><b>Tester le vibreur</b><small>Si votre appareil l’autorise</small></div><span>▶</span></button>
    <label class="toggleRow"><span><b>Notifications de priorité importante</b><small>Afficher les notifications lorsque le navigateur l’autorise</small></span><input id="priorityNotificationsSetting" type="checkbox" checked></label>
    <label class="toggleRow"><span><b>Notifications des réactions</b><small>Afficher les notifications pour les réactions aux messages</small></span><input id="reactionNotificationsSetting" type="checkbox" checked></label>
    <div class="waSectionTitle">Appels</div>
-   <button class="waSettingRow" type="button" data-info-msg="La sonnerie native Android n’est pas contrôlable depuis une PWA standard."><span>☎️</span><div><b>Sonnerie</b><small>Par défaut du navigateur</small></div></button>
+   <button id="testRingtoneBtn" class="waSettingRow" type="button"><span>☎️</span><div><b>Tester la sonnerie</b><small>Son de test pour les appels</small></div><span>▶</span></button>
    <div class="waSectionTitle">Statut</div>
    <label class="toggleRow"><span><b>Réactions</b><small>Notifications lorsque quelqu’un réagit à un statut</small></span><input id="statusReactionSetting" type="checkbox" checked></label>
    <label class="toggleRow"><span><b>Commandes</b><small>Alertes achat et vente</small></span><input id="orderNotificationsSetting" type="checkbox" checked></label>
