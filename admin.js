@@ -12,7 +12,7 @@ const configured=()=>firebaseConfig.apiKey&&!String(firebaseConfig.apiKey).inclu
 if(!configured()) throw new Error("Configure firebase-config.js first.");
 const app=getApps().length?getApp():initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
 
-let admin=null,supportOff=null;
+let admin=null,supportOff=null,activityRows=[];
 let data={users:[],profiles:[],products:[],requests:[],exchanges:[],orders:[],videos:[],investments:[],cases:[],levels:[]};
 
 $$("[data-admin]").forEach(b=>b.onclick=()=>{
@@ -54,8 +54,35 @@ async function loadAll(){
     $("#aPending").textContent=requests.filter(x=>x.status==="pending").length+exchanges.filter(x=>x.status==="pending").length;
     $("#aOrders").textContent=orders.length;$("#aInvestments").textContent=investments.length;
     renderUsers();renderRequests();renderOrders();renderVideos();renderInvestments();renderCases();renderLevels();renderSupportUsers();
+    loadActivity();
   }catch(e){console.error(e);toast("Done admin yo pa t chaje.");}
 }
+
+async function loadActivity(){
+  const box=$("#adminActivity");if(!box)return;
+  box.innerHTML='<p class="muted">Chargement…</p>';
+  try{
+    const s=await getDocs(query(collection(db,"userActivity"),orderBy("createdAt","desc"),limit(500)));
+    activityRows=s.docs.map(d=>({id:d.id,...d.data()}));
+    renderActivity();
+  }catch(e){
+    console.warn("admin activity",e?.code||e);
+    box.innerHTML='<p class="muted">Aktivite yo poko disponib sou règ Firebase ki pibliye yo.</p>';
+  }
+}
+function renderActivity(){
+  const box=$("#adminActivity");if(!box)return;
+  const term=($("#activitySearch")?.value||"").trim().toLowerCase();
+  const rows=activityRows.filter(x=>{
+    const who=label(x.userId||"");
+    return !term||[who,x.userId,x.action,x.target,x.page].join(" ").toLowerCase().includes(term);
+  });
+  box.innerHTML=rows.length?rows.map(x=>`<div class="adminRow">
+    <b>${esc(label(x.userId||""))}</b> • ${esc(x.action||"action")}
+    <div class="muted">${esc(x.page||"")} • ${esc(x.target||"")} • ${stamp(x.createdAt)||esc(x.clientAt||"")}</div>
+  </div>`).join(""):'<p class="muted">Pa gen aktivite pou filtè sa a.</p>';
+}
+$("#activitySearch")?.addEventListener("input",renderActivity);
 
 function renderUsers(){
   const term=($("#userSearch").value||"").trim().toLowerCase();
