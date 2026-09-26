@@ -11,8 +11,23 @@ const toast=t=>{const e=$("#toast");if(!e)return;e.textContent=t;e.classList.add
 const norm=s=>String(s||"").trim().toLowerCase().replace(/[^a-z0-9_.-]/g,"");
 const safe=s=>String(s||"file").replace(/[^a-zA-Z0-9._-]/g,"_");
 
-let auth=null,db=null,storage=null,user=null,currentChat=null,typingOff=null,typingTimer=null;
+let auth=null,db=null,storage=null,user=null,currentChat=null,currentPeer=null,typingOff=null,typingTimer=null;
 let recorder=null,recordChunks=[],recordStream=null,recordStarted=0;
+
+function ephemeralExpiresAtMs(){
+  if(!user||!currentChat)return 0;
+  try{
+    const p=JSON.parse(localStorage.getItem("wbp_chatprefs_"+user.uid+"_"+currentChat)||"{}");
+    const v=p.disappearingDuration||"off";
+    const ms=v==="24h"?86400000:v==="7d"?604800000:v==="90d"?7776000000:0;
+    return ms?Date.now()+ms:0;
+  }catch{return 0}
+}
+function chatBlocked(){
+  if(window.WBP_CHAT_BLOCKED||window.WBP_CHAT_BLOCKED_BY_PEER)return true;
+  if(!user||!currentPeer)return false;
+  return localStorage.getItem("wbp_block_"+user.uid+"_"+currentPeer)==="1";
+}
 
 if(configured()){
   const app=getApps().length?getApp():initializeApp(firebaseConfig);
@@ -55,6 +70,7 @@ $("#createGroupBtn")?.addEventListener("click",async()=>{
 
 async function sendMedia(file){
   if(!user||!currentChat||!file)return;
+  if(chatBlocked())return toast("Fichye bloke nan diskisyon sa a.");
   const isImage=file.type.startsWith("image/");
   const allowed=isImage||file.type==="application/pdf"||/\.(docx?|xlsx?|txt)$/i.test(file.name);
   if(!allowed)return toast("Kalite fichye sa pa sipòte.");
@@ -67,7 +83,7 @@ async function sendMedia(file){
     await addDoc(collection(db,"chats",currentChat,"messages"),{
       senderId:user.uid,type:isImage?"image":"document",
       mediaUrl,mediaPath:path,fileName:file.name,fileSize:file.size,
-      readBy:[user.uid],createdAt:serverTimestamp()
+      readBy:[user.uid],expiresAtMs:ephemeralExpiresAtMs(),createdAt:serverTimestamp()
     });
     await updateDoc(doc(db,"chats",currentChat),{
       lastMessage:isImage?"📷 Foto":"📄 "+file.name.slice(0,60),
@@ -83,8 +99,34 @@ $("#chatAttachment")?.addEventListener("change",async e=>{
   e.target.value="";
 });
 
+async function uploadAudioFile(file){
+  if(!file||!user||!currentChat)return;
+  if(chatBlocked())return toast("Mesaj vokal bloke nan diskisyon sa a.");
+  if(file.size>25*1024*1024)return toast("Audio a dwe pi piti pase 25 MB.");
+  try{
+    const ext=(file.name.split(".").pop()||"audio").replace(/[^a-z0-9]/gi,"").slice(0,6)||"audio";
+    const path="whatssap-business-pro/chat-media/"+user.uid+"/"+currentChat+"/"+crypto.randomUUID()+"-voice."+ext;
+    const rr=ref(storage,path),up=await uploadBytes(rr,file,{contentType:file.type||"audio/*"}),mediaUrl=await getDownloadURL(up.ref);
+    await addDoc(collection(db,"chats",currentChat,"messages"),{
+      senderId:user.uid,type:"audio",mediaUrl,mediaPath:path,fileSize:file.size,
+      readBy:[user.uid],expiresAtMs:ephemeralExpiresAtMs(),createdAt:serverTimestamp()
+    });
+    await updateDoc(doc(db,"chats",currentChat),{lastMessage:"🎤 Mesaj vokal",updatedAt:serverTimestamp()});
+    toast("Mesaj vokal voye.");
+  }catch(e){console.error(e);toast("Mesaj vokal la pa t voye.");}
+}
+$("#voiceFileFallback")?.addEventListener("change",async e=>{
+  const file=e.target.files?.[0];
+  if(file)await uploadAudioFile(file);
+  e.target.value="";
+});
+
 async function startVoice(){
-  if(!navigator.mediaDevices?.getUserMedia||typeof MediaRecorder==="undefined")return toast("Navigatè sa pa sipòte mesaj vokal.");
+  if(chatBlocked())return toast("Mesaj vokal bloke nan diskisyon sa a.");
+  if(!navigator.mediaDevices?.getUserMedia||typeof MediaRecorder==="undefined"){
+    $("#voiceFileFallback")?.click();
+    return toast("Sèvi ak anrejistrè telefòn lan pou voye audio.");
+  }
   try{
     recordStream=await navigator.mediaDevices.getUserMedia({audio:true});
     const types=["audio/webm;codecs=opus","audio/webm","audio/mp4"];
@@ -97,7 +139,7 @@ async function startVoice(){
     $("#voiceBtn").textContent="⏹️";
     $("#voiceStatus").textContent="🎙️ Ap anrejistre... peze ankò pou voye";
     $("#voiceStatus").classList.remove("hidden");
-  }catch(e){console.error(e);toast("Mikwofòn pa disponib.");}
+  }catch(e){console.error(e);$("#voiceFileFallback")?.click();toast("Mikwofòn dirèk pa disponib; chwazi oswa anrejistre yon audio.");}
 }
 async function stopVoice(){
   if(recorder?.state==="recording")recorder.stop();
@@ -116,7 +158,7 @@ async function uploadVoice(){
     const rr=ref(storage,path),up=await uploadBytes(rr,blob,{contentType:mime}),mediaUrl=await getDownloadURL(up.ref);
     await addDoc(collection(db,"chats",currentChat,"messages"),{
       senderId:user.uid,type:"audio",mediaUrl,mediaPath:path,duration,
-      fileSize:blob.size,readBy:[user.uid],createdAt:serverTimestamp()
+      fileSize:blob.size,readBy:[user.uid],expiresAtMs:ephemeralExpiresAtMs(),createdAt:serverTimestamp()
     });
     await updateDoc(doc(db,"chats",currentChat),{lastMessage:"🎤 Mesaj vokal",updatedAt:serverTimestamp()});
     toast("Mesaj vokal voye.");
@@ -181,6 +223,7 @@ async function setupBlockButton(chatId){
 
 window.addEventListener("wbp-chat-open",e=>{
   currentChat=e.detail?.chatId||null;
+  currentPeer=e.detail?.uid||null;
   watchTyping(currentChat);
   setupBlockButton(currentChat);
 });
