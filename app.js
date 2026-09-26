@@ -44,7 +44,7 @@ async function syncPhoneDirectory(phone,oldPhone="",meta={}){
 }
 const safe=s=>String(s||"file").replace(/[^a-zA-Z0-9._-]/g,"_");
 const money=(n,c)=>Number(n||0).toLocaleString(undefined,{maximumFractionDigits:2})+" "+(c||"HTG");
-const S={user:null,profile:{},account:{},chatId:null,chatOtherUid:null,chatOtherName:"",chatPresenceOff:null,presenceTimer:null,chatRows:[],chatFilter:"all",chatFallbackOffs:[],products:[],clips:[],boosts:[],cart:[],unsubs:[]};
+const S={user:null,profile:{},account:{},chatId:null,chatOtherUid:null,chatOtherName:"",chatPresenceOff:null,presenceTimer:null,chatRows:[],chatFilter:"all",chatFallbackOffs:[],chatPrefs:{},products:[],clips:[],boosts:[],cart:[],unsubs:[]};
 
 if(!configured()){
   $("#authScreen").classList.add("hidden");
@@ -631,13 +631,131 @@ $("#chatInfoMessageBtn")?.addEventListener("click",()=>$("#closeChatContactInfo"
 $("#chatInfoVoiceBtn")?.addEventListener("click",()=>callNotReady("voice",S.chatOtherName));
 $("#chatInfoVideoBtn")?.addEventListener("click",()=>callNotReady("video",S.chatOtherName));
 
+function closeChatActionPanel(){
+  $("#chatActionPanel")?.classList.add("hidden");
+  $("#chatActionPanel")?.setAttribute("aria-hidden","true");
+}
+function openChatActionPanel(title,html){
+  if($("#chatActionTitle"))$("#chatActionTitle").textContent=title||"Discussion";
+  if($("#chatActionBody"))$("#chatActionBody").innerHTML=html||"";
+  $("#chatActionPanel")?.classList.remove("hidden");
+  $("#chatActionPanel")?.setAttribute("aria-hidden","false");
+}
+$("#closeChatActionPanel")?.addEventListener("click",closeChatActionPanel);
+
+function chatPrefRef(){
+  if(!S.user||!S.chatId)return null;
+  return doc(db,"users",S.user.uid,"chatPrefs",S.chatId);
+}
+async function loadChatPrefs(){
+  const r=chatPrefRef();
+  if(!r){S.chatPrefs={};return S.chatPrefs}
+  try{
+    const s=await getDoc(r);
+    S.chatPrefs=s.exists()?s.data():{};
+  }catch(e){console.warn("chat prefs",e?.code||e);S.chatPrefs={}}
+  applyChatTheme();
+  return S.chatPrefs;
+}
+async function saveChatPrefs(patch){
+  const r=chatPrefRef();if(!r)return;
+  S.chatPrefs={...S.chatPrefs,...patch};
+  await setDoc(r,{...patch,updatedAt:serverTimestamp()},{merge:true});
+  applyChatTheme();
+}
+function applyChatTheme(){
+  const conv=$("#chatPage .conversation");
+  if(conv)conv.dataset.chatTheme=S.chatPrefs.theme||"default";
+}
+async function currentChatMessages(){
+  if(!S.chatId)return [];
+  const s=await getDocs(query(collection(db,"chats",S.chatId,"messages"),orderBy("createdAt","asc"),limit(300)));
+  return s.docs.map(d=>({id:d.id,...d.data()}));
+}
+async function openChatSearch(){
+  closeChatActionPanel();
+  openChatActionPanel("Rechercher",'<div class="chatActionSearch"><input id="chatActionSearchInput" placeholder="Rechercher dans cette discussion..." autofocus></div><div id="chatActionResults" class="chatActionResults"><p class="muted">Tapez un mot pour rechercher.</p></div>');
+  const rows=await currentChatMessages().catch(()=>[]);
+  const input=$("#chatActionSearchInput"),box=$("#chatActionResults");
+  const render=()=>{
+    const q=(input?.value||"").trim().toLowerCase();
+    if(!q){box.innerHTML='<p class="muted">Tapez un mot pour rechercher.</p>';return}
+    const found=rows.filter(m=>((m.text||"")+" "+(m.fileName||"")).toLowerCase().includes(q));
+    box.innerHTML=found.length?found.map(m=>'<div class="chatActionResult"><div>'+esc(m.text||m.fileName||"Média")+'</div><small>'+esc(messageDayLabel(m.createdAt))+' • '+esc(messageClock(m.createdAt))+'</small></div>').join(""):'<p class="muted">Aucun résultat.</p>';
+  };
+  input?.addEventListener("input",render);
+  setTimeout(()=>input?.focus(),60);
+}
+async function openChatMedia(){
+  closeChatActionPanel();
+  openChatActionPanel("Médias, liens et documents",'<div id="chatActionResults" class="chatActionResults"><p class="muted">Chargement…</p></div>');
+  const rows=await currentChatMessages().catch(()=>[]);
+  const items=rows.filter(m=>m.type==="image"||m.type==="audio"||m.type==="document"||/https?:\/\//i.test(m.text||""));
+  const box=$("#chatActionResults");
+  if(!items.length){box.innerHTML='<p class="muted">Aucun média, lien ou document.</p>';return}
+  box.innerHTML=items.map(m=>{
+    if(m.type==="image"&&m.mediaUrl)return '<a class="chatMediaRow" href="'+esc(m.mediaUrl)+'" target="_blank" rel="noopener"><img src="'+esc(m.mediaUrl)+'" alt=""><span>Photo</span><small>'+esc(messageClock(m.createdAt))+'</small></a>';
+    if(m.type==="audio"&&m.mediaUrl)return '<div class="chatMediaRow"><span>🎤 Message vocal</span><audio controls src="'+esc(m.mediaUrl)+'"></audio></div>';
+    if(m.type==="document"&&m.mediaUrl)return '<a class="chatMediaRow" href="'+esc(m.mediaUrl)+'" target="_blank" rel="noopener"><span>📄 '+esc(m.fileName||"Document")+'</span><small>'+esc(messageClock(m.createdAt))+'</small></a>';
+    return '<div class="chatActionResult"><div>'+esc(m.text||"Lien")+'</div><small>'+esc(messageClock(m.createdAt))+'</small></div>';
+  }).join("");
+}
+async function openMutePanel(){
+  await loadChatPrefs();
+  const muted=S.chatPrefs.muted===true;
+  openChatActionPanel("Mode silencieux",'<div class="chatActionOption"><div><b>Notifications de cette discussion</b><small>'+ (muted?"Mode silencieux activé":"Notifications actives") +'</small></div><button id="toggleChatMute" type="button">'+(muted?"Réactiver":"Mettre en silencieux")+'</button></div>');
+  $("#toggleChatMute")?.addEventListener("click",async()=>{
+    await saveChatPrefs({muted:!muted});
+    toast(!muted?"Discussion mise en silencieux.":"Notifications réactivées.");
+    closeChatActionPanel();
+  });
+}
+async function openEphemeralPanel(){
+  await loadChatPrefs();
+  const val=S.chatPrefs.disappearingDuration||"off";
+  openChatActionPanel("Messages éphémères",'<div class="chatActionForm"><p class="muted">Choisissez la durée appliquée à cette discussion.</p><select id="chatDisappearSelect"><option value="off">Désactivé</option><option value="24h">24 heures</option><option value="7d">7 jours</option><option value="90d">90 jours</option></select><button id="saveChatDisappear" type="button">Enregistrer</button></div>');
+  $("#chatDisappearSelect").value=val;
+  $("#saveChatDisappear")?.addEventListener("click",async()=>{
+    await saveChatPrefs({disappearingDuration:$("#chatDisappearSelect").value});
+    toast("Durée des messages éphémères enregistrée.");
+    closeChatActionPanel();
+  });
+}
+async function openThemePanel(){
+  await loadChatPrefs();
+  const theme=S.chatPrefs.theme||"default";
+  openChatActionPanel("Thème de la discussion",'<div class="chatThemeGrid"><button data-chat-theme-choice="default">Clair</button><button data-chat-theme-choice="green">Vert</button><button data-chat-theme-choice="blue">Bleu</button><button data-chat-theme-choice="rose">Rose</button><button data-chat-theme-choice="dark">Sombre</button></div>');
+  $("[data-chat-theme-choice]").forEach(b=>{
+    b.classList.toggle("active",b.dataset.chatThemeChoice===theme);
+    b.onclick=async()=>{
+      await saveChatPrefs({theme:b.dataset.chatThemeChoice});
+      toast("Thème de la discussion enregistré.");
+      closeChatActionPanel();
+    };
+  });
+}
+function openReportPanel(){
+  openChatActionPanel("Signaler",'<div class="chatActionForm"><p class="muted">Les derniers messages seront joints au signalement pour permettre la modération.</p><textarea id="chatReportReason" maxlength="500" placeholder="Pourquoi signalez-vous cette discussion ?"></textarea><button id="confirmChatReport" class="danger" type="button">Envoyer le signalement</button></div>');
+  $("#confirmChatReport")?.addEventListener("click",async()=>{
+    const reason=$("#chatReportReason")?.value.trim()||"";
+    await reportChat(S.chatId,S.chatOtherName,reason);
+    closeChatActionPanel();
+  });
+}
+
 async function blockCurrentPeer(){
   if(!S.chatOtherUid)return;
   try{
-    await setDoc(doc(db,"users",S.user.uid,"blocks",S.chatOtherUid),{blockedAt:serverTimestamp()});
-    toast("Kontak la bloke.");
+    const r=doc(db,"users",S.user.uid,"blocks",S.chatOtherUid),s=await getDoc(r);
+    if(s.exists()){
+      await deleteDoc(r);
+      toast("Kontak la debloke.");
+    }else{
+      await setDoc(r,{blockedUid:S.chatOtherUid,blockedAt:serverTimestamp()});
+      toast("Kontak la bloke.");
+    }
     $("#chatMoreMenu")?.classList.add("hidden");
-  }catch(e){console.error(e);toast("Blokaj la echwe.");}
+  }catch(e){console.error(e);toast("Operasyon blokaj la echwe.");}
 }
 
 async function openChat(id,name){
@@ -664,15 +782,16 @@ async function openChat(id,name){
     '</div>'+
     '<div id="chatMoreMenu" class="waChatMoreMenu hidden">'+
       '<button id="showContactInfoMenu" type="button">Afficher le contact</button>'+
-      '<button type="button" data-chat-menu-info="Recherche dans la discussion à ajouter.">Rechercher</button>'+
-      '<button type="button" data-chat-menu-info="Médias, liens et documents seront regroupés ici.">Médias, liens et documents</button>'+
-      '<button type="button" data-chat-menu-info="Mode silencieux enregistré dans Paramètres.">Mode silencieux</button>'+
-      '<button type="button" data-chat-menu-info="Messages éphémères disponibles dans Paramètres > Discussions.">Messages éphémères</button>'+
-      '<button type="button" data-chat-menu-info="Thèmes de discussion à connecter.">Thème de la discussion</button>'+
+      '<button id="chatMenuSearchBtn" type="button">Rechercher</button>'+
+      '<button id="chatMenuMediaBtn" type="button">Médias, liens et documents</button>'+
+      '<button id="chatMenuMuteBtn" type="button">Mode silencieux</button>'+
+      '<button id="chatMenuDisappearBtn" type="button">Messages éphémères</button>'+
+      '<button id="chatMenuThemeBtn" type="button">Thème de la discussion</button>'+
       '<button id="chatMenuReportBtn" type="button">Signaler</button>'+
-      '<button id="chatMenuBlockBtn" type="button">Bloquer</button>'+
+      '<button id="chatMenuBlockBtn" type="button">Bloquer / débloquer</button>'+
     '</div>';
   watchPeerPresence(S.chatOtherUid);
+  await loadChatPrefs();
   $("#messageForm").classList.remove("hidden");
   if(S.chatOtherUid){
     getDoc(doc(db,"publicProfiles",S.chatOtherUid)).then(pSnap=>{
@@ -694,8 +813,12 @@ async function openChat(id,name){
   $("#videoCallBtn").onclick=()=>callNotReady("video",S.chatOtherName);
   $("#voiceCallBtn").onclick=()=>callNotReady("voice",S.chatOtherName);
   $("#chatMoreBtn").onclick=()=>$("#chatMoreMenu").classList.toggle("hidden");
-  $$("[data-chat-menu-info]").forEach(b=>b.onclick=()=>{toast(b.dataset.chatMenuInfo);$("#chatMoreMenu").classList.add("hidden")});
-  $("#chatMenuReportBtn").onclick=()=>{ $("#chatMoreMenu").classList.add("hidden");reportChat(id,S.chatOtherName); };
+  $("#chatMenuSearchBtn").onclick=()=>{$("#chatMoreMenu").classList.add("hidden");openChatSearch()};
+  $("#chatMenuMediaBtn").onclick=()=>{$("#chatMoreMenu").classList.add("hidden");openChatMedia()};
+  $("#chatMenuMuteBtn").onclick=()=>{$("#chatMoreMenu").classList.add("hidden");openMutePanel()};
+  $("#chatMenuDisappearBtn").onclick=()=>{$("#chatMoreMenu").classList.add("hidden");openEphemeralPanel()};
+  $("#chatMenuThemeBtn").onclick=()=>{$("#chatMoreMenu").classList.add("hidden");openThemePanel()};
+  $("#chatMenuReportBtn").onclick=()=>{$("#chatMoreMenu").classList.add("hidden");openReportPanel()};
   $("#chatMenuBlockBtn").onclick=blockCurrentPeer;
   window.dispatchEvent(new CustomEvent("wbp-chat-open",{detail:{chatId:id,name:S.chatOtherName,uid:S.chatOtherUid}}));
   const q=query(collection(db,"chats",id,"messages"),orderBy("createdAt","asc"),limit(300));
@@ -780,7 +903,7 @@ $("#messageForm").onsubmit=async e=>{
     input?.focus();
   }
 };
-async function reportChat(id,name){const q=query(collection(db,"chats",id,"messages"),orderBy("createdAt","desc"),limit(20)),s=await getDocs(q),excerpt=s.docs.reverse().map(d=>({senderId:d.data().senderId,text:d.data().text||""}));await addDoc(collection(db,"moderationCases"),{reporterId:S.user.uid,type:"chat",targetId:id,title:"Chat ak "+name,excerpt,status:"open",createdAt:serverTimestamp()});toast("Dènye mesaj yo pataje ak moderasyon.")}
+async function reportChat(id,name,reason=""){const q=query(collection(db,"chats",id,"messages"),orderBy("createdAt","desc"),limit(20)),s=await getDocs(q),excerpt=s.docs.reverse().map(d=>({senderId:d.data().senderId,text:d.data().text||""}));await addDoc(collection(db,"moderationCases"),{reporterId:S.user.uid,type:"chat",targetId:id,title:"Chat ak "+name,reason,excerpt,status:"open",createdAt:serverTimestamp()});toast("Signalement voye bay moderasyon.")}
 
 function watchSupport(){const r=doc(db,"supportThreads",S.user.uid);setDoc(r,{userId:S.user.uid,updatedAt:serverTimestamp()},{merge:true}).catch(()=>{});const q=query(collection(db,"supportThreads",S.user.uid,"messages"),orderBy("createdAt","asc"),limit(200));addOff(onSnapshot(q,s=>{$("#supportMessages").innerHTML=s.docs.map(d=>{const m=d.data();return `<div class="msg ${m.senderId===S.user.uid?"me":""}">${esc(m.text||"")}</div>`}).join("");$("#supportMessages").scrollTop=$("#supportMessages").scrollHeight}))}
 $("#supportForm").onsubmit=async e=>{e.preventDefault();const t=$("#supportText").value.trim();if(!t)return;await addDoc(collection(db,"supportThreads",S.user.uid,"messages"),{senderId:S.user.uid,text:t,createdAt:serverTimestamp()});await setDoc(doc(db,"supportThreads",S.user.uid),{userId:S.user.uid,userLabel:S.profile.displayName||S.profile.username||S.user.phoneNumber||"",updatedAt:serverTimestamp()},{merge:true});$("#supportText").value=""};
