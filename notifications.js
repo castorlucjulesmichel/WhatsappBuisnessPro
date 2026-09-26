@@ -17,7 +17,7 @@ if(configured()){
      const unread=rows.filter(x=>x.read!==true).length;
      const badge=$("#notificationBadge");if(badge){badge.textContent=unread;badge.classList.toggle("hidden",unread===0)}
      if($("#notificationList")) $("#notificationList").innerHTML=rows.length?rows.map(n=>`<div class="notificationItem ${n.read===true?"":"unread"}" data-notification="${n.id}" role="button" tabindex="0"><div>${esc(n.title||"Notifikasyon")}</div><small>${esc(n.message||"")}</small></div>`).join(""):'<p class="muted">Pa gen notifikasyon.</p>';
-     $("[data-notification]").forEach(el=>{
+     $$("[data-notification]").forEach(el=>{
        const mark=async()=>{
          try{
            await updateDoc(doc(db,"notifications",el.dataset.notification),{read:true,readAt:serverTimestamp()});
