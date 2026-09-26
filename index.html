@@ -139,11 +139,12 @@
 </section>
 
 <section id="callsPage" class="page whatsappCallsPage">
- <div class="waChatsHead"><h1>Appels</h1><div class="waChatsHeadActions"><button class="waIconBtn" type="button">⌕</button><button class="waIconBtn" type="button">⋮</button></div></div>
- <div class="card waCallsIntro">
+ <div class="waChatsHead"><h1>Appels</h1><div class="waChatsHeadActions"><button id="callsSearchBtn" class="waIconBtn" type="button">⌕</button><button id="callsMenuBtn" class="waIconBtn" type="button">⋮</button></div></div>
+ <input id="callsSearchInput" class="waSubSearch hidden" placeholder="Rechercher dans les appels...">
+ <button id="createCallLinkBtn" class="card waCallsIntro" type="button">
   <div class="waCallCircle">🔗</div>
-  <div><b>Créer un lien d’appel</b><small>Partagez un lien pour un appel audio ou vidéo dans Whatsapp Business Pro.</small></div>
- </div>
+  <div><b>Créer un lien d’appel</b><small>Partagez un lien pour recevoir un appel vocal ou vidéo.</small></div>
+ </button>
  <h3 class="waSectionLabel">Récents</h3>
  <div id="callsList" class="waCallsList"><p class="muted">Aucun appel récent.</p></div>
 </section>
