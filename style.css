@@ -137,11 +137,47 @@ html[data-theme="dark"] .waFilter{color:var(--text);border-color:#44504c}
 .waSettingsDetail .toggleRow{padding:15px 0}.waSettingsDetail .toggleRow b{font-size:17px;font-weight:500}.waSettingsDetail .toggleRow input[type="checkbox"]{width:50px;height:27px}
 .dangerText{color:#b42318}.waListsHero{text-align:center;padding:14px 10px 8px}.waListsArt{font-size:38px;color:#17ad63;word-spacing:16px}.waListsHero p{color:#646a67;line-height:1.45}
 .waCreateListRow{display:flex;gap:8px}.waCreateListRow input{flex:1}.waPresetList{display:grid;grid-template-columns:52px 1fr;align-items:center;gap:12px;padding:12px 0}.waPresetList>span{font-size:28px;color:#65706b}.waPresetList div{display:flex;flex-direction:column;gap:3px}.waPresetList b{font-size:17px;font-weight:500}.waPresetList small{color:#6d7370}
-.waProfilePage{padding-left:0;padding-right:0}.waProfilePage .waSubHead{margin:0;padding:0 18px}.waBusinessProfileForm{background:#fff}.waProfileHero{height:340px;background:#f5f4f3;display:grid;place-items:center;position:relative}
-.waProfileAvatar{width:190px;height:190px;border-radius:50%;object-fit:cover;background:#ddd;border:5px solid #fff}.waCameraFab{position:absolute;left:calc(50% + 55px);top:210px;background:#111;color:#fff;width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-size:24px}
-.waPublicNote{text-align:center;color:#666;padding:10px 18px}.waBusinessProfileForm>.waSectionTitle{padding:0 28px}
-.waProfileField{display:grid;grid-template-columns:54px 1fr;align-items:center;gap:12px;padding:10px 28px}.waProfileField>span{font-size:23px;color:#68706c}.waProfileField input,.waProfileField textarea,.waProfileField select{border:0;border-bottom:1px solid #eee;border-radius:0;padding:13px 0;background:#fff}
-.waProfilePhone{padding:14px 28px;font-size:17px}.waBusinessProfileForm>.waSettingRow{padding-left:28px;padding-right:28px}.waBusinessProfileForm>.waSaveWide{width:calc(100% - 56px);margin-left:28px}
+.waProfilePage{max-width:760px;padding:0 14px 110px;background:var(--bg)}
+.profileTopBar{display:flex;align-items:center;justify-content:space-between;padding:18px 4px 12px}
+.profileTopBar h2{margin:0;font-size:30px;letter-spacing:-.5px}
+.profileTopIcon{width:44px;height:44px;padding:0;border-radius:50%;display:grid;place-items:center;background:var(--card)!important;color:var(--text)!important;border:1px solid var(--line)}
+.profileSummaryCard{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:22px 18px 18px;text-align:center;margin-bottom:14px}
+.profileAvatarWrap{width:126px;height:126px;margin:0 auto;position:relative}
+.waProfileAvatar{width:126px;height:126px;border-radius:50%;object-fit:cover;background:#e5ece9;border:4px solid var(--card);box-shadow:0 0 0 1px var(--line)}
+.waCameraFab{position:absolute;right:0;bottom:3px;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#111;color:#fff;border:3px solid var(--card);font-size:18px;cursor:pointer}
+.profileIdentity h3{margin:13px 0 2px;font-size:23px}
+.profileIdentity p{margin:0;color:var(--muted)}
+.profileRoleBadge{display:inline-block;margin-top:8px;padding:5px 10px;border-radius:999px;background:#e8f6ef;color:#08704f;font-size:12px;font-weight:800}
+.profileQuickActions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px}
+.profileQuickActions button{min-height:44px;border-radius:14px}
+.waBusinessProfileForm{background:transparent}
+.profileSectionCard{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:6px 14px;margin-bottom:12px;overflow:hidden}
+.profileSectionTitle{font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.35px;padding:14px 4px 6px}
+.waProfileField{display:grid;grid-template-columns:38px 1fr;align-items:start;gap:10px;padding:10px 3px;border-bottom:1px solid var(--line)}
+.waProfileField:last-child{border-bottom:0}
+.waProfileField>span{font-size:20px;color:#68706c;padding-top:18px;text-align:center}
+.waProfileField>div{min-width:0}
+.waProfileField small{display:block;color:var(--muted);font-size:11px;margin-bottom:2px}
+.waProfileField input,.waProfileField textarea,.waProfileField select{border:0!important;border-radius:0!important;padding:5px 0 8px!important;background:transparent!important;box-shadow:none!important}
+.waProfileField textarea{min-height:68px}
+.waProfilePhone{margin:0;padding:11px 3px;color:var(--muted);font-size:13px}
+.profileLinkRow{width:100%;display:grid;grid-template-columns:38px 1fr 20px;align-items:center;gap:10px;background:transparent!important;color:var(--text)!important;text-align:left;padding:13px 3px;border-radius:0;border-bottom:1px solid var(--line);font-weight:500}
+.profileLinkRow:last-child{border-bottom:0}
+.profileLinkRow>span:first-child{font-size:20px;text-align:center}
+.profileLinkRow>div{display:flex;flex-direction:column;gap:2px}
+.profileLinkRow small{color:var(--muted);font-size:12px;font-weight:500}
+.profileSaveBtn{width:100%;min-height:50px;border-radius:16px;margin:2px 0 14px;font-size:16px}
+.profileUtilityCard{padding-top:0;padding-bottom:0}
+#profileAssistantBox{border-radius:20px}
+@media(max-width:560px){
+ .waProfilePage{padding-left:10px;padding-right:10px}
+ .profileTopBar{padding-top:max(14px,env(safe-area-inset-top))}
+ .profileTopBar h2{font-size:28px}
+ .profileSummaryCard{padding:18px 14px 15px}
+ .profileAvatarWrap,.waProfileAvatar{width:112px;height:112px}
+ .waCameraFab{width:39px;height:39px}
+ .profileQuickActions{gap:7px}
+}
 html[data-theme="dark"] .waSubPage,html[data-theme="dark"] .waSettingsPage,html[data-theme="dark"] .waProfilePage,html[data-theme="dark"] .waSubHead,html[data-theme="dark"] .waSettingsProfile,html[data-theme="dark"] .waSettingRow,html[data-theme="dark"] .waContactAction,html[data-theme="dark"] .waContactPerson,html[data-theme="dark"] .waBusinessProfileForm{background:var(--card);color:var(--text)}
 @media(max-width:560px){.waSubPage,.waSettingsPage{padding-left:14px;padding-right:14px}.waSubHead{margin-left:-14px;margin-right:-14px;padding-left:14px;padding-right:14px}.waSubHead h2{font-size:25px}.waPhoneRow{grid-template-columns:36px 125px 1fr}.waSelectRow{grid-template-columns:1fr 135px}.waProfileHero{height:280px}.waProfileAvatar{width:160px;height:160px}.waCameraFab{top:175px}}
 
