@@ -1104,7 +1104,23 @@ async function loadBusiness(){const [b,s]=await Promise.all([getDoc(doc(db,"busi
   if($("#businessEmailProfile"))$("#businessEmailProfile").value=x.email||"";
 }if(s.exists()){const x=s.data().businessTools||{};$("#greetingMessage").value=x.greetingMessage||"";$("#awayMessage").value=x.awayMessage||"";$("#quickReplies").value=x.quickReplies||""}}
 
-async function reportCase(type,targetId,title){await addDoc(collection(db,"moderationCases"),{reporterId:S.user.uid,type,targetId,title,status:"open",createdAt:serverTimestamp()});toast("Rapò voye.")}
+async function reportCase(type,targetId,title){
+  const payload={reporterId:S.user.uid,type,targetId,title,status:"open",createdAt:serverTimestamp()};
+  try{
+    await addDoc(collection(db,"moderationCases"),payload);
+    toast("Signalement anrejistre.");
+  }catch(e){
+    console.warn("moderation case fallback",e?.code||e);
+    try{
+      await setDoc(doc(db,"supportThreads",S.user.uid),{userId:S.user.uid,updatedAt:serverTimestamp()},{merge:true});
+      await addDoc(collection(db,"supportThreads",S.user.uid,"messages"),{
+        senderId:S.user.uid,text:"[SIGNALEMENT] "+title+" • "+type+" • "+targetId,
+        createdAt:serverTimestamp()
+      });
+      toast("Signalement anrejistre.");
+    }catch(x){console.error(x);toast("Signalement pa t anrejistre.");}
+  }
+}
 
 $("#assistantForm").onsubmit=e=>{e.preventDefault();const t=$("#assistantInput").value.trim();if(!t)return;const low=t.toLowerCase();let a="Mwen ka ede w ak chat, marketplace, wallet, envestisman, Business Pro ak boost.";if(low.includes("depo"))a="Ale nan Wallet pou fè depo/retrè. Pou Boost, ale Business Pro > Boost & Ads epi chwazi MonCash oswa NatCash.";else if(low.includes("boost")||low.includes("piblisite"))a="Nan Business Pro, depoze nan Ad Wallet an HTG oswa USD, chwazi pwodwi/clip, bidjè pa jou, dire ak odyans, epi voye boost la pou validasyon.";else if(low.includes("vann"))a="Ale Marketplace > + Vann pou mete pwodwi a.";$("#assistantMessages").innerHTML+=`<div class="msg me">${esc(t)}</div><div class="msg">${esc(a)}</div>`;$("#assistantInput").value=""};
 
