@@ -455,6 +455,7 @@ $("#pickerNewContactBtn")?.addEventListener("click",()=>showPage("newContact"));
 $("#importPhoneContactsBtn")?.addEventListener("click",async()=>{if(openNativeContactSelector())return;await importPhoneContacts();});
 $("#pickerNewGroupBtn")?.addEventListener("click",()=>{showPage("chat");setTimeout(()=>$("#newGroupBox")?.classList.remove("hidden"),50)});
 $("#contactPickerSearchBtn")?.addEventListener("click",()=>$("#contactPickerSearch")?.classList.toggle("hidden"));
+$("#contactPickerMenuBtn")?.addEventListener("click",()=>window.WBP_ROUTE?.("settings"));
 $("#contactPickerSearch")?.addEventListener("input",render);
 window.addEventListener("wbp-language-changed",render);
 $("#newContactForm")?.addEventListener("submit",async e=>{
