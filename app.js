@@ -746,7 +746,7 @@ async function openThemePanel(){
   await loadChatPrefs();
   const theme=S.chatPrefs.theme||"default";
   openChatActionPanel("Thème de la discussion",'<div class="chatThemeGrid"><button data-chat-theme-choice="default">Clair</button><button data-chat-theme-choice="green">Vert</button><button data-chat-theme-choice="blue">Bleu</button><button data-chat-theme-choice="rose">Rose</button><button data-chat-theme-choice="dark">Sombre</button></div>');
-  $("[data-chat-theme-choice]").forEach(b=>{
+  $$("[data-chat-theme-choice]").forEach(b=>{
     b.classList.toggle("active",b.dataset.chatThemeChoice===theme);
     b.onclick=async()=>{
       await saveChatPrefs({theme:b.dataset.chatThemeChoice});
