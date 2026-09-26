@@ -1,0 +1,29 @@
+name: Firebase Rules Check
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "firestore.rules"
+      - "storage.rules"
+      - "firebase.json"
+      - ".firebaserc"
+      - ".github/workflows/firebase-rules-check.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rules:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+      - name: Install Firebase CLI
+        run: npm install --no-save firebase-tools@14
+      - name: Start emulators and compile rules
+        run: npx firebase emulators:exec --only firestore,storage "echo Firebase rules loaded successfully" --project whatsappbusinesspro
