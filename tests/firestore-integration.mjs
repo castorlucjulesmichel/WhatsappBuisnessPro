@@ -60,6 +60,10 @@ await assertSucceeds(addDoc(collection(u1,"chats",chatId,"messages"),{
 await assertSucceeds(setDoc(doc(u1,"users","user-one","chatPrefs",chatId),{
   theme:"green",disappearingDuration:"24h",updatedAt:serverTimestamp()
 }));
+await assertSucceeds(setDoc(doc(u1,"users","user-one","callHistory","call-1"),{
+  userId:"user-one",chatId,peerUid:"user-two",name:"User Two",mode:"voice",
+  direction:"outgoing",status:"terminé",clientAtMs:Date.now(),createdAt:serverTimestamp()
+}));
 
 await assertSucceeds(setDoc(doc(u1,"users","user-one","blocks","user-two"),{
   blockedUid:"user-two",blockedAt:serverTimestamp()
@@ -132,5 +136,5 @@ await assertSucceeds(updateDoc(doc(adminDb,"financialRequests",financial.id),{
   status:"approved",reviewedBy:"admin-one",reviewedAt:serverTimestamp()
 }));
 
-console.log("Firestore integration passed: chat, blocking, status contacts, products, orders, video interactions, finance, boost, support, moderation and activity logs.");
+console.log("Firestore integration passed: chat, blocking, call history, status contacts, products, orders, video interactions, finance, boost, support, moderation and activity logs.");
 await env.cleanup();
