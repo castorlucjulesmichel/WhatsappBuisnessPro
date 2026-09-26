@@ -559,3 +559,23 @@ html[data-theme="dark"] .chatInfoActions button{background:var(--card)!important
 .conversation[data-chat-theme="dark"] #messages{background:#17211e!important}
 .conversation[data-chat-theme="dark"] .msg:not(.me){background:#24302c;color:#fff;border-color:#33433d}
 .conversation[data-chat-theme="dark"] .msg.me{background:#075e54;color:#fff;border-color:#0b6e62}
+
+
+/* Real voice/video call overlay v49 */
+.callOverlay{position:fixed;inset:0;z-index:7000;background:#101714;color:#fff;display:grid;place-items:center}
+.callStage{position:relative;width:100%;height:100%;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 18px calc(30px + env(safe-area-inset-bottom));overflow:hidden}
+.callRemoteVideo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#0b100e}
+.callLocalVideo{position:absolute;right:16px;top:max(18px,env(safe-area-inset-top));width:112px;height:158px;object-fit:cover;border-radius:16px;border:2px solid #ffffff55;background:#222;z-index:2;box-shadow:0 8px 24px #0006}
+.callAvatar{width:126px;height:126px;border-radius:50%;display:grid;place-items:center;background:#20302a;font-size:54px;margin-bottom:18px;z-index:2}
+.callStage h2,.callStage p{z-index:2;text-shadow:0 2px 8px #0008}
+.callStage h2{margin:0 0 6px;font-size:28px}
+.callStage p{margin:0;color:#d3ded9}
+.callActions{position:absolute;left:0;right:0;bottom:calc(32px + env(safe-area-inset-bottom));z-index:3;display:flex;justify-content:center;gap:22px}
+.callBtn{width:64px;height:64px;border-radius:50%;padding:0;display:grid;place-items:center;font-size:26px;background:#2a3934;color:#fff}
+.callAccept{background:#19a463!important}
+.callEnd{background:#d92d20!important}
+@media(max-width:560px){
+ .callLocalVideo{width:94px;height:132px;right:12px}
+ .callBtn{width:58px;height:58px;font-size:23px}
+ .callAvatar{width:112px;height:112px;font-size:48px}
+}
