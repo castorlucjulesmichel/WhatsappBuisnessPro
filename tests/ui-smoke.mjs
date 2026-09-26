@@ -74,7 +74,7 @@ await page.evaluate(()=>{
   document.querySelector("#adminGate")?.classList.add("hidden");
   document.querySelector("#adminApp")?.classList.remove("hidden");
 });
-const adminTabs=await page.$eval("[data-admin]",els=>els.map(e=>e.dataset.admin));
+const adminTabs=await page.$$eval("[data-admin]",els=>els.map(e=>e.dataset.admin));
 for(const name of adminTabs){
   await page.click('[data-admin="'+name+'"]');
   const active=await page.$eval("#"+name+"Admin",e=>e.classList.contains("active"));
