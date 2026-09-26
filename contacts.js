@@ -1,7 +1,7 @@
 import {firebaseConfig} from "./firebase-config.js";
 import {getApps,getApp,initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {getAuth,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import {getFirestore,doc,getDoc,setDoc,collection,query,where,getDocs,onSnapshot,serverTimestamp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import {getFirestore,doc,getDoc,setDoc,deleteDoc,collection,query,where,getDocs,onSnapshot,serverTimestamp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const toast=t=>{const e=$("#toast");if(!e)return;e.textContent=t;e.classList.add("show");setTimeout(()=>e.classList.remove("show"),2300)};
@@ -91,14 +91,21 @@ async function refreshDirectoryLinks(rows=contacts){
         targetUid=found?.uid||"";
         if(found?.username)targetUsername=found.username;
       }
-      if(targetUid&&contact.contactUid!==targetUid){
-        await setDoc(doc(db,"users",user.uid,"contacts",contact.id),{
+      if(targetUid){
+        const targetRef=doc(db,"users",user.uid,"contacts",targetUid);
+        await setDoc(targetRef,{
           contactUid:targetUid,
           username:targetUsername,
+          displayName:contact.displayName||targetUsername||"Contact",
+          phone,
+          importedFromPhone:contact.importedFromPhone===true,
           linkedByPhone:true,
           updatedAt:serverTimestamp()
         },{merge:true});
-      }else if(!targetUid&&contact.linkedByPhone===true&&contact.contactUid){
+        if(contact.id!==targetUid&&(contact.importedFromPhone===true||contact.linkedByPhone===true)){
+          await deleteDoc(doc(db,"users",user.uid,"contacts",contact.id)).catch(()=>{});
+        }
+      }else if(contact.linkedByPhone===true&&contact.contactUid){
         await setDoc(doc(db,"users",user.uid,"contacts",contact.id),{
           contactUid:"",
           linkedByPhone:false,
@@ -144,11 +151,12 @@ async function saveImportedContacts(items){
   for(let i=0;i<pending.length;i+=CHUNK){
     const chunk=pending.slice(i,i+CHUNK);
     const results=await Promise.allSettled(chunk.map(async item=>{
-      const ref=doc(db,"users",user.uid,"contacts",item.id);
-      const snap=await getDoc(ref);
-      if(snap.exists())return "skipped";
       const isSelfPhone=normalizePhone(accountPhone||user?.phoneNumber||"")===item.phone;
       const found=isSelfPhone?{uid:user.uid,username:""}:await lookupAppUserByPhone(item.phone);
+      const docId=found?.uid||item.id;
+      const ref=doc(db,"users",user.uid,"contacts",docId);
+      const snap=await getDoc(ref);
+      if(snap.exists())return "skipped";
       await setDoc(ref,{
         contactUid:found?.uid||"",
         username:found?.username||"",
@@ -156,6 +164,7 @@ async function saveImportedContacts(items){
         phone:item.phone,
         importedFromPhone:true,
         isSelfContact:isSelfPhone,
+        linkedByPhone:!!found?.uid,
         createdAt:serverTimestamp(),
         updatedAt:serverTimestamp()
       });
