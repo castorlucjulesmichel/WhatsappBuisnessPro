@@ -25,7 +25,7 @@ service firebase.storage {
       allow read: if signedIn()
         && (
           owner(uid)
-          || firestore.exists(/databases/(default)/documents/users/$(uid)/contacts/$(request.auth.uid))
+          || firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)/contacts/$(uid))
           || firestore.get(/databases/(default)/documents/statuses/$(statusId)).data.boostActive == true
         );
       allow write: if owner(uid)
