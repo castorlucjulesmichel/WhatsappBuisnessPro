@@ -9,7 +9,7 @@ const toast=t=>{const e=$("#toast");if(!e)return;e.textContent=t;e.classList.add
 
 let auth=null,db=null,user=null,currentChat="",currentPeer="",currentName="Contact";
 let pc=null,localStream=null,activeCall=null,pendingOffer=null;
-let chatsOff=null,signalOffs=new Map(),seenSignals=new Set(),candidateQueue=new Map();
+let chatsOff=null,historyOff=null,signalOffs=new Map(),seenSignals=new Set(),candidateQueue=new Map();
 
 if(configured()){
   const app=getApps().length?getApp():initializeApp(firebaseConfig);
@@ -21,9 +21,23 @@ function historyKey(){return user?"wbp_call_history_"+user.uid:"wbp_call_history
 function readHistory(){try{return JSON.parse(localStorage.getItem(historyKey())||"[]")}catch{return []}}
 function writeHistory(rows){localStorage.setItem(historyKey(),JSON.stringify(rows.slice(0,80)));renderHistory()}
 function addHistory(row){
+  const rec={id:crypto.randomUUID(),at:Date.now(),...row};
   const rows=readHistory();
-  rows.unshift({id:crypto.randomUUID(),at:Date.now(),...row});
+  rows.unshift(rec);
   writeHistory(rows);
+  if(user&&db){
+    setDoc(doc(db,"users",user.uid,"callHistory",rec.id),{
+      userId:user.uid,
+      chatId:rec.chatId||"",
+      peerUid:rec.peerUid||"",
+      name:rec.name||"Contact",
+      mode:rec.mode||"voice",
+      direction:rec.direction||"outgoing",
+      status:rec.status||"terminé",
+      clientAtMs:rec.at,
+      createdAt:serverTimestamp()
+    }).catch(e=>console.warn("call history sync",e?.code||e));
+  }
 }
 function renderHistory(){
   const box=$("#callsList");if(!box)return;
@@ -293,8 +307,17 @@ async function watchChatsFallbackForCalls(uid){
 
 if(configured())onAuthStateChanged(auth,u=>{
   user=u;clearSignalWatchers();seenSignals.clear();
-  chatsOff?.();chatsOff=null;renderHistory();
+  chatsOff?.();chatsOff=null;
+  historyOff?.();historyOff=null;
+  renderHistory();
   if(!u){cleanupCall();return}
+  historyOff=onSnapshot(query(collection(db,"users",u.uid,"callHistory"),orderBy("createdAt","desc"),limit(80)),s=>{
+    const remote=s.docs.map(d=>{
+      const x=d.data()||{};
+      return {id:d.id,at:x.createdAt?.toMillis?.()||Number(x.clientAtMs||Date.now()),chatId:x.chatId||"",peerUid:x.peerUid||"",name:x.name||"Contact",mode:x.mode||"voice",direction:x.direction||"outgoing",status:x.status||"terminé"};
+    });
+    if(remote.length)writeHistory(remote);
+  },e=>console.warn("call history watch",e?.code||e));
   const q=query(collection(db,"chats"),where("participants","array-contains",u.uid),limit(60));
   chatsOff=onSnapshot(q,s=>{
     for(const d of s.docs)watchChatSignals(d.id);
