@@ -70,8 +70,9 @@ function queueActivity(payload={},opts={}){
 }
 async function sendRecord(rec){
   if(!user||!db)return false;
+  if(rec.userId&&rec.userId!==user.uid)return false;
   await addDoc(collection(db,"userActivity"),{
-    ...rec,userId:user.uid,createdAt:serverTimestamp()
+    ...rec,userId:rec.userId||user.uid,createdAt:serverTimestamp()
   });
   return true;
 }
@@ -85,7 +86,10 @@ async function flushQueue(){
     let blocked=false;
     for(const rec of rows.slice(-300)){
       if(blocked){remaining.push(rec);continue}
-      try{await sendRecord(rec)}
+      try{
+        const sent=await sendRecord(rec);
+        if(!sent)remaining.push(rec);
+      }
       catch(e){
         console.warn("activity sync",e?.code||e);
         remaining.push(rec);
