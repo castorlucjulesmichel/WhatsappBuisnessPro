@@ -69,6 +69,7 @@ if(!await page.$eval("#settingsPage",e=>e.classList.contains("active")))errors.p
 
 
 await page.goto("http://127.0.0.1:4173/admin.html",{waitUntil:"networkidle",timeout:90000});
+await page.waitForTimeout(1200);
 await page.evaluate(()=>{
   document.querySelector("#adminGate")?.classList.add("hidden");
   document.querySelector("#adminApp")?.classList.remove("hidden");
