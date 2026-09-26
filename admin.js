@@ -142,7 +142,7 @@ function renderOrders(){
   $("#adminOrders").innerHTML=rows.map(o=>`<div class="adminRow"><b>${money(o.total,o.currency)} • ${esc(o.status||"pending")}</b><br>
   <span class="muted">Achtè: ${esc(label(o.buyerId))} • Vandè: ${esc(label(o.sellerId))} • Komisyon: ${money(o.platformCommission||0,o.currency)}</span>
   ${o.status==="pending"?`<div class="actions"><button data-order="${o.id}" data-os="approved">Valide vant</button><button class="danger" data-order="${o.id}" data-os="rejected">Rejte</button></div>`:""}</div>`).join("")||'<p class="muted">Pa gen kòmand.</p>';
-  $("[data-order]").forEach(b=>b.onclick=async()=>{const r=doc(db,"orders",b.dataset.order),s=await getDoc(r);await updateDoc(r,{status:b.dataset.os,reviewedBy:admin.uid,reviewedAt:serverTimestamp()});if(s.exists()){await addDoc(collection(db,"notifications"),{recipientId:s.data().buyerId,title:"Kòmand mete ajou",message:"Estati kòmand ou: "+b.dataset.os,read:false,createdAt:serverTimestamp()});await addDoc(collection(db,"notifications"),{recipientId:s.data().sellerId,title:"Vant mete ajou",message:"Estati vant la: "+b.dataset.os,read:false,createdAt:serverTimestamp()})}toast("Kòmand mete ajou.");loadAll()});
+  $$("[data-order]").forEach(b=>b.onclick=async()=>{const r=doc(db,"orders",b.dataset.order),s=await getDoc(r);await updateDoc(r,{status:b.dataset.os,reviewedBy:admin.uid,reviewedAt:serverTimestamp()});if(s.exists()){await addDoc(collection(db,"notifications"),{recipientId:s.data().buyerId,title:"Kòmand mete ajou",message:"Estati kòmand ou: "+b.dataset.os,read:false,createdAt:serverTimestamp()});await addDoc(collection(db,"notifications"),{recipientId:s.data().sellerId,title:"Vant mete ajou",message:"Estati vant la: "+b.dataset.os,read:false,createdAt:serverTimestamp()})}toast("Kòmand mete ajou.");loadAll()});
 }
 
 function renderVideos(){
@@ -153,7 +153,7 @@ function renderVideos(){
 function renderInvestments(){
   $("#adminInvestments").innerHTML=data.investments.map(x=>`<div class="adminRow"><b>${esc(x.levelName||"Envestisman")} • ${money(x.amount,x.currency)}</b><br><span class="muted">${esc(label(x.userId))} • ${esc(x.status||"pending")}</span>
   ${x.status==="pending"?`<div class="actions"><button data-investment="${x.id}" data-is="approved">Apwouve</button><button class="danger" data-investment="${x.id}" data-is="rejected">Rejte</button></div>`:""}</div>`).join("")||'<p class="muted">Pa gen demann envestisman.</p>';
-  $("[data-investment]").forEach(b=>b.onclick=async()=>{const r=doc(db,"investments",b.dataset.investment),s=await getDoc(r);await updateDoc(r,{status:b.dataset.is,reviewedBy:admin.uid,reviewedAt:serverTimestamp()});if(s.exists())await addDoc(collection(db,"notifications"),{recipientId:s.data().userId,title:"Envestisman mete ajou",message:"Estati demann ou: "+b.dataset.is,read:false,createdAt:serverTimestamp()});toast("Envestisman mete ajou.");loadAll()});
+  $$("[data-investment]").forEach(b=>b.onclick=async()=>{const r=doc(db,"investments",b.dataset.investment),s=await getDoc(r);await updateDoc(r,{status:b.dataset.is,reviewedBy:admin.uid,reviewedAt:serverTimestamp()});if(s.exists())await addDoc(collection(db,"notifications"),{recipientId:s.data().userId,title:"Envestisman mete ajou",message:"Estati demann ou: "+b.dataset.is,read:false,createdAt:serverTimestamp()});toast("Envestisman mete ajou.");loadAll()});
 }
 
 function renderCases(){
