@@ -3,7 +3,7 @@
 <div id="adminApp" class="hidden"><header><div><b>Whatssap Business Pro — Admin</b><small id="adminIdentity"></small></div><div class="headerActions"><button id="refreshAdmin">Rafrechi</button><button id="adminLogout" class="ghost">Soti</button></div></header>
 <main class="adminMain">
 <div class="metrics"><div><b id="aUsers">0</b><span>Itilizatè</span></div><div><b id="aProducts">0</b><span>Pwodwi</span></div><div><b id="aVideos">0</b><span>Videyo</span></div><div><b id="aPending">0</b><span>An atant</span></div><div><b id="aOrders">0</b><span>Kòmand</span></div><div><b id="aInvestments">0</b><span>Envestisman</span></div></div>
-<div class="adminTabs"><button data-admin="users" class="active">Itilizatè</button><button data-admin="requests">Demand</button><button data-admin="orders">Vant/Kòmand</button><button data-admin="videos">Videyo</button><button data-admin="investments">Envestisman</button><button data-admin="support">Chat sipò</button><button data-admin="moderation">Moderasyon</button><button data-admin="levels">Nivo</button><button data-admin="boost">Boost & Ads</button><button data-admin="ledger">Tranzaksyon</button></div>
+<div class="adminTabs"><button data-admin="users" class="active">Itilizatè</button><button data-admin="requests">Demand</button><button data-admin="orders">Vant/Kòmand</button><button data-admin="videos">Videyo</button><button data-admin="investments">Envestisman</button><button data-admin="support">Chat sipò</button><button data-admin="moderation">Moderasyon</button><button data-admin="levels">Nivo</button><button data-admin="boost">Boost & Ads</button><button data-admin="activity">Aktivite</button><button data-admin="ledger">Tranzaksyon</button></div>
 <section id="usersAdmin" class="adminSection active"><div class="card"><h2>Itilizatè</h2><input id="userSearch" placeholder="Chèche non, telefòn, username..."><div id="adminUsers"></div></div></section>
 <section id="requestsAdmin" class="adminSection"><div class="card"><h2>Depo / Retrè / Transfè / Echanj / Payout</h2><div id="adminRequests"></div></div></section>
 <section id="ordersAdmin" class="adminSection"><div class="card"><h2>Vant & Kòmand</h2><div id="adminOrders"></div></div></section>
@@ -16,6 +16,14 @@
  <div class="metrics"><div><b id="aAdTopups">0</b><span>Depo Ads an atant</span></div><div><b id="aCampaigns">0</b><span>Kanpay</span></div></div>
  <div class="card"><h2>Depo Boost — MonCash / NatCash</h2><div id="adminAdTopups"></div></div>
  <div class="card"><h2>Kanpay Boost</h2><div id="adminCampaigns"></div></div>
+</section>
+<section id="activityAdmin" class="adminSection">
+ <div class="card">
+  <h2>Aktivite itilizatè yo</h2>
+  <p class="muted">Bouton, navigasyon, fòm, paramèt, chat ak lòt aksyon yo anrejistre san kontni prive mesaj yo.</p>
+  <input id="activitySearch" placeholder="Chèche itilizatè, aksyon oswa paj...">
+  <div id="adminActivity"></div>
+ </div>
 </section>
 <section id="ledgerAdmin" class="adminSection">
  <div class="card">
