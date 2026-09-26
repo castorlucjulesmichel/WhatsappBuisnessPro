@@ -524,6 +524,46 @@ $("#chatCameraBtn")?.addEventListener("click",()=>{
 });
 $("#chatMenuBtn")?.addEventListener("click",()=>go("settings"));
 
+function chatLocale(){
+  const l=$("#lang")?.value||localStorage.getItem("wbp_lang")||"ht";
+  return {ht:"ht-HT",fr:"fr-FR",en:"en-US",es:"es-ES"}[l]||"fr-FR";
+}
+function messageDate(v){
+  if(!v)return null;
+  if(v instanceof Date)return v;
+  if(typeof v?.toDate==="function")return v.toDate();
+  if(v?.seconds)return new Date(v.seconds*1000);
+  const d=new Date(v);
+  return Number.isNaN(d.getTime())?null:d;
+}
+function localDayKey(d){
+  if(!d)return "";
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function messageClock(v){
+  const d=messageDate(v);if(!d)return "";
+  return new Intl.DateTimeFormat(chatLocale(),{hour:"2-digit",minute:"2-digit"}).format(d);
+}
+function messageDayLabel(v){
+  const d=messageDate(v);if(!d)return "";
+  const now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const day=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+  const diff=Math.round((today-day)/86400000);
+  const l=$("#lang")?.value||localStorage.getItem("wbp_lang")||"ht";
+  const labels={
+    ht:{today:"Jodi a",yesterday:"Yè"},
+    fr:{today:"Aujourd’hui",yesterday:"Hier"},
+    en:{today:"Today",yesterday:"Yesterday"},
+    es:{today:"Hoy",yesterday:"Ayer"}
+  }[l]||{today:"Aujourd’hui",yesterday:"Hier"};
+  if(diff===0)return labels.today;
+  if(diff===1)return labels.yesterday;
+  if(diff>1&&diff<7){
+    const s=new Intl.DateTimeFormat(chatLocale(),{weekday:"long"}).format(d);
+    return s.charAt(0).toUpperCase()+s.slice(1);
+  }
+  return new Intl.DateTimeFormat(chatLocale(),{day:"numeric",month:"long",year:"numeric"}).format(d);
+}
 function messageContent(m){
   if(m.type==="image"&&m.mediaUrl)return '<img class="chatMediaImage" src="'+esc(m.mediaUrl)+'" alt="">'+(m.text?'<div>'+esc(m.text)+'</div>':'');
   if(m.type==="audio"&&m.mediaUrl)return '<audio class="chatAudio" controls src="'+esc(m.mediaUrl)+'"></audio>';
@@ -660,9 +700,22 @@ async function openChat(id,name){
   window.dispatchEvent(new CustomEvent("wbp-chat-open",{detail:{chatId:id,name:S.chatOtherName,uid:S.chatOtherUid}}));
   const q=query(collection(db,"chats",id,"messages"),orderBy("createdAt","asc"),limit(300));
   addOff(onSnapshot(q,s=>{
-    $("#messages").innerHTML=s.docs.map(d=>{const m=d.data();const receipt=Array.isArray(m.readBy)&&m.readBy.length>1?" ✓✓":(m.senderId===S.user.uid?" ✓":"");return '<div class="msg '+(m.senderId===S.user.uid?"me":"")+'">'+messageContent(m)+(m.senderId===S.user.uid?'<small class="msgReceipt">'+receipt+'</small>':'')+'</div>'}).join("");
+    const rows=s.docs.map(d=>({id:d.id,...d.data()}));
+    let previousDay="",html="";
+    for(const m of rows){
+      const d=messageDate(m.createdAt),dayKey=localDayKey(d);
+      if(dayKey&&dayKey!==previousDay){
+        html+='<div class="chatDateSeparator"><span>'+esc(messageDayLabel(d))+'</span></div>';
+        previousDay=dayKey;
+      }
+      const mine=m.senderId===S.user.uid;
+      const receipt=mine?(Array.isArray(m.readBy)&&m.readBy.length>1?"✓✓":"✓"):"";
+      const time=messageClock(m.createdAt);
+      html+='<div class="msg '+(mine?"me":"")+'"><div class="msgBody">'+messageContent(m)+'</div><div class="msgMeta">'+(time?'<span class="msgTime">'+esc(time)+'</span>':"")+(receipt?'<span class="msgReceipt">'+receipt+'</span>':"")+'</div></div>';
+    }
+    $("#messages").innerHTML=html;
     $("#messages").scrollTop=$("#messages").scrollHeight;
-    window.dispatchEvent(new CustomEvent("wbp-messages-rendered",{detail:{chatId:id,messages:s.docs.map(d=>({id:d.id,...d.data()}))}}));
+    window.dispatchEvent(new CustomEvent("wbp-messages-rendered",{detail:{chatId:id,messages:rows}}));
   }))
 }
 window.WBP_OPEN_CHAT=(id,name)=>openChat(id,name);
@@ -707,7 +760,7 @@ $("#messageForm").onsubmit=async e=>{
   if(btn)btn.disabled=true;
   if(input)input.value="";
   if(messages){
-    messages.insertAdjacentHTML("beforeend",'<div class="msg me pendingMsg" data-pending="'+tempId+'">'+esc(t)+'<small class="msgReceipt"> …</small></div>');
+    messages.insertAdjacentHTML("beforeend",'<div class="msg me pendingMsg" data-pending="'+tempId+'"><div class="msgBody">'+esc(t)+'</div><div class="msgMeta"><span class="msgTime">'+esc(messageClock(new Date()))+'</span><span class="msgReceipt">…</span></div></div>');
     messages.scrollTop=messages.scrollHeight;
   }
   try{
