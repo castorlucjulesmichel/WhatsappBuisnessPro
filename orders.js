@@ -20,8 +20,9 @@ if(configured()){
      try{
        b.disabled=true;
        await updateDoc(doc(db,"orders",b.dataset.orderStatus),{status:b.dataset.next,updatedAt:serverTimestamp()});
+       window.WBP_ACTIVITY?.("order_status_updated","orders",{orderId:b.dataset.orderStatus,status:b.dataset.next});
        toast("Statut kòmand lan mete ajou.");
-     }catch(e){console.error(e);toast("Statut kòmand lan pa t chanje.");}
+     }catch(e){console.error(e);window.WBP_ACTIVITY?.("order_status_failed","orders",{code:e?.code||""});toast("Statut kòmand lan pa t chanje.");}
      finally{b.disabled=false;}
    });
    renderStats();
