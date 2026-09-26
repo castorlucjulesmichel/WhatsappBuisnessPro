@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#075e54"><title>Whatsapp Business Pro</title>
-<link rel="manifest" href="manifest.webmanifest"><link rel="icon" type="image/webp" href="assets/logo.webp"><link rel="apple-touch-icon" href="assets/logo.webp"><link rel="stylesheet" href="style.css?v=44">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" type="image/webp" href="assets/logo.webp"><link rel="apple-touch-icon" href="assets/logo.webp"><link rel="stylesheet" href="style.css?v=45">
 </head>
 <body>
 <div id="toast"></div>
@@ -524,35 +524,64 @@
       <div id="notificationList"></div>
     </section>
 <section id="profilePage" class="page waProfilePage">
- <div class="waSubHead"><button class="waBackBtn" data-go="tools" type="button">←</button><div><h2>Modifier le profil</h2></div><button class="waIconBtn" type="button">↗</button><button class="waIconBtn" type="button">👤</button></div>
- <form id="profileForm" class="waBusinessProfileForm">
-  <div class="waProfileHero">
-   <img id="avatarPreview" class="waProfileAvatar" alt="">
-   <label class="waCameraFab">📷<input id="avatarFile" type="file" accept="image/*" hidden></label>
+ <div class="profileTopBar">
+  <h2>Profil</h2>
+  <button id="profileSettingsBtn" class="profileTopIcon" type="button" aria-label="Paramètres">⚙️</button>
+ </div>
+
+ <div class="profileSummaryCard">
+  <div class="profileAvatarWrap">
+   <img id="avatarPreview" class="waProfileAvatar" src="assets/logo.webp" alt="Photo de profil">
+   <label class="waCameraFab" for="avatarFile" aria-label="Changer la photo">📷</label>
+   <input id="avatarFile" type="file" accept="image/*" hidden>
   </div>
-  <p class="waPublicNote">Votre profil est public dans Whatsapp Business Pro.</p>
-  <div class="waSectionTitle">Informations sur l’entreprise</div>
-  <label class="waProfileField"><span>👤</span><input id="displayName" placeholder="Nom de l’entreprise / nom public"></label>
-  <label class="waProfileField"><span>@</span><input id="username" placeholder="Nom de profil"></label>
-  <label class="waProfileField"><span>◫</span><select id="role"><option value="buyer">Acheteur</option><option value="seller">Vendeur</option><option value="business">Autre entreprise</option><option value="investor">Investisseur</option></select></label>
-  <label class="waProfileField"><span>🕘</span><input id="businessHoursProfile" placeholder="Ajouter les horaires"></label>
-  <label class="waProfileField"><span>📄</span><textarea id="bio" placeholder="Description"></textarea></label>
-  <label class="waProfileField"><span>📍</span><input id="country" placeholder="Pays / adresse"></label>
-  <input id="birthYear" type="number" min="1900" max="2100" placeholder="Année de naissance" class="hidden">
-  <div class="waSectionTitle">Produits et services</div>
-  <button type="button" class="waSettingRow" data-go="market" data-market-mode="sell"><span>▦</span><div><b>Catalogue</b></div><span>›</span></button>
-  <div class="waSectionTitle">Liens</div>
-  <label class="waProfileField"><span>🌐</span><input id="businessWebsiteProfile" type="url" placeholder="Site Web"></label>
-  <label class="waProfileField"><span>◎</span><input id="instagramProfile" placeholder="Instagram"></label>
-  <label class="waProfileField"><span>ⓕ</span><input id="facebookProfile" placeholder="Facebook"></label>
-  <div class="waSectionTitle">Coordonnées</div>
-  <label class="waProfileField"><span>☎️</span><input id="mobilePhoneProfile" type="tel" inputmode="tel" autocomplete="tel" placeholder="+509XXXXXXXX" required></label>
-  <label class="waProfileField"><span>✉️</span><input id="businessEmailProfile" type="email" placeholder="Adresse e-mail professionnelle"></label>
-  <p class="waProfilePhone">✉️ <span id="profilePhoneDisplay">Compte Google</span></p>
-  <button type="submit" class="waSaveWide">Enregistrer le profil</button>
+  <div class="profileIdentity">
+   <h3 id="profileHeroName">Mon profil</h3>
+   <p id="profileHeroUsername">@utilisateur</p>
+   <span id="profileHeroRole" class="profileRoleBadge">Compte</span>
+  </div>
+  <div class="profileQuickActions">
+   <button id="profileEditBtn" type="button">✏️ Modifier</button>
+   <button id="profileShareBtn" type="button" class="ghost">↗ Partager</button>
+  </div>
+ </div>
+
+ <form id="profileForm" class="waBusinessProfileForm">
+  <div class="profileSectionCard">
+   <div class="profileSectionTitle">Informations principales</div>
+   <label class="waProfileField"><span>👤</span><div><small>Nom public</small><input id="displayName" placeholder="Votre nom ou entreprise"></div></label>
+   <label class="waProfileField"><span>@</span><div><small>Nom de profil</small><input id="username" placeholder="username"></div></label>
+   <label class="waProfileField"><span>◫</span><div><small>Type de compte</small><select id="role"><option value="buyer">Acheteur</option><option value="seller">Vendeur</option><option value="business">Entreprise</option><option value="investor">Investisseur</option></select></div></label>
+   <label class="waProfileField"><span>📄</span><div><small>À propos</small><textarea id="bio" placeholder="Présentez-vous ou votre activité"></textarea></div></label>
+   <label class="waProfileField"><span>📍</span><div><small>Pays / adresse</small><input id="country" placeholder="Pays / adresse"></div></label>
+   <input id="birthYear" type="number" min="1900" max="2100" placeholder="Année de naissance" class="hidden">
+  </div>
+
+  <div class="profileSectionCard">
+   <div class="profileSectionTitle">Business</div>
+   <label class="waProfileField"><span>🕘</span><div><small>Horaires</small><input id="businessHoursProfile" placeholder="Ex. Lun–Sam, 8h–18h"></div></label>
+   <button type="button" class="profileLinkRow" data-go="market" data-market-mode="sell"><span>🛍️</span><div><b>Catalogue</b><small>Publier et gérer vos produits</small></div><span>›</span></button>
+  </div>
+
+  <div class="profileSectionCard">
+   <div class="profileSectionTitle">Liens et coordonnées</div>
+   <label class="waProfileField"><span>🌐</span><div><small>Site Web</small><input id="businessWebsiteProfile" type="url" placeholder="https://..."></div></label>
+   <label class="waProfileField"><span>◎</span><div><small>Instagram</small><input id="instagramProfile" placeholder="@compte"></div></label>
+   <label class="waProfileField"><span>ⓕ</span><div><small>Facebook</small><input id="facebookProfile" placeholder="Page Facebook"></div></label>
+   <label class="waProfileField"><span>☎️</span><div><small>Téléphone</small><input id="mobilePhoneProfile" type="tel" inputmode="tel" autocomplete="tel" placeholder="+509XXXXXXXX" required></div></label>
+   <label class="waProfileField"><span>✉️</span><div><small>E-mail professionnel</small><input id="businessEmailProfile" type="email" placeholder="email@exemple.com"></div></label>
+   <p class="waProfilePhone">Compte Google: <span id="profilePhoneDisplay">—</span></p>
+  </div>
+
+  <button type="submit" class="waSaveWide profileSaveBtn">Enregistrer les modifications</button>
  </form>
- <div class="card"><h3>Localisation</h3><p id="locationStatus" class="muted">Non partagée.</p><button id="shareLocation">Partager la localisation actuelle</button></div>
- <div class="card"><h3>Assistant virtuel</h3><div id="assistantMessages" class="assistantMessages"></div><form id="assistantForm" class="row"><input id="assistantInput" placeholder="Posez une question..."><button>Envoyer</button></form></div>
+
+ <div class="profileSectionCard profileUtilityCard">
+  <button id="shareLocation" type="button" class="profileLinkRow"><span>📍</span><div><b>Localisation</b><small id="locationStatus">Non partagée</small></div><span>›</span></button>
+  <button id="profileAssistantBtn" type="button" class="profileLinkRow"><span>🤖</span><div><b>Assistant virtuel</b><small>Obtenir de l’aide rapidement</small></div><span>›</span></button>
+ </div>
+
+ <div id="profileAssistantBox" class="card hidden"><h3>Assistant virtuel</h3><div id="assistantMessages" class="assistantMessages"></div><form id="assistantForm" class="row"><input id="assistantInput" placeholder="Posez une question..."><button>Envoyer</button></form></div>
 </section>
 
 <section id="nativeContactSelector" class="nativeContactSelector hidden" aria-hidden="true">
@@ -578,14 +607,14 @@
  <button data-page="profile"><span class="navIcon">👤</span><span>Profil</span></button>
 </nav>
 </div>
-<script src="i18n.js?v=44"></script>
-<script src="navigation.js?v=44"></script>
-<script type="module" src="app.js?v=44"></script>
-<script type="module" src="status.js?v=44"></script>
-<script type="module" src="boost.js?v=44"></script>
-<script type="module" src="orders.js?v=44"></script>
-<script type="module" src="notifications.js?v=44"></script>
-<script type="module" src="settings.js?v=44"></script>
-<script type="module" src="chat-advanced.js?v=44"></script>
-<script type="module" src="contacts.js?v=44"></script>
+<script src="i18n.js?v=45"></script>
+<script src="navigation.js?v=45"></script>
+<script type="module" src="app.js?v=45"></script>
+<script type="module" src="status.js?v=45"></script>
+<script type="module" src="boost.js?v=45"></script>
+<script type="module" src="orders.js?v=45"></script>
+<script type="module" src="notifications.js?v=45"></script>
+<script type="module" src="settings.js?v=45"></script>
+<script type="module" src="chat-advanced.js?v=45"></script>
+<script type="module" src="contacts.js?v=45"></script>
 </body></html>
