@@ -373,6 +373,58 @@ html.chatConversationOpen,body.chatConversationOpen{overflow:hidden!important}
   background:#f3f6f4!important;
   overscroll-behavior:contain;
 }
+.chatDateSeparator{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  clear:both;
+  margin:14px 0 10px;
+  pointer-events:none;
+}
+.chatDateSeparator span{
+  display:inline-block;
+  padding:6px 11px;
+  border-radius:10px;
+  background:#e7ecea;
+  color:#525b57;
+  font-size:12px;
+  font-weight:700;
+  box-shadow:0 1px 2px #0000000d;
+}
+.whatsappChatsPage.chat-open .msg{
+  position:relative;
+  min-width:82px;
+  padding:8px 10px 5px;
+}
+.msgBody{white-space:pre-wrap;word-break:break-word}
+.msgMeta{
+  min-height:15px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:4px;
+  margin-top:2px;
+  padding-left:16px;
+  line-height:1;
+}
+.msgTime{
+  color:#7a8580;
+  font-size:10px;
+  white-space:nowrap;
+}
+.msgReceipt{
+  display:inline!important;
+  margin:0!important;
+  color:#4e9f87;
+  font-size:11px;
+  white-space:nowrap;
+}
+.msg:not(.me) .msgMeta{justify-content:flex-end}
+html[data-theme="dark"] .chatDateSeparator span{
+  background:#25302c;
+  color:#d2ddd8;
+}
+html[data-theme="dark"] .msgTime{color:#aab5b0}
 
 .whatsappChatsPage.chat-open #messageForm{
   display:grid!important;
