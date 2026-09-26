@@ -677,10 +677,6 @@ async function resolveChatPeer(id){
   const uid=chat?.participants?.find(x=>x!==S.user.uid)||null;
   return {chat,uid};
 }
-function callNotReady(type,name){
-  const label=type==="video"?"Apèl vidéo":"Apèl vocal";
-  toast(label+" ak "+(name||"kontak")+" ap parèt isit la; koneksyon WebRTC reyèl la poko aktive.");
-}
 async function showChatContactInfo(uid,name){
   if(!uid)return;
   try{
