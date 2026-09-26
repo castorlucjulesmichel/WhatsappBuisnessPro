@@ -195,37 +195,11 @@ async function markRead(messages=[]){
   }
 }
 
-async function setupBlockButton(chatId){
-  const btn=$("#blockChatBtn");if(!btn||!user)return;
-  const s=await getDoc(doc(db,"chats",chatId));
-  if(!s.exists()||s.data().participants?.length!==2){
-    btn.classList.add("hidden");return;
-  }
-  btn.classList.remove("hidden");
-  const peer=s.data().participants.find(x=>x!==user.uid);
-  if(!peer)return;
-  const br=doc(db,"users",user.uid,"blocks",peer);
-  const refresh=async()=>{
-    const b=await getDoc(br);
-    btn.textContent=b.exists()?"Debloke":"Bloke";
-    btn.dataset.blocked=b.exists()?"1":"0";
-  };
-  await refresh();
-  btn.onclick=async()=>{
-    if(btn.dataset.blocked==="1"){
-      await deleteDoc(br);toast("Kontak debloke.");
-    }else{
-      await setDoc(br,{blockedUid:peer,createdAt:serverTimestamp()});toast("Kontak bloke.");
-    }
-    await refresh();
-  };
-}
 
 window.addEventListener("wbp-chat-open",e=>{
   currentChat=e.detail?.chatId||null;
   currentPeer=e.detail?.uid||null;
   watchTyping(currentChat);
-  setupBlockButton(currentChat);
 });
 window.addEventListener("wbp-messages-rendered",e=>{
   if(e.detail?.chatId===currentChat)markRead(e.detail.messages||[]);
