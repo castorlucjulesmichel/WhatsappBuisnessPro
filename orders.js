@@ -7,6 +7,7 @@ const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 const money=(n,c)=>Number(n||0).toLocaleString(undefined,{maximumFractionDigits:2})+" "+(c||"HTG");
 const configured=()=>firebaseConfig.apiKey&&!String(firebaseConfig.apiKey).includes("YOUR_");
+const toast=t=>{const e=$("#toast");if(!e)return;e.textContent=t;e.classList.add("show");setTimeout(()=>e.classList.remove("show"),2200)};
 if(configured()){
  const app=getApps().length?getApp():initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
  let user=null,buy=[],sell=[],offs=[];
@@ -15,7 +16,14 @@ if(configured()){
  function render(){
    if($("#buyerOrders")) $("#buyerOrders").innerHTML=buy.length?buy.map(o=>`<div class="orderCard"><b>${money(o.total,o.currency)}</b> • <span class="status ${esc(o.status||"pending")}">${esc(o.status||"pending")}</span><div class="orderItems">${esc(itemsText(o.items))}</div><small class="muted">Peman: ${esc(o.paymentStatus||"unpaid")}</small></div>`).join(""):'<p class="muted">Pa gen kòmand kòm achtè.</p>';
    if($("#sellerOrders")) $("#sellerOrders").innerHTML=sell.length?sell.map(o=>`<div class="orderCard"><b>${money(o.total,o.currency)}</b> • <span class="status ${esc(o.status||"pending")}">${esc(o.status||"pending")}</span><div class="orderItems">${esc(itemsText(o.items))}</div><div class="actions">${o.status==="approved"||o.status==="pending"?`<button data-order-status="${o.id}" data-next="processing">Ap prepare</button>`:""}${o.status==="processing"?`<button data-order-status="${o.id}" data-next="shipped">Voye</button>`:""}${o.status==="shipped"?`<button data-order-status="${o.id}" data-next="completed">Fini</button>`:""}</div></div>`).join(""):'<p class="muted">Pa gen vant ankò.</p>';
-   $$("[data-order-status]").forEach(b=>b.onclick=async()=>{await updateDoc(doc(db,"orders",b.dataset.orderStatus),{status:b.dataset.next,updatedAt:serverTimestamp()})});
+   $("[data-order-status]").forEach(b=>b.onclick=async()=>{
+     try{
+       b.disabled=true;
+       await updateDoc(doc(db,"orders",b.dataset.orderStatus),{status:b.dataset.next,updatedAt:serverTimestamp()});
+       toast("Statut kòmand lan mete ajou.");
+     }catch(e){console.error(e);toast("Statut kòmand lan pa t chanje.");}
+     finally{b.disabled=false;}
+   });
    renderStats();
  }
  function renderStats(){
