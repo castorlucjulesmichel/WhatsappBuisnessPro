@@ -579,3 +579,17 @@ html[data-theme="dark"] .chatInfoActions button{background:var(--card)!important
  .callBtn{width:58px;height:58px;font-size:23px}
  .callAvatar{width:112px;height:112px;font-size:48px}
 }
+
+
+/* Video interactions */
+.clipCommentsPanel{position:fixed;inset:0;z-index:250;background:var(--bg);display:flex;flex-direction:column}
+.clipCommentsHead{display:grid;grid-template-columns:44px 1fr;align-items:center;gap:8px;min-height:64px;padding:max(8px,env(safe-area-inset-top)) 12px 8px;background:var(--card);border-bottom:1px solid var(--line)}
+.clipCommentsHead h3{margin:0}
+.clipCommentsList{flex:1;overflow-y:auto;padding:12px}
+.clipCommentRow{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:8px}
+.clipCommentRow p{margin:4px 0 2px}
+.clipCommentRow small{color:var(--muted)}
+.clipCommentForm{display:grid;grid-template-columns:minmax(0,1fr) 48px;gap:8px;padding:9px 10px calc(9px + env(safe-area-inset-bottom));background:var(--card);border-top:1px solid var(--line)}
+.clipCommentForm input{margin:0}
+.clipCommentForm button{width:48px;height:48px;border-radius:50%;padding:0}
+.clipProductBtn{display:inline-flex!important;align-items:center;gap:6px;margin:6px 0 8px;background:#fff!important;color:#111!important;border:1px solid #ffffff99!important;border-radius:999px!important;padding:8px 12px!important;font-weight:700}
