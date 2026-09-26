@@ -37,7 +37,7 @@ if(configured()){const app=getApps().length?getApp():initializeApp(firebaseConfi
 function go(name){return typeof window.WBP_ROUTE==="function"?window.WBP_ROUTE(name):showPage(name)}
 function showPage(name){
   if(typeof window.WBP_ROUTE==="function")return window.WBP_ROUTE(name);
-  $(".page").forEach(x=>x.classList.remove("active"));
+  $$(".page").forEach(x=>x.classList.remove("active"));
   $("#"+name+"Page")?.classList.add("active");
   document.body.classList.toggle("waMainTab",name==="chat"||name==="calls");
   return true;
