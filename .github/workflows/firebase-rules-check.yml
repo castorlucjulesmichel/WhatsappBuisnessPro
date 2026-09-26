@@ -8,6 +8,7 @@ on:
       - "storage.rules"
       - "firebase.json"
       - ".firebaserc"
+      - "tests/firestore-integration.mjs"
       - ".github/workflows/firebase-rules-check.yml"
   workflow_dispatch:
 
@@ -17,16 +18,18 @@ permissions:
 jobs:
   rules:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version: "22"
-      - name: Install Firebase CLI
-        run: npm install --no-save firebase-tools@14
-      - name: Start emulators and compile rules
+      - name: Install Firebase test tools
+        run: npm install --no-save firebase-tools@14 firebase@10.14.1 @firebase/rules-unit-testing@3.0.4
+      - name: Compile Firestore and Storage rules
         run: npx firebase emulators:exec --only firestore,storage "echo Firebase rules loaded successfully" --project whatsappbusinesspro
+      - name: Run real Firestore rules integration
+        run: npx firebase emulators:exec --only firestore "node tests/firestore-integration.mjs" --project whatsappbusinesspro
       - name: Deploy rules when Firebase token is configured
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
