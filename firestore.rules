@@ -45,6 +45,14 @@ service cloud.firestore {
       match /chatPrefs/{chatId} {
         allow read, create, update, delete: if isSelf(uid) && active();
       }
+
+      match /callHistory/{callId} {
+        allow read: if isSelf(uid);
+        allow create: if isSelf(uid) && active()
+          && request.resource.data.userId == uid;
+        allow delete: if isSelf(uid);
+        allow update: if false;
+      }
     }
 
     // Exact phone discovery without exposing the users collection.
