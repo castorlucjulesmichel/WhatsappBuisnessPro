@@ -311,9 +311,24 @@ $("#profileForm").onsubmit=async e=>{e.preventDefault();try{
   },{merge:true});
   await loadProfile();
   if(profilePreviewUrl){URL.revokeObjectURL(profilePreviewUrl);profilePreviewUrl="";}
+  window.WBP_ACTIVITY?.("profile_saved","profile",{role:$("#role")?.value||""});
   toast("Profil sove.");
-}catch(x){console.error(x);toast(x.message||"Profil pa t sove.");}};
-$("#shareLocation").onclick=()=>{if(!navigator.geolocation)return toast("Lokalizasyon pa disponib.");$("#locationStatus").textContent="Ap chèche...";navigator.geolocation.getCurrentPosition(async p=>{const loc={lat:p.coords.latitude,lng:p.coords.longitude,accuracy:p.coords.accuracy,sharedAt:serverTimestamp()};await setDoc(doc(db,"userSettings",S.user.uid),{location:loc},{merge:true});$("#locationStatus").textContent="Lokalizasyon pataje avèk presizyon "+Math.round(p.coords.accuracy)+" m.";toast("Lokalizasyon sove.")},()=>{$("#locationStatus").textContent="Pèmisyon lokalizasyon refize.";},{enableHighAccuracy:true,timeout:12000})};
+}catch(x){console.error(x);window.WBP_ACTIVITY?.("profile_save_failed","profile",{code:x?.code||""});toast(x.message||"Profil pa t sove.");}};
+$("#shareLocation").onclick=()=>{
+  if(!navigator.geolocation)return toast("Lokalizasyon pa disponib.");
+  $("#locationStatus").textContent="Ap chèche...";
+  navigator.geolocation.getCurrentPosition(async p=>{
+    try{
+      const loc={lat:p.coords.latitude,lng:p.coords.longitude,accuracy:p.coords.accuracy,sharedAt:serverTimestamp()};
+      await setDoc(doc(db,"userSettings",S.user.uid),{location:loc},{merge:true});
+      $("#locationStatus").textContent="Lokalizasyon pataje avèk presizyon "+Math.round(p.coords.accuracy)+" m.";
+      window.WBP_ACTIVITY?.("location_saved","profile",{accuracy:Math.round(p.coords.accuracy)});
+      toast("Lokalizasyon sove.");
+    }catch(e){
+      console.error(e);$("#locationStatus").textContent="Lokalizasyon pa t sove.";toast("Lokalizasyon pa t sove.");
+    }
+  },()=>{$("#locationStatus").textContent="Pèmisyon lokalizasyon refize.";window.WBP_ACTIVITY?.("location_denied","profile");},{enableHighAccuracy:true,timeout:12000});
+};
 
 $("#sellBtn").onclick=()=>$("#sellBox").classList.toggle("hidden");
 $("#productForm").onsubmit=async e=>{e.preventDefault();try{
@@ -322,8 +337,8 @@ $("#productForm").onsubmit=async e=>{e.preventDefault();try{
   for(const f of files)imageUrls.push(await upload(f,"whatssap-business-pro/products",8*1024*1024,"image/"));
   const imageUrl=imageUrls[0]||"";
   await addDoc(collection(db,"products"),{sellerId:S.user.uid,sellerUsername:S.profile.username||"",sellerName:S.profile.displayName||"",name:$("#pName").value.trim(),price:Number($("#pPrice").value),currency:$("#pCurrency").value,category:$("#pCategory").value,stock:Number($("#pStock").value||0),description:$("#pDesc").value.trim(),imageUrl,imageUrls,active:true,createdAt:serverTimestamp()});
-  e.target.reset();$("#sellBox").classList.add("hidden");toast("Pwodwi pibliye.");
-}catch(x){console.error(x);toast(x.message||"Pwodwi pa pibliye.");}};
+  e.target.reset();$("#sellBox").classList.add("hidden");window.WBP_ACTIVITY?.("product_published","market",{currency:$("#pCurrency")?.value||""});toast("Pwodwi pibliye.");
+}catch(x){console.error(x);window.WBP_ACTIVITY?.("product_publish_failed","market",{code:x?.code||""});toast(x.message||"Pwodwi pa pibliye.");}};
 
 function renderProducts(){
   const term=$("#marketSearch").value.trim().toLowerCase(),cat=$("#marketCategory").value;
@@ -362,7 +377,7 @@ function watchBoosts(){addOff(onSnapshot(query(collection(db,"adCampaigns"),wher
 function cartKey(){return "wbp_cart_"+S.user.uid}
 function loadCart(){try{S.cart=JSON.parse(localStorage.getItem(cartKey())||"[]")}catch{S.cart=[]}renderCart()}
 function saveCart(){localStorage.setItem(cartKey(),JSON.stringify(S.cart));renderCart()}
-function addCart(id){const p=S.products.find(x=>x.id===id);if(!p)return;const x=S.cart.find(i=>i.id===id);if(x)x.qty++;else S.cart.push({id:p.id,name:p.name,price:p.price,currency:p.currency,sellerId:p.sellerId,qty:1});saveCart();toast("Ajoute nan panier.")}
+function addCart(id){const p=S.products.find(x=>x.id===id);if(!p)return;const x=S.cart.find(i=>i.id===id);if(x)x.qty++;else S.cart.push({id:p.id,name:p.name,price:p.price,currency:p.currency,sellerId:p.sellerId,qty:1});saveCart();window.WBP_ACTIVITY?.("cart_add","market",{productId:id});toast("Ajoute nan panier.")}
 function renderCart(){
   $("#cartCount").textContent=S.cart.reduce((a,x)=>a+x.qty,0);
   $("#cartItems").innerHTML=S.cart.length?S.cart.map(x=>`<div class="historyRow"><b>${esc(x.name)}</b> • x${x.qty} • ${money(x.price,x.currency)} <button class="danger" data-rm="${x.id}">Retire</button></div>`).join(""):'<p class="muted">Panier vid.</p>';
@@ -377,8 +392,8 @@ $("#checkoutBtn").onclick=async()=>{if(!S.cart.length)return toast("Panier vid."
     const commission=total*Number(appSettings.platformCommissionRate||0);
     await addDoc(collection(db,"orders"),{buyerId:S.user.uid,sellerId:items[0].sellerId,items,total,currency,platformCommission:commission,sellerNet:total-commission,status:"pending",paymentStatus:"unpaid",createdAt:serverTimestamp()});
   }
-  S.cart=[];saveCart();$("#cartBox").classList.add("hidden");toast("Kòmand kreye.");
-}catch(x){console.error(x);toast(x.message||"Kòmand pa kreye.");}};
+  const orderCount=Object.keys(groups).length;S.cart=[];saveCart();$("#cartBox").classList.add("hidden");window.WBP_ACTIVITY?.("order_created","market",{orders:orderCount});toast("Kòmand kreye.");
+}catch(x){console.error(x);window.WBP_ACTIVITY?.("order_create_failed","market",{code:x?.code||""});toast(x.message||"Kòmand pa kreye.");}};
 
 $("#clipBtn").onclick=()=>{
   refreshClipProductOptions();
@@ -406,8 +421,8 @@ $("#clipForm").onsubmit=async e=>{e.preventDefault();try{
     productName:product?.name||"",
     active:true,createdAt:serverTimestamp()
   });
-  e.target.reset();$("#clipForm").classList.add("hidden");toast("Vidéo publiée.");
-}catch(x){console.error(x);toast(x.message||"Vidéo non publiée.");}};
+  e.target.reset();$("#clipForm").classList.add("hidden");window.WBP_ACTIVITY?.("video_published","clips",{productLinked:!!productId});toast("Vidéo publiée.");
+}catch(x){console.error(x);window.WBP_ACTIVITY?.("video_publish_failed","clips",{code:x?.code||""});toast(x.message||"Vidéo non publiée.");}};
 
 async function toggleClipLike(id){
   if(!S.user)return;
@@ -416,9 +431,9 @@ async function toggleClipLike(id){
   try{
     const s=await getDoc(r);
     if(s.exists()){
-      await deleteDoc(r);localStorage.removeItem(localKey);toast("Like retiré.");
+      await deleteDoc(r);localStorage.removeItem(localKey);window.WBP_ACTIVITY?.("video_unliked","clips",{videoId:id});toast("Like retiré.");
     }else{
-      await setDoc(r,{createdAt:serverTimestamp()});localStorage.setItem(localKey,"1");toast("Like enregistré.");
+      await setDoc(r,{createdAt:serverTimestamp()});localStorage.setItem(localKey,"1");window.WBP_ACTIVITY?.("video_liked","clips",{videoId:id});toast("Like enregistré.");
     }
   }catch(e){
     console.warn("clip like remote",e?.code||e);
@@ -480,6 +495,7 @@ $("#clipCommentForm")?.addEventListener("submit",async e=>{
       userId:S.user.uid,username,text,createdAt:serverTimestamp()
     });
     $("#clipCommentText").value="";
+    window.WBP_ACTIVITY?.("video_comment_created","clips",{videoId:id});
     await openClipComments(id);
   }catch(err){
     console.warn("clip comment remote",err?.code||err);
@@ -1059,6 +1075,7 @@ $("#messageForm").onsubmit=async e=>{
     await updateDoc(doc(db,"chats",S.chatId),{
       lastMessage:t.slice(0,120),updatedAt:serverTimestamp()
     });
+    window.WBP_ACTIVITY?.("message_sent","chat",{chatId:S.chatId,type:"text"});
   }catch(err){
     console.error("send message",err);
     document.querySelector('[data-pending="'+tempId+'"]')?.remove();
@@ -1087,11 +1104,21 @@ async function reportChat(id,name,reason=""){
     });
   }
   localStorage.setItem("wbp_last_report_"+id,JSON.stringify({reason,at:Date.now()}));
+  window.WBP_ACTIVITY?.("chat_reported","chat",{chatId:id});
   toast("Signalement anrejistre.");
 }
 
 function watchSupport(){const r=doc(db,"supportThreads",S.user.uid);setDoc(r,{userId:S.user.uid,updatedAt:serverTimestamp()},{merge:true}).catch(()=>{});const q=query(collection(db,"supportThreads",S.user.uid,"messages"),orderBy("createdAt","asc"),limit(200));addOff(onSnapshot(q,s=>{$("#supportMessages").innerHTML=s.docs.map(d=>{const m=d.data();return `<div class="msg ${m.senderId===S.user.uid?"me":""}">${esc(m.text||"")}</div>`}).join("");$("#supportMessages").scrollTop=$("#supportMessages").scrollHeight}))}
-$("#supportForm").onsubmit=async e=>{e.preventDefault();const t=$("#supportText").value.trim();if(!t)return;await addDoc(collection(db,"supportThreads",S.user.uid,"messages"),{senderId:S.user.uid,text:t,createdAt:serverTimestamp()});await setDoc(doc(db,"supportThreads",S.user.uid),{userId:S.user.uid,userLabel:S.profile.displayName||S.profile.username||S.user.phoneNumber||"",updatedAt:serverTimestamp()},{merge:true});$("#supportText").value=""};
+$("#supportForm").onsubmit=async e=>{
+  e.preventDefault();
+  const t=$("#supportText").value.trim();if(!t)return;
+  try{
+    await addDoc(collection(db,"supportThreads",S.user.uid,"messages"),{senderId:S.user.uid,text:t,createdAt:serverTimestamp()});
+    await setDoc(doc(db,"supportThreads",S.user.uid),{userId:S.user.uid,userLabel:S.profile.displayName||S.profile.username||S.user.phoneNumber||"",updatedAt:serverTimestamp()},{merge:true});
+    $("#supportText").value="";
+    window.WBP_ACTIVITY?.("support_message_sent","settings");
+  }catch(err){console.error(err);toast("Mesaj sipò a pa t voye.");}
+};
 
 $("#walletRequestForm").onsubmit=async e=>{e.preventDefault();try{
   const type=$("#walletType").value,amount=Number($("#walletAmount").value),currency=$("#walletCurrency").value,method=$("#walletMethod").value;
@@ -1101,9 +1128,17 @@ $("#walletRequestForm").onsubmit=async e=>{e.preventDefault();try{
   let proofUrl="";const f=$("#walletProof").files[0];if(f)proofUrl=await upload(f,"whatssap-business-pro/proofs",8*1024*1024,"image/");
   if(type==="deposit"&&!reference&&!proofUrl)return toast("Pou depo manyèl, mete referans tranzaksyon an oswa yon prèv peman.");
   await addDoc(collection(db,"financialRequests"),{userId:S.user.uid,type,mode:"manual",amount,currency,method,destination,reference,proofUrl,note:$("#walletNote").value.trim(),status:"pending",createdAt:serverTimestamp()});
-  e.target.reset();toast(type==="deposit"?"Demann depo manyèl voye pou validasyon admin.":type==="withdrawal"?"Demann retrè manyèl voye pou validasyon admin.":"Demann operasyon voye.");
+  e.target.reset();window.WBP_ACTIVITY?.("wallet_request_created","wallet",{type,currency,method});toast(type==="deposit"?"Demann depo manyèl voye pou validasyon admin.":type==="withdrawal"?"Demann retrè manyèl voye pou validasyon admin.":"Demann operasyon voye.");
 }catch(x){console.error(x);toast(x.message||"Demann pa voye.");}};
-$("#exchangeForm").onsubmit=async e=>{e.preventDefault();const amount=Number($("#exchangeAmount").value),from=$("#exchangeFrom").value,to=$("#exchangeTo").value;if(!(amount>0)||from===to)return toast("Verifye echanj la.");await addDoc(collection(db,"exchangeRequests"),{userId:S.user.uid,amount,from,to,status:"pending",createdAt:serverTimestamp()});e.target.reset();toast("Demann echanj voye.")};
+$("#exchangeForm").onsubmit=async e=>{
+  e.preventDefault();
+  const amount=Number($("#exchangeAmount").value),from=$("#exchangeFrom").value,to=$("#exchangeTo").value;
+  if(!(amount>0)||from===to)return toast("Verifye echanj la.");
+  try{
+    await addDoc(collection(db,"exchangeRequests"),{userId:S.user.uid,amount,from,to,status:"pending",createdAt:serverTimestamp()});
+    e.target.reset();window.WBP_ACTIVITY?.("exchange_request_created","wallet",{from,to});toast("Demann echanj voye.");
+  }catch(err){console.error(err);toast("Demann echanj la pa t voye.");}
+};
 function watchWallet(){
   addOff(onSnapshot(doc(db,"users",S.user.uid),s=>{const b=s.data()?.walletBalances||{};$("#walletBalances").innerHTML=appSettings.currencies.map(c=>`<div class="balanceCard"><b>${money(b[c]||0,c)}</b><small>Balans</small></div>`).join("");$("#mBalance").textContent=money(b.HTG||0,"HTG")}));
   const fq=query(collection(db,"financialRequests"),where("userId","==",S.user.uid)),eq=query(collection(db,"exchangeRequests"),where("userId","==",S.user.uid));
@@ -1112,11 +1147,30 @@ function watchWallet(){
 }
 
 function watchLevels(){addOff(onSnapshot(collection(db,"investmentLevels"),s=>{const rows=s.docs.map(d=>({id:d.id,...d.data()})).filter(x=>x.active!==false);$("#investmentLevels").innerHTML=rows.length?rows.map(x=>`<div class="level"><h3>${esc(x.name)}</h3><b>${money(x.amount,x.currency)}</b><p>Pwofi: ${Number(x.rate||0)}% • ${esc(x.period||"monthly")}</p><button data-invest="${x.id}">Envesti</button></div>`).join(""):'<p class="muted">Pa gen nivo aktif.</p>';$$("[data-invest]").forEach(b=>b.onclick=()=>invest(rows.find(x=>x.id===b.dataset.invest))) }))}
-async function invest(level){if(!level)return;await addDoc(collection(db,"investments"),{userId:S.user.uid,levelId:level.id,levelName:level.name,amount:Number(level.amount),currency:level.currency,rate:Number(level.rate||0),period:level.period||"monthly",status:"pending",createdAt:serverTimestamp()});toast("Demann envestisman voye.")}
+async function invest(level){
+  if(!level)return;
+  try{
+    await addDoc(collection(db,"investments"),{userId:S.user.uid,levelId:level.id,levelName:level.name,amount:Number(level.amount),currency:level.currency,rate:Number(level.rate||0),period:level.period||"monthly",status:"pending",createdAt:serverTimestamp()});
+    window.WBP_ACTIVITY?.("investment_request_created","invest",{levelId:level.id,currency:level.currency});
+    toast("Demann envestisman voye.");
+  }catch(err){console.error(err);toast("Demann envestisman an pa t voye.");}
+}
 function watchInvestments(){const q=query(collection(db,"investments"),where("userId","==",S.user.uid));addOff(onSnapshot(q,s=>{const a=s.docs.map(d=>({id:d.id,...d.data()}));$("#mInvest").textContent=a.filter(x=>x.status==="active"||x.status==="approved").length;$("#myInvestments").innerHTML=a.map(x=>`<div class="historyRow"><b>${esc(x.levelName||"Envestisman")}</b> • ${money(x.amount,x.currency)} <span class="status ${esc(x.status||"pending")}">${esc(x.status||"pending")}</span></div>`).join("")||'<p class="muted">Pa gen envestisman.</p>'}))}
 
-$("#businessForm").onsubmit=async e=>{e.preventDefault();await setDoc(doc(db,"businesses",S.user.uid),{ownerId:S.user.uid,username:S.profile.username||"",name:$("#businessName").value.trim(),description:$("#businessDescription").value.trim(),hours:$("#businessHours").value.trim(),website:$("#businessWebsite").value.trim(),active:true,updatedAt:serverTimestamp()},{merge:true});toast("Pwofil biznis sove.")};
-$("#businessToolsForm").onsubmit=async e=>{e.preventDefault();await setDoc(doc(db,"userSettings",S.user.uid),{businessTools:{greetingMessage:$("#greetingMessage").value.trim(),awayMessage:$("#awayMessage").value.trim(),quickReplies:$("#quickReplies").value.trim()},updatedAt:serverTimestamp()},{merge:true});toast("Zouti mesaj sove.")};
+$("#businessForm").onsubmit=async e=>{
+  e.preventDefault();
+  try{
+    await setDoc(doc(db,"businesses",S.user.uid),{ownerId:S.user.uid,username:S.profile.username||"",name:$("#businessName").value.trim(),description:$("#businessDescription").value.trim(),hours:$("#businessHours").value.trim(),website:$("#businessWebsite").value.trim(),active:true,updatedAt:serverTimestamp()},{merge:true});
+    window.WBP_ACTIVITY?.("business_profile_saved","business");toast("Pwofil biznis sove.");
+  }catch(err){console.error(err);toast("Pwofil biznis la pa t sove.");}
+};
+$("#businessToolsForm").onsubmit=async e=>{
+  e.preventDefault();
+  try{
+    await setDoc(doc(db,"userSettings",S.user.uid),{businessTools:{greetingMessage:$("#greetingMessage").value.trim(),awayMessage:$("#awayMessage").value.trim(),quickReplies:$("#quickReplies").value.trim()},updatedAt:serverTimestamp()},{merge:true});
+    window.WBP_ACTIVITY?.("business_tools_saved","business");toast("Zouti mesaj sove.");
+  }catch(err){console.error(err);toast("Zouti mesaj yo pa t sove.");}
+};
 async function loadBusiness(){const [b,s]=await Promise.all([getDoc(doc(db,"businesses",S.user.uid)),getDoc(doc(db,"userSettings",S.user.uid))]);if(b.exists()){
   const x=b.data();
   if($("#businessName"))$("#businessName").value=x.name||"";
@@ -1134,6 +1188,7 @@ async function reportCase(type,targetId,title){
   const payload={reporterId:S.user.uid,type,targetId,title,status:"open",createdAt:serverTimestamp()};
   try{
     await addDoc(collection(db,"moderationCases"),payload);
+    window.WBP_ACTIVITY?.("content_reported",type,{targetId});
     toast("Signalement anrejistre.");
   }catch(e){
     console.warn("moderation case fallback",e?.code||e);
