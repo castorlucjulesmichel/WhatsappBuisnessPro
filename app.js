@@ -493,11 +493,6 @@ function renderClips(){
   $$("[data-reportclip]").forEach(b=>b.onclick=()=>reportCase("clip",b.dataset.reportclip,"Vidéo signalée"));
 }
 function watchClips(){addOff(onSnapshot(query(collection(db,"shortVideos"),limit(80)),s=>{S.clips=s.docs.map(d=>({id:d.id,...d.data()}));renderClips()}))}
-$("#newChatBtn")?.addEventListener("click",()=>{
-  $("#newChatBox")?.classList.add("hidden");
-  go("contactPicker");
-});
-$("#newChatBox")?.classList.add("hidden");
 function chatClock(ts){
   const d=ts?.toDate?.() || (ts?.seconds?new Date(ts.seconds*1000):null);
   if(!d)return "";
