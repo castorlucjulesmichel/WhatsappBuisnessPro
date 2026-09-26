@@ -170,7 +170,6 @@ $$("[data-create-action]").forEach(b=>b.addEventListener("click",()=>{
     go("tools");
   }
 }));
-$("#socialAccountsBtn")?.addEventListener("click",()=>toast("Connexion Facebook/Instagram ap disponib lè API sosyal yo konekte."));
 
 
 function fillCurrencies(){
