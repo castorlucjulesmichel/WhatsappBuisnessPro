@@ -250,7 +250,14 @@ window.addEventListener("wbp-chat-open",e=>{
   if(currentChat)watchChatSignals(currentChat);
 });
 window.addEventListener("wbp-start-call",e=>startOutgoing(e.detail?.mode||"voice",e.detail||{}));
-window.addEventListener("wbp-call-signal",e=>{const d=e.detail||{};handleSignal(d.chatId,d.signal).catch(console.error)});
+window.addEventListener("wbp-call-signal",e=>{
+  const d=e.detail||{};
+  if(d.docId){
+    if(seenSignals.has(d.docId))return;
+    seenSignals.add(d.docId);
+  }
+  handleSignal(d.chatId,d.signal).catch(console.error);
+});
 
 $("#acceptCallBtn")?.addEventListener("click",acceptIncoming);
 $("#declineCallBtn")?.addEventListener("click",declineIncoming);
@@ -270,6 +277,16 @@ $("#callsSearchInput")?.addEventListener("input",renderHistory);
 $("#callsMenuBtn")?.addEventListener("click",()=>window.WBP_ROUTE?.("settings"));
 $("#createCallLinkBtn")?.addEventListener("click",createCallLink);
 
+async function watchChatsFallbackForCalls(uid){
+  try{
+    const s=await new Promise((resolve,reject)=>{
+      const off=onSnapshot(collection(db,"users",uid,"contacts"),snap=>{off();resolve(snap)},reject);
+    });
+    const peers=[...new Set(s.docs.map(d=>d.data()?.contactUid).filter(Boolean))].slice(0,40);
+    peers.forEach(peer=>watchChatSignals(roomId(uid,peer)));
+  }catch(e){console.warn("call fallback",e?.code||e)}
+}
+
 if(configured())onAuthStateChanged(auth,u=>{
   user=u;clearSignalWatchers();seenSignals.clear();
   chatsOff?.();chatsOff=null;renderHistory();
@@ -277,7 +294,10 @@ if(configured())onAuthStateChanged(auth,u=>{
   const q=query(collection(db,"chats"),where("participants","array-contains",u.uid),limit(60));
   chatsOff=onSnapshot(q,s=>{
     for(const d of s.docs)watchChatSignals(d.id);
-  },e=>console.warn("call chats",e?.code||e));
+  },e=>{
+    console.warn("call chats",e?.code||e);
+    watchChatsFallbackForCalls(u.uid);
+  });
   const m=location.hash.match(/^#call=([^&]+)/);
   if(m){
     history.replaceState(null,"",location.pathname+location.search);
