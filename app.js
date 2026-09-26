@@ -44,7 +44,7 @@ async function syncPhoneDirectory(phone,oldPhone="",meta={}){
 }
 const safe=s=>String(s||"file").replace(/[^a-zA-Z0-9._-]/g,"_");
 const money=(n,c)=>Number(n||0).toLocaleString(undefined,{maximumFractionDigits:2})+" "+(c||"HTG");
-const S={user:null,profile:{},account:{},chatId:null,chatOtherUid:null,chatOtherName:"",chatPresenceOff:null,presenceTimer:null,chatRows:[],chatFilter:"all",chatFallbackOffs:[],chatPrefs:{},products:[],clips:[],boosts:[],cart:[],unsubs:[]};
+const S={user:null,profile:{},account:{},chatId:null,chatOtherUid:null,chatOtherName:"",chatPresenceOff:null,presenceTimer:null,chatRows:[],chatFilter:"all",chatFallbackOffs:[],chatPrefs:{},currentClipId:null,products:[],clips:[],boosts:[],cart:[],unsubs:[]};
 
 if(!configured()){
   $("#authScreen").classList.add("hidden");
@@ -357,7 +357,7 @@ function renderProducts(){
   });
 }
 $("#marketSearch").oninput=renderProducts;$("#marketCategory").onchange=renderProducts;
-function watchProducts(){addOff(onSnapshot(query(collection(db,"products"),limit(150)),s=>{S.products=s.docs.map(d=>({id:d.id,...d.data()}));renderProducts()}))}
+function watchProducts(){addOff(onSnapshot(query(collection(db,"products"),limit(150)),s=>{S.products=s.docs.map(d=>({id:d.id,...d.data()}));renderProducts();refreshClipProductOptions()}))}
 function watchBoosts(){addOff(onSnapshot(query(collection(db,"adCampaigns"),where("status","==","active")),s=>{S.boosts=s.docs.map(d=>({id:d.id,...d.data()}));renderProducts();renderClips()}))}
 
 function cartKey(){return "wbp_cart_"+S.user.uid}
@@ -381,21 +381,119 @@ $("#checkoutBtn").onclick=async()=>{if(!S.cart.length)return toast("Panier vid."
   S.cart=[];saveCart();$("#cartBox").classList.add("hidden");toast("Kòmand kreye.");
 }catch(x){console.error(x);toast(x.message||"Kòmand pa kreye.");}};
 
-$("#clipBtn").onclick=()=>$("#clipForm").classList.toggle("hidden");
+$("#clipBtn").onclick=()=>{
+  refreshClipProductOptions();
+  $("#clipForm").classList.toggle("hidden");
+};
+function refreshClipProductOptions(){
+  const sel=$("#clipProduct");if(!sel)return;
+  const current=sel.value;
+  const mine=S.products.filter(p=>p.sellerId===S.user?.uid&&p.active!==false);
+  sel.innerHTML='<option value="">Aucun produit associé</option>'+mine.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name||"Produit")+'</option>').join("");
+  if([...sel.options].some(o=>o.value===current))sel.value=current;
+}
 $("#clipForm").onsubmit=async e=>{e.preventDefault();try{
-  const f=$("#clipFile").files[0],videoUrl=await upload(f,"whatssap-business-pro/clips",80*1024*1024,"video/");
-  await addDoc(collection(db,"shortVideos"),{ownerId:S.user.uid,username:S.profile.username||"",caption:$("#clipCaption").value.trim(),videoUrl,active:true,createdAt:serverTimestamp()});
-  e.target.reset();$("#clipForm").classList.add("hidden");toast("Clip pibliye.");
-}catch(x){console.error(x);toast(x.message||"Clip pa pibliye.");}};
+  const f=$("#clipFile").files[0];
+  if(!f)return toast("Chwazi yon videyo.");
+  const videoUrl=await upload(f,"whatssap-business-pro/clips",80*1024*1024,"video/");
+  const productId=$("#clipProduct")?.value||"";
+  const product=S.products.find(p=>p.id===productId)||null;
+  await addDoc(collection(db,"shortVideos"),{
+    ownerId:S.user.uid,
+    username:S.profile.username||"",
+    displayName:S.profile.displayName||"",
+    caption:$("#clipCaption").value.trim(),
+    videoUrl,productId,
+    productName:product?.name||"",
+    active:true,createdAt:serverTimestamp()
+  });
+  e.target.reset();$("#clipForm").classList.add("hidden");toast("Vidéo publiée.");
+}catch(x){console.error(x);toast(x.message||"Vidéo non publiée.");}};
+
+async function toggleClipLike(id){
+  if(!S.user)return;
+  const r=doc(db,"shortVideos",id,"likes",S.user.uid);
+  try{
+    const s=await getDoc(r);
+    if(s.exists()){await deleteDoc(r);toast("Like retiré.");}
+    else{await setDoc(r,{createdAt:serverTimestamp()});toast("Like enregistré.");}
+  }catch(e){console.error(e);toast("Like indisponible.");}
+}
+async function shareClip(id){
+  const v=S.clips.find(x=>x.id===id);if(!v)return;
+  const url=location.origin+location.pathname+"#video="+encodeURIComponent(id);
+  const data={title:"Whatsapp Business Pro",text:(v.caption||"Vidéo").slice(0,160),url};
+  try{
+    if(navigator.share)await navigator.share(data);
+    else{await navigator.clipboard.writeText(url);toast("Lien vidéo copié.");}
+  }catch(e){if(e?.name!=="AbortError")toast("Partage indisponible.");}
+}
+async function openClipComments(id){
+  S.currentClipId=id;
+  $("#clipCommentsPanel")?.classList.remove("hidden");
+  $("#clipCommentsPanel")?.setAttribute("aria-hidden","false");
+  const box=$("#clipCommentsList");if(box)box.innerHTML='<p class="muted">Chargement…</p>';
+  try{
+    const s=await getDocs(query(collection(db,"shortVideos",id,"comments"),orderBy("createdAt","asc"),limit(150)));
+    if(box)box.innerHTML=s.empty?'<p class="muted">Aucun commentaire.</p>':s.docs.map(d=>{
+      const x=d.data();
+      return '<div class="clipCommentRow"><b>@'+esc(x.username||"user")+'</b><p>'+esc(x.text||"")+'</p><small>'+esc(messageDayLabel(x.createdAt))+' • '+esc(messageClock(x.createdAt))+'</small></div>';
+    }).join("");
+  }catch(e){
+    console.error(e);
+    if(box)box.innerHTML='<p class="muted">Commentaires indisponibles.</p>';
+  }
+}
+$("#closeClipComments")?.addEventListener("click",()=>{
+  S.currentClipId=null;
+  $("#clipCommentsPanel")?.classList.add("hidden");
+  $("#clipCommentsPanel")?.setAttribute("aria-hidden","true");
+});
+$("#clipCommentForm")?.addEventListener("submit",async e=>{
+  e.preventDefault();
+  const id=S.currentClipId,text=$("#clipCommentText")?.value.trim()||"";
+  if(!id||!text)return;
+  try{
+    await addDoc(collection(db,"shortVideos",id,"comments"),{
+      userId:S.user.uid,username:S.profile.username||S.profile.displayName||"user",
+      text,createdAt:serverTimestamp()
+    });
+    $("#clipCommentText").value="";
+    await openClipComments(id);
+  }catch(err){console.error(err);toast("Commentaire non enregistré.");}
+});
+function openClipProduct(id){
+  const v=S.clips.find(x=>x.id===id);
+  if(!v?.productId)return toast("Aucun produit associé.");
+  go("market");
+  const p=S.products.find(x=>x.id===v.productId);
+  if(p&&$("#marketSearch")){$("#marketSearch").value=p.name||"";renderProducts();}
+}
 function renderClips(){
   const sponsored=new Set(S.boosts.filter(b=>b.status==="active"&&b.targetType==="clip").map(b=>b.targetId));
   const list=[...S.clips].filter(v=>v.active!==false).sort((a,b)=>Number(sponsored.has(b.id))-Number(sponsored.has(a.id)));
-  $("#clipFeed").innerHTML=list.length?list.map(v=>`<article class="clip"><video src="${esc(v.videoUrl)}" controls playsinline preload="metadata"></video><div class="clipOverlay">${sponsored.has(v.id)?'<span class="status approved">Sponsored</span>':""}<b>@${esc(v.username||"user")}</b><p>${esc(v.caption||"")}</p><div class="actions"><button data-like="${v.id}">♡ Like</button><button data-reportclip="${v.id}">⚑ Rapòte</button></div></div></article>`).join(""):'<p class="muted">Pa gen clip.</p>';
-  $$("[data-like]").forEach(b=>b.onclick=()=>setDoc(doc(db,"shortVideos",b.dataset.like,"likes",S.user.uid),{createdAt:serverTimestamp()}).then(()=>toast("Like anrejistre.")));
-  $$("[data-reportclip]").forEach(b=>b.onclick=()=>reportCase("clip",b.dataset.reportclip,"Videyo rapòte"));
+  $("#clipFeed").innerHTML=list.length?list.map(v=>`<article class="clip">
+    <video src="${esc(v.videoUrl)}" controls playsinline preload="metadata"></video>
+    <div class="clipOverlay">
+      ${sponsored.has(v.id)?'<span class="status approved">Sponsored</span>':""}
+      <b>@${esc(v.username||"user")}</b>
+      <p>${esc(v.caption||"")}</p>
+      ${v.productId?'<button class="clipProductBtn" data-clip-product="'+v.id+'">🛍️ '+esc(v.productName||"Voir le produit")+'</button>':""}
+      <div class="actions">
+        <button data-like="${v.id}">♡ Like</button>
+        <button data-comments="${v.id}">💬 Commentaires</button>
+        <button data-shareclip="${v.id}">↗ Partager</button>
+        <button data-reportclip="${v.id}">⚑ Signaler</button>
+      </div>
+    </div>
+  </article>`).join(""):'<p class="muted">Aucune vidéo.</p>';
+  $$("[data-like]").forEach(b=>b.onclick=()=>toggleClipLike(b.dataset.like));
+  $$("[data-comments]").forEach(b=>b.onclick=()=>openClipComments(b.dataset.comments));
+  $$("[data-shareclip]").forEach(b=>b.onclick=()=>shareClip(b.dataset.shareclip));
+  $$("[data-clip-product]").forEach(b=>b.onclick=()=>openClipProduct(b.dataset.clipProduct));
+  $$("[data-reportclip]").forEach(b=>b.onclick=()=>reportCase("clip",b.dataset.reportclip,"Vidéo signalée"));
 }
 function watchClips(){addOff(onSnapshot(query(collection(db,"shortVideos"),limit(80)),s=>{S.clips=s.docs.map(d=>({id:d.id,...d.data()}));renderClips()}))}
-
 $("#newChatBtn")?.addEventListener("click",()=>{
   $("#newChatBox")?.classList.add("hidden");
   go("contactPicker");
