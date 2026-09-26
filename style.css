@@ -593,3 +593,13 @@ html[data-theme="dark"] .chatInfoActions button{background:var(--card)!important
 .clipCommentForm input{margin:0}
 .clipCommentForm button{width:48px;height:48px;border-radius:50%;padding:0}
 .clipProductBtn{display:inline-flex!important;align-items:center;gap:6px;margin:6px 0 8px;background:#fff!important;color:#111!important;border:1px solid #ffffff99!important;border-radius:999px!important;padding:8px 12px!important;font-weight:700}
+
+.settingsStaticRow{cursor:default!important;user-select:text}
+.settingsStaticRow:hover{background:inherit!important}
+.settingsStaticRow .status{margin-left:auto;font-size:11px;white-space:nowrap}
+.callHistoryRow{display:grid;grid-template-columns:44px minmax(0,1fr) 42px;align-items:center;gap:10px;padding:11px 4px;border-bottom:1px solid var(--line)}
+.callHistoryRow:last-child{border-bottom:0}
+.callHistoryIcon{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:#e8f6ef}
+.callHistoryRow>div:nth-child(2){min-width:0;display:flex;flex-direction:column}
+.callHistoryRow small{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.callHistoryRow button{width:40px;height:40px;border-radius:50%;padding:0}
