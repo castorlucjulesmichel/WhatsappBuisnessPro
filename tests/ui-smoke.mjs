@@ -45,6 +45,28 @@ await page.evaluate(()=>window.WBP_ROUTE?.("clips"));
 await page.click("#clipBtn");
 if(await page.$eval("#clipForm",e=>e.classList.contains("hidden")))errors.push("clip form did not open");
 
+
+await page.evaluate(()=>window.WBP_ROUTE?.("chat"));
+await page.click("#newGroupBtn");
+if(await page.$eval("#newGroupBox",e=>e.classList.contains("hidden")))errors.push("new group panel did not open");
+await page.click("#chatCameraBtn");
+if(!await page.$eval("#statusPage",e=>e.classList.contains("active")))errors.push("chat camera did not route to status");
+await page.evaluate(()=>window.WBP_ROUTE?.("chat"));
+await page.click("#chatMenuBtn");
+if(!await page.$eval("#settingsPage",e=>e.classList.contains("active")))errors.push("chat menu did not route to settings");
+
+await page.evaluate(()=>window.WBP_ROUTE?.("calls"));
+await page.click("#callsSearchBtn");
+if(await page.$eval("#callsSearchInput",e=>e.classList.contains("hidden")))errors.push("calls search did not open");
+await page.click("#callsMenuBtn");
+if(!await page.$eval("#settingsPage",e=>e.classList.contains("active")))errors.push("calls menu did not route to settings");
+
+await page.evaluate(()=>window.WBP_ROUTE?.("contactPicker"));
+await page.click("#contactPickerSearchBtn");
+if(await page.$eval("#contactPickerSearch",e=>e.classList.contains("hidden")))errors.push("contact search did not open");
+await page.click("#contactPickerMenuBtn");
+if(!await page.$eval("#settingsPage",e=>e.classList.contains("active")))errors.push("contact picker menu did not route to settings");
+
 await browser.close();
 
 const meaningful=errors.filter(x=>!x.includes("Failed to load resource")&&!x.includes("net::ERR"));
