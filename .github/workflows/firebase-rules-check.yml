@@ -27,3 +27,8 @@ jobs:
         run: npm install --no-save firebase-tools@14
       - name: Start emulators and compile rules
         run: npx firebase emulators:exec --only firestore,storage "echo Firebase rules loaded successfully" --project whatsappbusinesspro
+      - name: Deploy rules when Firebase token is configured
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        if: env.FIREBASE_TOKEN != ''
+        run: npx firebase deploy --only firestore:rules,storage --project whatsappbusinesspro --token "$FIREBASE_TOKEN" --non-interactive
