@@ -629,8 +629,8 @@ $("#closeChatContactInfo")?.addEventListener("click",()=>{
   $("#chatContactInfoPanel")?.setAttribute("aria-hidden","true");
 });
 $("#chatInfoMessageBtn")?.addEventListener("click",()=>$("#closeChatContactInfo")?.click());
-$("#chatInfoVoiceBtn")?.addEventListener("click",()=>callNotReady("voice",S.chatOtherName));
-$("#chatInfoVideoBtn")?.addEventListener("click",()=>callNotReady("video",S.chatOtherName));
+$("#chatInfoVoiceBtn")?.addEventListener("click",()=>window.dispatchEvent(new CustomEvent("wbp-start-call",{detail:{mode:"voice",chatId:S.chatId,uid:S.chatOtherUid,name:S.chatOtherName}})));
+$("#chatInfoVideoBtn")?.addEventListener("click",()=>window.dispatchEvent(new CustomEvent("wbp-start-call",{detail:{mode:"video",chatId:S.chatId,uid:S.chatOtherUid,name:S.chatOtherName}})));
 
 function closeChatActionPanel(){
   $("#chatActionPanel")?.classList.add("hidden");
@@ -675,9 +675,13 @@ async function saveChatPrefs(patch){
   if(key)localStorage.setItem(key,JSON.stringify(S.chatPrefs));
   applyChatTheme();
   const r=chatPrefRef();
-  if(r){
-    try{await setDoc(r,{...patch,updatedAt:serverTimestamp()},{merge:true})}
-    catch(e){console.warn("chat prefs remote save",e?.code||e)}
+  if(r)setDoc(r,{...patch,updatedAt:serverTimestamp()},{merge:true}).catch(e=>console.warn("chat prefs remote save",e?.code||e));
+  if("disappearingDuration" in patch && S.chatId && S.chatOtherUid){
+    addDoc(collection(db,"chats",S.chatId,"messages"),{
+      senderId:S.user.uid,type:"document",readBy:[S.user.uid],
+      chatSignal:{kind:"ephemeral",value:patch.disappearingDuration,to:S.chatOtherUid,from:S.user.uid,sentAt:Date.now()},
+      createdAt:serverTimestamp()
+    }).catch(e=>console.warn("ephemeral sync",e?.code||e));
   }
 }
 function applyChatTheme(){
@@ -762,17 +766,35 @@ function openReportPanel(){
 
 async function blockCurrentPeer(){
   if(!S.chatOtherUid)return;
+  const key="wbp_block_"+S.user.uid+"_"+S.chatOtherUid;
+  let blocked=localStorage.getItem(key)==="1";
   try{
     const r=doc(db,"users",S.user.uid,"blocks",S.chatOtherUid),s=await getDoc(r);
-    if(s.exists()){
-      await deleteDoc(r);
+    blocked=s.exists()||blocked;
+    if(blocked){
+      localStorage.removeItem(key);
+      window.WBP_CHAT_BLOCKED=false;
+      deleteDoc(r).catch(e=>console.warn("remote unblock",e?.code||e));
       toast("Kontak la debloke.");
     }else{
-      await setDoc(r,{blockedUid:S.chatOtherUid,blockedAt:serverTimestamp()});
+      localStorage.setItem(key,"1");
+      window.WBP_CHAT_BLOCKED=true;
+      setDoc(r,{blockedUid:S.chatOtherUid,blockedAt:serverTimestamp()}).catch(e=>console.warn("remote block",e?.code||e));
       toast("Kontak la bloke.");
     }
+    if(S.chatId){
+      addDoc(collection(db,"chats",S.chatId,"messages"),{
+        senderId:S.user.uid,type:"document",readBy:[S.user.uid],
+        chatSignal:{kind:"block",blocked:!blocked,to:S.chatOtherUid,from:S.user.uid,sentAt:Date.now()},
+        createdAt:serverTimestamp()
+      }).catch(()=>{});
+    }
     $("#chatMoreMenu")?.classList.add("hidden");
-  }catch(e){console.error(e);toast("Operasyon blokaj la echwe.");}
+  }catch(e){
+    console.error(e);
+    if(blocked){localStorage.removeItem(key);window.WBP_CHAT_BLOCKED=false;toast("Kontak la debloke.");}
+    else{localStorage.setItem(key,"1");window.WBP_CHAT_BLOCKED=true;toast("Kontak la bloke.");}
+  }
 }
 
 async function openChat(id,name){
@@ -809,6 +831,7 @@ async function openChat(id,name){
     '</div>';
   watchPeerPresence(S.chatOtherUid);
   await loadChatPrefs();
+  window.WBP_CHAT_BLOCKED=localStorage.getItem("wbp_block_"+S.user.uid+"_"+S.chatOtherUid)==="1";
   $("#messageForm").classList.remove("hidden");
   if(S.chatOtherUid){
     getDoc(doc(db,"publicProfiles",S.chatOtherUid)).then(pSnap=>{
@@ -827,8 +850,8 @@ async function openChat(id,name){
   $("#closeChatViewBtn").onclick=closeChatView;
   $("#chatContactInfoBtn").onclick=()=>showChatContactInfo(S.chatOtherUid,S.chatOtherName);
   $("#showContactInfoMenu").onclick=()=>{ $("#chatMoreMenu").classList.add("hidden"); showChatContactInfo(S.chatOtherUid,S.chatOtherName); };
-  $("#videoCallBtn").onclick=()=>callNotReady("video",S.chatOtherName);
-  $("#voiceCallBtn").onclick=()=>callNotReady("voice",S.chatOtherName);
+  $("#videoCallBtn").onclick=()=>window.dispatchEvent(new CustomEvent("wbp-start-call",{detail:{mode:"video",chatId:id,uid:S.chatOtherUid,name:S.chatOtherName}}));
+  $("#voiceCallBtn").onclick=()=>window.dispatchEvent(new CustomEvent("wbp-start-call",{detail:{mode:"voice",chatId:id,uid:S.chatOtherUid,name:S.chatOtherName}}));
   $("#chatMoreBtn").onclick=()=>$("#chatMoreMenu").classList.toggle("hidden");
   $("#chatMenuSearchBtn").onclick=()=>{$("#chatMoreMenu").classList.add("hidden");openChatSearch()};
   $("#chatMenuMediaBtn").onclick=()=>{$("#chatMoreMenu").classList.add("hidden");openChatMedia()};
@@ -840,7 +863,18 @@ async function openChat(id,name){
   window.dispatchEvent(new CustomEvent("wbp-chat-open",{detail:{chatId:id,name:S.chatOtherName,uid:S.chatOtherUid}}));
   const q=query(collection(db,"chats",id,"messages"),orderBy("createdAt","asc"),limit(300));
   addOff(onSnapshot(q,s=>{
-    const rows=s.docs.map(d=>({id:d.id,...d.data()}));
+    const allRows=s.docs.map(d=>({id:d.id,...d.data()}));
+    for(const m of allRows){
+      if(m.callSignal)window.dispatchEvent(new CustomEvent("wbp-call-signal",{detail:{chatId:id,signal:m.callSignal,docId:m.id}}));
+      if(m.chatSignal?.kind==="ephemeral"&&m.chatSignal.to===S.user.uid){
+        S.chatPrefs={...S.chatPrefs,disappearingDuration:m.chatSignal.value||"off"};
+        const key=chatPrefLocalKey();if(key)localStorage.setItem(key,JSON.stringify(S.chatPrefs));
+      }
+      if(m.chatSignal?.kind==="block"&&m.chatSignal.to===S.user.uid){
+        window.WBP_CHAT_BLOCKED_BY_PEER=m.chatSignal.blocked===true;
+      }
+    }
+    const rows=allRows.filter(m=>!m.callSignal&&!m.chatSignal&&!(m.expiresAtMs&&Number(m.expiresAtMs)<=Date.now()));
     let previousDay="",html="";
     for(const m of rows){
       const d=messageDate(m.createdAt),dayKey=localDayKey(d);
@@ -885,8 +919,13 @@ async function ensureCurrentChatExists(){
   }
 }
 
+function ephemeralDurationMs(){
+  const v=S.chatPrefs?.disappearingDuration||"off";
+  return v==="24h"?86400000:v==="7d"?604800000:v==="90d"?7776000000:0;
+}
 $("#messageForm").onsubmit=async e=>{
   e.preventDefault();
+  if(window.WBP_CHAT_BLOCKED||window.WBP_CHAT_BLOCKED_BY_PEER)return toast("Mesaj bloke nan diskisyon sa a.");
   const input=$("#messageText");
   const btn=$("#sendMessageBtn");
   const t=input?.value.trim()||"";
@@ -905,7 +944,7 @@ $("#messageForm").onsubmit=async e=>{
   }
   try{
     await addDoc(collection(db,"chats",S.chatId,"messages"),{
-      senderId:S.user.uid,type:"text",text:t,readBy:[S.user.uid],createdAt:serverTimestamp()
+      senderId:S.user.uid,type:"text",text:t,readBy:[S.user.uid],expiresAtMs:ephemeralDurationMs()?Date.now()+ephemeralDurationMs():0,createdAt:serverTimestamp()
     });
     await updateDoc(doc(db,"chats",S.chatId),{
       lastMessage:t.slice(0,120),updatedAt:serverTimestamp()
@@ -920,7 +959,26 @@ $("#messageForm").onsubmit=async e=>{
     input?.focus();
   }
 };
-async function reportChat(id,name,reason=""){const q=query(collection(db,"chats",id,"messages"),orderBy("createdAt","desc"),limit(20)),s=await getDocs(q),excerpt=s.docs.reverse().map(d=>({senderId:d.data().senderId,text:d.data().text||""}));await addDoc(collection(db,"moderationCases"),{reporterId:S.user.uid,type:"chat",targetId:id,title:"Chat ak "+name,reason,excerpt,status:"open",createdAt:serverTimestamp()});toast("Signalement voye bay moderasyon.")}
+async function reportChat(id,name,reason=""){
+  const q=query(collection(db,"chats",id,"messages"),orderBy("createdAt","desc"),limit(20));
+  const s=await getDocs(q);
+  const excerpt=s.docs.reverse().map(d=>({senderId:d.data().senderId,text:d.data().text||""})).filter(x=>x.text);
+  const payload={reporterId:S.user.uid,type:"chat",targetId:id,title:"Chat ak "+name,reason,excerpt,status:"open",createdAt:serverTimestamp()};
+  try{
+    await addDoc(collection(db,"moderationCases"),payload);
+  }catch(e){
+    console.warn("moderation fallback",e?.code||e);
+    await setDoc(doc(db,"supportThreads",S.user.uid),{userId:S.user.uid,updatedAt:serverTimestamp()},{merge:true});
+    await addDoc(collection(db,"supportThreads",S.user.uid,"messages"),{
+      senderId:S.user.uid,
+      text:"[SIGNALEMENT] "+payload.title+(reason?" — "+reason:""),
+      reportPayload:{targetId:id,reason,excerpt},
+      createdAt:serverTimestamp()
+    });
+  }
+  localStorage.setItem("wbp_last_report_"+id,JSON.stringify({reason,at:Date.now()}));
+  toast("Signalement anrejistre.");
+}
 
 function watchSupport(){const r=doc(db,"supportThreads",S.user.uid);setDoc(r,{userId:S.user.uid,updatedAt:serverTimestamp()},{merge:true}).catch(()=>{});const q=query(collection(db,"supportThreads",S.user.uid,"messages"),orderBy("createdAt","asc"),limit(200));addOff(onSnapshot(q,s=>{$("#supportMessages").innerHTML=s.docs.map(d=>{const m=d.data();return `<div class="msg ${m.senderId===S.user.uid?"me":""}">${esc(m.text||"")}</div>`}).join("");$("#supportMessages").scrollTop=$("#supportMessages").scrollHeight}))}
 $("#supportForm").onsubmit=async e=>{e.preventDefault();const t=$("#supportText").value.trim();if(!t)return;await addDoc(collection(db,"supportThreads",S.user.uid,"messages"),{senderId:S.user.uid,text:t,createdAt:serverTimestamp()});await setDoc(doc(db,"supportThreads",S.user.uid),{userId:S.user.uid,userLabel:S.profile.displayName||S.profile.username||S.user.phoneNumber||"",updatedAt:serverTimestamp()},{merge:true});$("#supportText").value=""};
