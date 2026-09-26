@@ -68,7 +68,7 @@ async function render(){
 }
 function renderContacts(){
   $("#contactList").innerHTML=contacts.length?contacts.map(c=>`<span class="contactChip">@${esc(c.username||c.displayName||c.id)} <button class="ghost" data-remove-contact="${c.id}">×</button></span>`).join(""):'<span class="muted">Pa gen kontak ankò.</span>';
-  $$("[data-remove-contact]").forEach(b=>b.onclick=async()=>{await deleteDoc(doc(db,"users",user.uid,"contacts",b.dataset.removeContact));toast("Kontak retire.")});
+  $("[data-remove-contact]").forEach(b=>b.onclick=async()=>{try{await deleteDoc(doc(db,"users",user.uid,"contacts",b.dataset.removeContact));window.WBP_ACTIVITY?.("contact_removed","status",{contactId:b.dataset.removeContact});toast("Kontak retire.")}catch(e){console.error(e);toast("Kontak la pa t retire.");}});
 }
 function watchContacts(){
   const off=onSnapshot(collection(db,"users",user.uid,"contacts"),async s=>{
@@ -122,7 +122,7 @@ $("#statusForm")?.addEventListener("submit",async e=>{
       boostEndsAt:null,createdAt:serverTimestamp(),expiresAt
     });
     if(file)await uploadBytes(ref(storage,mediaPath),file,{contentType:file.type});
-    e.target.reset();$("#statusForm").classList.add("hidden");toast("Status pibliye pou 24 èdtan.");
+    e.target.reset();$("#statusForm").classList.add("hidden");window.WBP_ACTIVITY?.("status_published","status",{mediaType});toast("Status pibliye pou 24 èdtan.");
   }catch(err){
     console.error(err);
     try{await deleteDoc(sr)}catch{}
@@ -142,7 +142,7 @@ $("#addContactBtn")?.addEventListener("click",async()=>{
       uid:target.id,contactUid:target.id,username:target.data().username||username,
       displayName:target.data().displayName||username,addedAt:serverTimestamp()
     },{merge:true});
-    $("#contactUsername").value="";toast("Kontak ajoute.");
+    $("#contactUsername").value="";window.WBP_ACTIVITY?.("contact_added","status",{contactUid:target.id});toast("Kontak ajoute.");
   }catch(e){console.error(e);toast("Kontak la pa t ajoute.");}
 });
 
