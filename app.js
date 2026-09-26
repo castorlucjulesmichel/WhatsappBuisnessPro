@@ -125,7 +125,7 @@ function clearOffs(){S.unsubs.forEach(f=>{try{f()}catch{}});S.unsubs=[];clearCha
 function go(name){
   if(typeof window.WBP_ROUTE==="function")return window.WBP_ROUTE(name);
   const target=$("#"+name+"Page");if(!target)return false;
-  $(".page").forEach(x=>x.classList.remove("active"));
+  $$(".page").forEach(x=>x.classList.remove("active"));
   target.classList.add("active");
   return true;
 }
