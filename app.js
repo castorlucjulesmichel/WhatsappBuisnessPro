@@ -411,12 +411,21 @@ $("#clipForm").onsubmit=async e=>{e.preventDefault();try{
 
 async function toggleClipLike(id){
   if(!S.user)return;
+  const localKey="wbp_clip_like_"+S.user.uid+"_"+id;
   const r=doc(db,"shortVideos",id,"likes",S.user.uid);
   try{
     const s=await getDoc(r);
-    if(s.exists()){await deleteDoc(r);toast("Like retiré.");}
-    else{await setDoc(r,{createdAt:serverTimestamp()});toast("Like enregistré.");}
-  }catch(e){console.error(e);toast("Like indisponible.");}
+    if(s.exists()){
+      await deleteDoc(r);localStorage.removeItem(localKey);toast("Like retiré.");
+    }else{
+      await setDoc(r,{createdAt:serverTimestamp()});localStorage.setItem(localKey,"1");toast("Like enregistré.");
+    }
+  }catch(e){
+    console.warn("clip like remote",e?.code||e);
+    const liked=localStorage.getItem(localKey)==="1";
+    if(liked){localStorage.removeItem(localKey);toast("Like retiré localement.");}
+    else{localStorage.setItem(localKey,"1");toast("Like enregistré localement.");}
+  }
 }
 async function shareClip(id){
   const v=S.clips.find(x=>x.id===id);if(!v)return;
@@ -427,20 +436,33 @@ async function shareClip(id){
     else{await navigator.clipboard.writeText(url);toast("Lien vidéo copié.");}
   }catch(e){if(e?.name!=="AbortError")toast("Partage indisponible.");}
 }
+function localClipComments(id){
+  try{return JSON.parse(localStorage.getItem("wbp_clip_comments_"+id)||"[]")}catch{return []}
+}
+function saveLocalClipComments(id,rows){
+  localStorage.setItem("wbp_clip_comments_"+id,JSON.stringify(rows.slice(-100)));
+}
+function renderClipCommentRows(rows=[]){
+  const box=$("#clipCommentsList");if(!box)return;
+  box.innerHTML=rows.length?rows.map(x=>{
+    const when=x.createdAtMs?new Date(x.createdAtMs):x.createdAt;
+    return '<div class="clipCommentRow"><b>@'+esc(x.username||"user")+'</b><p>'+esc(x.text||"")+'</p><small>'+esc(messageDayLabel(when))+' • '+esc(messageClock(when))+(x.localOnly?' • local':'')+'</small></div>';
+  }).join(""):'<p class="muted">Aucun commentaire.</p>';
+}
 async function openClipComments(id){
   S.currentClipId=id;
   $("#clipCommentsPanel")?.classList.remove("hidden");
   $("#clipCommentsPanel")?.setAttribute("aria-hidden","false");
   const box=$("#clipCommentsList");if(box)box.innerHTML='<p class="muted">Chargement…</p>';
+  const local=localClipComments(id);
   try{
     const s=await getDocs(query(collection(db,"shortVideos",id,"comments"),orderBy("createdAt","asc"),limit(150)));
-    if(box)box.innerHTML=s.empty?'<p class="muted">Aucun commentaire.</p>':s.docs.map(d=>{
-      const x=d.data();
-      return '<div class="clipCommentRow"><b>@'+esc(x.username||"user")+'</b><p>'+esc(x.text||"")+'</p><small>'+esc(messageDayLabel(x.createdAt))+' • '+esc(messageClock(x.createdAt))+'</small></div>';
-    }).join("");
+    const remote=s.docs.map(d=>({id:d.id,...d.data()}));
+    renderClipCommentRows([...remote,...local]);
   }catch(e){
-    console.error(e);
-    if(box)box.innerHTML='<p class="muted">Commentaires indisponibles.</p>';
+    console.warn("clip comments remote",e?.code||e);
+    renderClipCommentRows(local);
+    if(!local.length&&box)box.innerHTML='<p class="muted">Aucun commentaire synchronisé.</p>';
   }
 }
 $("#closeClipComments")?.addEventListener("click",()=>{
@@ -452,14 +474,22 @@ $("#clipCommentForm")?.addEventListener("submit",async e=>{
   e.preventDefault();
   const id=S.currentClipId,text=$("#clipCommentText")?.value.trim()||"";
   if(!id||!text)return;
+  const username=S.profile.username||S.profile.displayName||"user";
   try{
     await addDoc(collection(db,"shortVideos",id,"comments"),{
-      userId:S.user.uid,username:S.profile.username||S.profile.displayName||"user",
-      text,createdAt:serverTimestamp()
+      userId:S.user.uid,username,text,createdAt:serverTimestamp()
     });
     $("#clipCommentText").value="";
     await openClipComments(id);
-  }catch(err){console.error(err);toast("Commentaire non enregistré.");}
+  }catch(err){
+    console.warn("clip comment remote",err?.code||err);
+    const rows=localClipComments(id);
+    rows.push({userId:S.user.uid,username,text,createdAtMs:Date.now(),localOnly:true});
+    saveLocalClipComments(id,rows);
+    $("#clipCommentText").value="";
+    renderClipCommentRows(rows);
+    toast("Commentaire enregistré sur cet appareil.");
+  }
 });
 function openClipProduct(id){
   const v=S.clips.find(x=>x.id===id);
