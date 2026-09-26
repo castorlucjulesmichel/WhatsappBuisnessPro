@@ -84,34 +84,38 @@ $("#adTopupForm")?.addEventListener("submit",async e=>{
       reference:$("#adTopupReference").value.trim(),proofUrl,status:"pending",
       createdAt:serverTimestamp()
     });
-    e.target.reset();$("#adTopupForm").classList.add("hidden");toast("Demann depo boost voye pou validasyon admin.");
-  }catch(err){console.error(err);toast(err.message||"Depo boost la echwe.");}
+    e.target.reset();$("#adTopupForm").classList.add("hidden");window.WBP_ACTIVITY?.("ad_topup_requested","business",{currency,method});toast("Demann depo boost voye pou validasyon admin.");
+  }catch(err){console.error(err);window.WBP_ACTIVITY?.("ad_topup_failed","business",{code:err?.code||""});toast(err.message||"Depo boost la echwe.");}
 });
 
 $("#boostForm")?.addEventListener("submit",async e=>{
   e.preventDefault();
   if(!user) return toast("Konekte dabò.");
-  const raw=$("#boostTarget").value;
-  const item=ownItems.find(x=>raw===x.type+":"+x.id);
-  if(!item) return toast("Chwazi sa w ap bouste.");
-  const dailyBudget=Number($("#boostDailyBudget").value),days=Number($("#boostDays").value),currency=$("#boostCurrency").value;
-  if(!(dailyBudget>0)||!(days>=1&&days<=90)||!["HTG","USD"].includes(currency)) return toast("Verifye bidjè ak dire.");
-  if(item.type==="status" && days!==1) return toast("Yon Status dire 24 èdtan; Boost Status la dwe 1 jou.");
-  const audience=$("#boostAudience").value;
-  let audienceData={mode:audience};
-  if(audience==="custom"){
-    const min=Number($("#boostAgeMin").value||18),max=Number($("#boostAgeMax").value||65);
-    if(min<18||max<min||max>65) return toast("Verifye laj odyans lan.");
-    audienceData={mode:"custom",country:$("#boostCountry").value.trim(),ageMin:min,ageMax:max};
+  try{
+    const raw=$("#boostTarget").value;
+    const item=ownItems.find(x=>raw===x.type+":"+x.id);
+    if(!item) return toast("Chwazi sa w ap bouste.");
+    const dailyBudget=Number($("#boostDailyBudget").value),days=Number($("#boostDays").value),currency=$("#boostCurrency").value;
+    if(!(dailyBudget>0)||!(days>=1&&days<=90)||!["HTG","USD"].includes(currency)) return toast("Verifye bidjè ak dire.");
+    if(item.type==="status" && days!==1) return toast("Yon Status dire 24 èdtan; Boost Status la dwe 1 jou.");
+    const audience=$("#boostAudience").value;
+    let audienceData={mode:audience};
+    if(audience==="custom"){
+      const min=Number($("#boostAgeMin").value||18),max=Number($("#boostAgeMax").value||65);
+      if(min<18||max<min||max>65) return toast("Verifye laj odyans lan.");
+      audienceData={mode:"custom",country:$("#boostCountry").value.trim(),ageMin:min,ageMax:max};
+    }
+    const u=await getDoc(doc(db,"users",user.uid)),balance=Number(u.data()?.adBalances?.[currency]||0),totalBudget=dailyBudget*days;
+    if(balance<totalBudget) return toast("Ad Wallet ou pa gen ase lajan. Depoze ak MonCash/NatCash dabò.");
+    await addDoc(collection(db,"adCampaigns"),{
+      ownerId:user.uid,targetType:item.type,targetId:item.id,targetLabel:item.label,
+      goal:$("#boostGoal").value,audience:audienceData,dailyBudget,days,totalBudget,currency,
+      status:"pending_review",metrics:{reach:0,clicks:0,conversations:0},createdAt:serverTimestamp()
+    });
+    e.target.reset();total();window.WBP_ACTIVITY?.("boost_requested","business",{targetType:item.type,currency,days});toast("Boost la voye pou revizyon admin. Lajan ap retire sèlman lè li valide.");
+  }catch(err){
+    console.error(err);window.WBP_ACTIVITY?.("boost_request_failed","business",{code:err?.code||""});toast(err.message||"Boost la pa t voye.");
   }
-  const u=await getDoc(doc(db,"users",user.uid)),balance=Number(u.data()?.adBalances?.[currency]||0),totalBudget=dailyBudget*days;
-  if(balance<totalBudget) return toast("Ad Wallet ou pa gen ase lajan. Depoze ak MonCash/NatCash dabò.");
-  await addDoc(collection(db,"adCampaigns"),{
-    ownerId:user.uid,targetType:item.type,targetId:item.id,targetLabel:item.label,
-    goal:$("#boostGoal").value,audience:audienceData,dailyBudget,days,totalBudget,currency,
-    status:"pending_review",metrics:{reach:0,clicks:0,conversations:0},createdAt:serverTimestamp()
-  });
-  e.target.reset();total();toast("Boost la voye pou revizyon admin. Lajan ap retire sèlman lè li valide.");
 });
 
 if(configured()) onAuthStateChanged(auth,u=>{
