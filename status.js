@@ -80,7 +80,7 @@ let normalOffs=[];
 function clearNormal(){normalOffs.forEach(f=>{try{f()}catch{}});normalOffs=[]}
 function watchNormalStatuses(){
   clearNormal();normalStatuses=[];
-  const ownerIds=[user.uid,...contacts.map(c=>c.id)];
+  const ownerIds=[...new Set([user.uid,...contacts.map(c=>c.contactUid||c.uid||"").filter(Boolean)])];
   const buckets=new Map();
   const merge=()=>{
     normalStatuses=[...buckets.values()].flat().sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
@@ -132,15 +132,18 @@ $("#statusForm")?.addEventListener("submit",async e=>{
 $("#addContactBtn")?.addEventListener("click",async()=>{
   const username=norm($("#contactUsername").value);
   if(!username)return toast("Mete username kontak la.");
-  const q=query(collection(db,"publicProfiles"),where("username","==",username));
-  const s=await getDocs(q);
-  if(s.empty)return toast("Username pa jwenn.");
-  const target=s.docs[0];
-  if(target.id===user.uid)return toast("Ou pa ka ajoute tèt ou.");
-  await setDoc(doc(db,"users",user.uid,"contacts",target.id),{
-    uid:target.id,username:target.data().username||username,displayName:target.data().displayName||username,addedAt:serverTimestamp()
-  });
-  $("#contactUsername").value="";toast("Kontak ajoute.");
+  try{
+    const q=query(collection(db,"publicProfiles"),where("username","==",username));
+    const s=await getDocs(q);
+    if(s.empty)return toast("Username pa jwenn.");
+    const target=s.docs[0];
+    if(target.id===user.uid)return toast("Ou pa ka ajoute tèt ou.");
+    await setDoc(doc(db,"users",user.uid,"contacts",target.id),{
+      uid:target.id,contactUid:target.id,username:target.data().username||username,
+      displayName:target.data().displayName||username,addedAt:serverTimestamp()
+    },{merge:true});
+    $("#contactUsername").value="";toast("Kontak ajoute.");
+  }catch(e){console.error(e);toast("Kontak la pa t ajoute.");}
 });
 
 if(configured())onAuthStateChanged(auth,async u=>{
