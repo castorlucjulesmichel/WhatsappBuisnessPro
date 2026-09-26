@@ -1087,25 +1087,30 @@ $("#messageForm").onsubmit=async e=>{
   }
 };
 async function reportChat(id,name,reason=""){
-  const q=query(collection(db,"chats",id,"messages"),orderBy("createdAt","desc"),limit(20));
-  const s=await getDocs(q);
-  const excerpt=s.docs.reverse().map(d=>({senderId:d.data().senderId,text:d.data().text||""})).filter(x=>x.text);
-  const payload={reporterId:S.user.uid,type:"chat",targetId:id,title:"Chat ak "+name,reason,excerpt,status:"open",createdAt:serverTimestamp()};
   try{
-    await addDoc(collection(db,"moderationCases"),payload);
+    const q=query(collection(db,"chats",id,"messages"),orderBy("createdAt","desc"),limit(20));
+    const s=await getDocs(q);
+    const excerpt=s.docs.reverse().map(d=>({senderId:d.data().senderId,text:d.data().text||""})).filter(x=>x.text);
+    const payload={reporterId:S.user.uid,type:"chat",targetId:id,title:"Chat ak "+name,reason,excerpt,status:"open",createdAt:serverTimestamp()};
+    try{
+      await addDoc(collection(db,"moderationCases"),payload);
+    }catch(e){
+      console.warn("moderation fallback",e?.code||e);
+      await setDoc(doc(db,"supportThreads",S.user.uid),{userId:S.user.uid,updatedAt:serverTimestamp()},{merge:true});
+      await addDoc(collection(db,"supportThreads",S.user.uid,"messages"),{
+        senderId:S.user.uid,
+        text:"[SIGNALEMENT] "+payload.title+(reason?" — "+reason:""),
+        reportPayload:{targetId:id,reason,excerpt},
+        createdAt:serverTimestamp()
+      });
+    }
+    localStorage.setItem("wbp_last_report_"+id,JSON.stringify({reason,at:Date.now()}));
+    window.WBP_ACTIVITY?.("chat_reported","chat",{chatId:id});
+    toast("Signalement anrejistre.");
   }catch(e){
-    console.warn("moderation fallback",e?.code||e);
-    await setDoc(doc(db,"supportThreads",S.user.uid),{userId:S.user.uid,updatedAt:serverTimestamp()},{merge:true});
-    await addDoc(collection(db,"supportThreads",S.user.uid,"messages"),{
-      senderId:S.user.uid,
-      text:"[SIGNALEMENT] "+payload.title+(reason?" — "+reason:""),
-      reportPayload:{targetId:id,reason,excerpt},
-      createdAt:serverTimestamp()
-    });
+    console.error(e);
+    toast("Signalement lan pa t anrejistre.");
   }
-  localStorage.setItem("wbp_last_report_"+id,JSON.stringify({reason,at:Date.now()}));
-  window.WBP_ACTIVITY?.("chat_reported","chat",{chatId:id});
-  toast("Signalement anrejistre.");
 }
 
 function watchSupport(){const r=doc(db,"supportThreads",S.user.uid);setDoc(r,{userId:S.user.uid,updatedAt:serverTimestamp()},{merge:true}).catch(()=>{});const q=query(collection(db,"supportThreads",S.user.uid,"messages"),orderBy("createdAt","asc"),limit(200));addOff(onSnapshot(q,s=>{$("#supportMessages").innerHTML=s.docs.map(d=>{const m=d.data();return `<div class="msg ${m.senderId===S.user.uid?"me":""}">${esc(m.text||"")}</div>`}).join("");$("#supportMessages").scrollTop=$("#supportMessages").scrollHeight}))}
