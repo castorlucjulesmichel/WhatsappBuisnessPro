@@ -68,7 +68,7 @@ async function render(){
 }
 function renderContacts(){
   $("#contactList").innerHTML=contacts.length?contacts.map(c=>`<span class="contactChip">@${esc(c.username||c.displayName||c.id)} <button class="ghost" data-remove-contact="${c.id}">×</button></span>`).join(""):'<span class="muted">Pa gen kontak ankò.</span>';
-  $("[data-remove-contact]").forEach(b=>b.onclick=async()=>{try{await deleteDoc(doc(db,"users",user.uid,"contacts",b.dataset.removeContact));window.WBP_ACTIVITY?.("contact_removed","status",{contactId:b.dataset.removeContact});toast("Kontak retire.")}catch(e){console.error(e);toast("Kontak la pa t retire.");}});
+  $$("[data-remove-contact]").forEach(b=>b.onclick=async()=>{try{await deleteDoc(doc(db,"users",user.uid,"contacts",b.dataset.removeContact));window.WBP_ACTIVITY?.("contact_removed","status",{contactId:b.dataset.removeContact});toast("Kontak retire.")}catch(e){console.error(e);toast("Kontak la pa t retire.");}});
 }
 function watchContacts(){
   const off=onSnapshot(collection(db,"users",user.uid,"contacts"),async s=>{
