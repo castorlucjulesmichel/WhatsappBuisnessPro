@@ -180,6 +180,7 @@ function showImportResult(result){
   const base=(window.WBP_T?.("Contacts imported")||"Contacts imported")+": "+r.imported;
   const skipped=r.skipped?" • "+(window.WBP_T?.("Already present")||"Already present")+": "+r.skipped:"";
   const failed=r.failed?" • "+(window.WBP_T?.("Failed")||"Failed")+": "+r.failed:"";
+  window.WBP_ACTIVITY?.("contacts_imported","contacts",{imported:r.imported,skipped:r.skipped,failed:r.failed});
   toast(base+skipped+failed);
 }
 async function importPhoneContacts(){
@@ -461,22 +462,27 @@ window.addEventListener("wbp-language-changed",render);
 $("#newContactForm")?.addEventListener("submit",async e=>{
   e.preventDefault();
   if(!user)return;
-  const username=norm($("#contactProfileName")?.value);
-  if(!username)return toast(window.WBP_T?.("Entrez le nom de profil / username.")||"Entrez le nom de profil / username.");
-  const found=await getDocs(query(collection(db,"publicProfiles"),where("username","==",username)));
-  const target=found.docs[0]||null;
-  const first=$("#contactFirstName")?.value.trim()||"",last=$("#contactLastName")?.value.trim()||"";
-  const phone=($("#contactCountryCode")?.value||"")+($("#contactPhone")?.value.trim()||"");
-  const displayName=(first+" "+last).trim()||target?.data()?.displayName||username;
-  const contactUid=target?.id||"";
-  const id=contactUid||("local_"+username.replace(/[^a-z0-9_-]/g,"_"));
-  await setDoc(doc(db,"users",user.uid,"contacts",id),{
-    contactUid,username,displayName,phone,
-    syncPhone:$("#contactSyncPhone")?.checked===true,
-    createdAt:serverTimestamp()
-  });
-  toast(window.WBP_T?.(target?"Contact enregistré.":"Contact enregistré localement; il pourra être contacté lorsqu’il rejoindra l’application.")||(target?"Contact enregistré.":"Contact enregistré localement; il pourra être contacté lorsqu’il rejoindra l’application."));
-  e.target.reset();showPage("contactPicker");
+  try{
+    const username=norm($("#contactProfileName")?.value);
+    if(!username)return toast(window.WBP_T?.("Entrez le nom de profil / username.")||"Entrez le nom de profil / username.");
+    const found=await getDocs(query(collection(db,"publicProfiles"),where("username","==",username)));
+    const target=found.docs[0]||null;
+    const first=$("#contactFirstName")?.value.trim()||"",last=$("#contactLastName")?.value.trim()||"";
+    const phone=($("#contactCountryCode")?.value||"")+($("#contactPhone")?.value.trim()||"");
+    const displayName=(first+" "+last).trim()||target?.data()?.displayName||username;
+    const contactUid=target?.id||"";
+    const id=contactUid||("local_"+username.replace(/[^a-z0-9_-]/g,"_"));
+    await setDoc(doc(db,"users",user.uid,"contacts",id),{
+      contactUid,username,displayName,phone,
+      syncPhone:$("#contactSyncPhone")?.checked===true,
+      createdAt:serverTimestamp()
+    },{merge:true});
+    window.WBP_ACTIVITY?.("contact_saved","contacts",{linked:!!contactUid});
+    toast(window.WBP_T?.(target?"Contact enregistré.":"Contact enregistré localement; il pourra être contacté lorsqu’il rejoindra l’application.")||(target?"Contact enregistré.":"Contact enregistré localement; il pourra être contacté lorsqu’il rejoindra l’application."));
+    e.target.reset();showPage("contactPicker");
+  }catch(err){
+    console.error(err);window.WBP_ACTIVITY?.("contact_save_failed","contacts",{code:err?.code||""});toast("Kontak la pa t sove.");
+  }
 });
 onAuthStateChanged(auth,async u=>{user=u;if(u){try{const s=await getDoc(doc(db,"users",u.uid));accountPhone=s.data()?.phone||u.phoneNumber||""}catch{accountPhone=u.phoneNumber||""}watchContacts()}else{off?.();contacts=[];accountPhone=""}});
 window.addEventListener("wbp-phone-updated",e=>{accountPhone=e.detail?.phone||accountPhone;render()});
