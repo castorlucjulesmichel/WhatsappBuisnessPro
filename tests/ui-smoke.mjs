@@ -67,6 +67,19 @@ if(await page.$eval("#contactPickerSearch",e=>e.classList.contains("hidden")))er
 await page.click("#contactPickerMenuBtn");
 if(!await page.$eval("#settingsPage",e=>e.classList.contains("active")))errors.push("contact picker menu did not route to settings");
 
+
+await page.goto("http://127.0.0.1:4173/admin.html",{waitUntil:"networkidle",timeout:90000});
+await page.evaluate(()=>{
+  document.querySelector("#adminGate")?.classList.add("hidden");
+  document.querySelector("#adminApp")?.classList.remove("hidden");
+});
+const adminTabs=await page.$eval("[data-admin]",els=>els.map(e=>e.dataset.admin));
+for(const name of adminTabs){
+  await page.click('[data-admin="'+name+'"]');
+  const active=await page.$eval("#"+name+"Admin",e=>e.classList.contains("active"));
+  if(!active)errors.push("admin tab did not activate: "+name);
+}
+
 await browser.close();
 
 const meaningful=errors.filter(x=>!x.includes("Failed to load resource")&&!x.includes("net::ERR"));
