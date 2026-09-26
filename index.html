@@ -150,7 +150,7 @@
 </section>
 
 <section id="contactPickerPage" class="page waSubPage">
- <div class="waSubHead"><button class="waBackBtn" data-go="chat" type="button">←</button><div><h2>Sélectionner un contact</h2><small id="contactCountLabel">0 contact</small></div><button id="contactPickerSearchBtn" class="waIconBtn" type="button">⌕</button><button class="waIconBtn" type="button">⋮</button></div>
+ <div class="waSubHead"><button class="waBackBtn" data-go="chat" type="button">←</button><div><h2>Sélectionner un contact</h2><small id="contactCountLabel">0 contact</small></div><button id="contactPickerSearchBtn" class="waIconBtn" type="button">⌕</button><button id="contactPickerMenuBtn" class="waIconBtn" type="button">⋮</button></div>
  <input id="contactPickerSearch" class="waSubSearch hidden" placeholder="Rechercher un contact...">
  <button class="waContactAction" id="pickerNewGroupBtn" type="button"><span class="waRoundIcon">👥＋</span><b>Nouveau groupe</b></button>
  <button class="waContactAction" id="pickerNewContactBtn" type="button"><span class="waRoundIcon">👤＋</span><b>Nouveau contact</b><span class="waQrMini">▦</span></button>
@@ -243,10 +243,10 @@
    <span class="settingsIcon">🏪</span>
    <span class="settingsText"><b>Profil Business</b><small>Adresses, horaires, site Web et réponses rapides</small></span><span class="chevron">›</span>
   </button>
-  <button class="settingsItem" id="socialAccountsBtn" type="button">
+  <div class="settingsItem settingsStaticRow">
    <span class="settingsIcon">🔗</span>
-   <span class="settingsText"><b>Facebook et Instagram</b><small>Associez vos comptes pour toucher une clientèle plus large</small></span><span class="chevron">›</span>
-  </button>
+   <span class="settingsText"><b>Facebook et Instagram</b><small>Connexion réelle disponible après configuration de l’API Meta</small></span><span class="status">API</span>
+  </div>
   <button class="settingsItem" data-go="profile">
    <span class="settingsIcon">👤</span>
    <span class="settingsText"><b>Compte et profil</b><small>Photo, username et informations publiques</small></span><span class="chevron">›</span>
