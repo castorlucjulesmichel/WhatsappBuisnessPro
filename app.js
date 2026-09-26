@@ -173,7 +173,7 @@ $$("[data-create-action]").forEach(b=>b.addEventListener("click",()=>{
 
 
 function fillCurrencies(){
-  ["#pCurrency","#walletCurrency","#exchangeFrom","#exchangeTo","#adCurrency","#levelCurrency"].forEach(sel=>{
+  ["#pCurrency","#walletCurrency","#exchangeFrom","#exchangeTo","#levelCurrency"].forEach(sel=>{
     const e=$(sel); if(!e)return;
     e.innerHTML=appSettings.currencies.map(c=>'<option>'+c+'</option>').join("");
   });
@@ -1103,8 +1103,6 @@ async function loadBusiness(){const [b,s]=await Promise.all([getDoc(doc(db,"busi
   if($("#facebookProfile"))$("#facebookProfile").value=x.facebook||"";
   if($("#businessEmailProfile"))$("#businessEmailProfile").value=x.email||"";
 }if(s.exists()){const x=s.data().businessTools||{};$("#greetingMessage").value=x.greetingMessage||"";$("#awayMessage").value=x.awayMessage||"";$("#quickReplies").value=x.quickReplies||""}}
-
-$("#adForm")?.addEventListener("submit",async e=>{e.preventDefault();await addDoc(collection(db,"adRequests"),{userId:S.user.uid,product:$("#adProduct")?.value||"",country:$("#adCountry")?.value||"",budget:Number($("#adBudget")?.value||0),currency:$("#adCurrency")?.value||"HTG",goal:$("#adGoal")?.value||"Sales",description:$("#adDescription")?.value||"",status:"pending",createdAt:serverTimestamp()});toast("Kanpay piblisite voye.")});
 
 async function reportCase(type,targetId,title){await addDoc(collection(db,"moderationCases"),{reporterId:S.user.uid,type,targetId,title,status:"open",createdAt:serverTimestamp()});toast("Rapò voye.")}
 
