@@ -44,7 +44,7 @@ async function syncPhoneDirectory(phone,oldPhone="",meta={}){
 }
 const safe=s=>String(s||"file").replace(/[^a-zA-Z0-9._-]/g,"_");
 const money=(n,c)=>Number(n||0).toLocaleString(undefined,{maximumFractionDigits:2})+" "+(c||"HTG");
-const S={user:null,profile:{},account:{},chatId:null,chatOtherUid:null,chatOtherName:"",chatPresenceOff:null,presenceTimer:null,chatRows:[],chatFilter:"all",products:[],clips:[],boosts:[],cart:[],unsubs:[]};
+const S={user:null,profile:{},account:{},chatId:null,chatOtherUid:null,chatOtherName:"",chatPresenceOff:null,presenceTimer:null,chatRows:[],chatFilter:"all",chatFallbackOffs:[],products:[],clips:[],boosts:[],cart:[],unsubs:[]};
 
 if(!configured()){
   $("#authScreen").classList.add("hidden");
@@ -117,7 +117,11 @@ function watchPeerPresence(uid){
   const timer=setInterval(render,10000);
   S.chatPresenceOff=()=>{try{unsub()}catch{}clearInterval(timer)};
 }
-function clearOffs(){S.unsubs.forEach(f=>{try{f()}catch{}});S.unsubs=[]}
+function clearChatFallback(){
+  S.chatFallbackOffs.forEach(f=>{try{f()}catch{}});
+  S.chatFallbackOffs=[];
+}
+function clearOffs(){S.unsubs.forEach(f=>{try{f()}catch{}});S.unsubs=[];clearChatFallback()}
 function go(name){
   document.body.classList.toggle("waMainTab",name==="chat"||name==="calls");
   $$(".page").forEach(x=>x.classList.remove("active"));
@@ -331,7 +335,7 @@ function renderProducts(){
   });
 }
 $("#marketSearch").oninput=renderProducts;$("#marketCategory").onchange=renderProducts;
-function watchProducts(){addOff(onSnapshot(collection(db,"products"),s=>{S.products=s.docs.map(d=>({id:d.id,...d.data()}));renderProducts()}))}
+function watchProducts(){addOff(onSnapshot(query(collection(db,"products"),limit(150)),s=>{S.products=s.docs.map(d=>({id:d.id,...d.data()}));renderProducts()}))}
 function watchBoosts(){addOff(onSnapshot(query(collection(db,"adCampaigns"),where("status","==","active")),s=>{S.boosts=s.docs.map(d=>({id:d.id,...d.data()}));renderProducts();renderClips()}))}
 
 function cartKey(){return "wbp_cart_"+S.user.uid}
@@ -368,7 +372,7 @@ function renderClips(){
   $$("[data-like]").forEach(b=>b.onclick=()=>setDoc(doc(db,"shortVideos",b.dataset.like,"likes",S.user.uid),{createdAt:serverTimestamp()}).then(()=>toast("Like anrejistre.")));
   $$("[data-reportclip]").forEach(b=>b.onclick=()=>reportCase("clip",b.dataset.reportclip,"Videyo rapòte"));
 }
-function watchClips(){addOff(onSnapshot(collection(db,"shortVideos"),s=>{S.clips=s.docs.map(d=>({id:d.id,...d.data()}));$("#mProducts");renderClips()}))}
+function watchClips(){addOff(onSnapshot(query(collection(db,"shortVideos"),limit(80)),s=>{S.clips=s.docs.map(d=>({id:d.id,...d.data()}));renderClips()}))}
 
 $("#newChatBtn")?.addEventListener("click",()=>{
   $("#newChatBox")?.classList.add("hidden");
@@ -408,6 +412,37 @@ function renderChatList(){
   }).join("")||'<div class="chatItem muted">'+(window.WBP_T?.("No chats for this filter.")||"No chats for this filter.")+'</div>';
   $$("[data-chat]").forEach(x=>x.onclick=()=>openChat(x.dataset.chat,x.dataset.name));
 }
+async function watchChatsFallback(){
+  clearChatFallback();
+  if(!S.user)return;
+  try{
+    const contactsSnap=await getDocs(collection(db,"users",S.user.uid,"contacts"));
+    const uids=[...new Set(contactsSnap.docs.map(d=>d.data()?.contactUid).filter(Boolean))];
+    if(!uids.length){S.chatRows=[];renderChatList();return}
+    S.chatRows=[];
+    const upsert=row=>{
+      const i=S.chatRows.findIndex(x=>x.id===row.id);
+      if(i>=0)S.chatRows[i]=row;else S.chatRows.push(row);
+      S.chatRows.sort((a,b)=>(b.updatedAt?.seconds||0)-(a.updatedAt?.seconds||0));
+      renderChatList();
+    };
+    const remove=id=>{
+      S.chatRows=S.chatRows.filter(x=>x.id!==id);
+      renderChatList();
+    };
+    uids.forEach(uid=>{
+      const id=[S.user.uid,uid].sort().join("__");
+      const off=onSnapshot(doc(db,"chats",id),snap=>{
+        if(snap.exists())upsert({id:snap.id,...snap.data()});else remove(id);
+      },err=>console.warn("direct chat fallback",id,err?.code||err));
+      S.chatFallbackOffs.push(off);
+    });
+  }catch(e){
+    console.error("chat fallback",e);
+    const box=$("#chatList");
+    if(box&&!S.chatRows.length)box.innerHTML='<div class="chatItem muted">Aucune discussion pour le moment.</div>';
+  }
+}
 async function refreshChatsOnce(){
   if(!S.user)return;
   const q=query(collection(db,"chats"),where("participants","array-contains",S.user.uid));
@@ -416,23 +451,23 @@ async function refreshChatsOnce(){
     S.chatRows=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.updatedAt?.seconds||0)-(a.updatedAt?.seconds||0));
     renderChatList();
   }catch(e){
-    console.error("refresh chats",e);
-    const box=$("#chatList");
-    if(box&&!S.chatRows.length)box.innerHTML='<div class="chatItem muted">Impossible de charger les discussions. '+esc(e?.code||"")+'</div>';
+    console.warn("refresh chats",e?.code||e);
+    if(e?.code==="permission-denied")await watchChatsFallback();
+    else if(!S.chatRows.length)renderChatList();
   }
 }
 function watchChats(){
+  clearChatFallback();
   const q=query(collection(db,"chats"),where("participants","array-contains",S.user.uid));
   refreshChatsOnce();
   addOff(onSnapshot(q,s=>{
+    clearChatFallback();
     S.chatRows=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.updatedAt?.seconds||0)-(a.updatedAt?.seconds||0));
     renderChatList();
   },e=>{
-    console.error("watch chats",e);
-    if(!S.chatRows.length){
-      const box=$("#chatList");
-      if(box)box.innerHTML='<div class="chatItem muted">Impossible de charger les discussions. '+esc(e?.code||"")+'</div>';
-    }
+    console.warn("watch chats",e?.code||e);
+    if(e?.code==="permission-denied")watchChatsFallback();
+    else if(!S.chatRows.length)renderChatList();
   }));
 }
 $("#chatSearch")?.addEventListener("input",renderChatList);
@@ -753,8 +788,14 @@ onAuthStateChanged(auth,async u=>{
   await loadProfile();
   try{await syncPhoneDirectory(S.account.phone||"",S.account.phone||"",{displayName:S.profile.displayName||S.user.displayName||"",username:S.profile.username||""})}
   catch(e){console.warn("phone directory login sync",e)}
-  loadCart();await loadBusiness();
-  watchProducts();watchBoosts();watchClips();watchChats();watchSupport();watchWallet();watchLevels();watchInvestments();watchOrders();
+  loadCart();
+  watchChats();
+  const startSecondary=async()=>{
+    try{await loadBusiness()}catch(e){console.warn("business preload",e?.code||e)}
+    watchProducts();watchBoosts();watchClips();watchSupport();watchWallet();watchLevels();watchInvestments();watchOrders();
+  };
+  if("requestIdleCallback" in window)requestIdleCallback(()=>startSecondary(),{timeout:1200});
+  else setTimeout(()=>startSecondary(),220);
 });
 
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(console.error));
