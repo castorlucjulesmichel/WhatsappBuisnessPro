@@ -249,11 +249,40 @@ async function loadProfile(){
   S.profile=s.exists()?s.data():{};
   S.account=a.exists()?a.data():{};
   $("#displayName").value=S.profile.displayName||"";$("#username").value=S.profile.username||"";$("#bio").value=S.profile.bio||"";$("#country").value=S.profile.country||"";$("#birthYear").value=S.profile.birthYear||"";$("#role").value=S.profile.role||"buyer";
-  $("#avatarPreview").src=S.profile.photoUrl||"";
+  $("#avatarPreview").src=S.profile.photoUrl||S.user.photoURL||"assets/logo.webp";
+  const publicName=S.profile.displayName||S.profile.username||S.user.displayName||"Mon profil";
+  if($("#profileHeroName"))$("#profileHeroName").textContent=publicName;
+  if($("#profileHeroUsername"))$("#profileHeroUsername").textContent=S.profile.username?("@"+S.profile.username):"@utilisateur";
+  if($("#profileHeroRole")){
+    const roles={buyer:"Acheteur",seller:"Vendeur",business:"Entreprise",investor:"Investisseur"};
+    $("#profileHeroRole").textContent=roles[S.profile.role]||"Compte";
+  }
   $("#headerUser").textContent=S.profile.displayName||S.profile.username||S.user.displayName||S.user.email||"User";
   if($("#mobilePhoneProfile"))$("#mobilePhoneProfile").value=S.account.phone||"";
   if($("#profilePhoneDisplay"))$("#profilePhoneDisplay").textContent=S.user.email||S.user.displayName||"Compte Google";
 }
+let profilePreviewUrl="";
+$("#avatarFile")?.addEventListener("change",e=>{
+  const f=e.target.files?.[0];
+  if(!f)return;
+  if(!f.type.startsWith("image/"))return toast("Chwazi yon foto.");
+  if(f.size>8*1024*1024){e.target.value="";return toast("Foto a twò gwo. Maksimòm 8 MB.");}
+  if(profilePreviewUrl)URL.revokeObjectURL(profilePreviewUrl);
+  profilePreviewUrl=URL.createObjectURL(f);
+  $("#avatarPreview").src=profilePreviewUrl;
+});
+$("#profileSettingsBtn")?.addEventListener("click",()=>go("settings"));
+$("#profileEditBtn")?.addEventListener("click",()=>$("#displayName")?.focus());
+$("#profileAssistantBtn")?.addEventListener("click",()=>$("#profileAssistantBox")?.classList.toggle("hidden"));
+$("#profileShareBtn")?.addEventListener("click",async()=>{
+  const url=location.origin+location.pathname;
+  const text=(S.profile.displayName||S.profile.username||"Profil")+" — Whatsapp Business Pro";
+  try{
+    if(navigator.share)await navigator.share({title:"Whatsapp Business Pro",text,url});
+    else{await navigator.clipboard.writeText(url);toast("Lyen profil la kopye.");}
+  }catch(e){if(e?.name!=="AbortError")toast("Pataj la pa disponib.");}
+});
+
 async function upload(file,path,max,typePrefix){
   if(!file)return "";
   if(file.size>max)throw new Error("Fichye a twò gwo.");
@@ -290,7 +319,9 @@ $("#profileForm").onsubmit=async e=>{e.preventDefault();try{
     active:true,
     updatedAt:serverTimestamp()
   },{merge:true});
-  await loadProfile();toast("Profil sove.");
+  await loadProfile();
+  if(profilePreviewUrl){URL.revokeObjectURL(profilePreviewUrl);profilePreviewUrl="";}
+  toast("Profil sove.");
 }catch(x){console.error(x);toast(x.message||"Profil pa t sove.");}};
 $("#shareLocation").onclick=()=>{if(!navigator.geolocation)return toast("Lokalizasyon pa disponib.");$("#locationStatus").textContent="Ap chèche...";navigator.geolocation.getCurrentPosition(async p=>{const loc={lat:p.coords.latitude,lng:p.coords.longitude,accuracy:p.coords.accuracy,sharedAt:serverTimestamp()};await setDoc(doc(db,"userSettings",S.user.uid),{location:loc},{merge:true});$("#locationStatus").textContent="Lokalizasyon pataje avèk presizyon "+Math.round(p.coords.accuracy)+" m.";toast("Lokalizasyon sove.")},()=>{$("#locationStatus").textContent="Pèmisyon lokalizasyon refize.";},{enableHighAccuracy:true,timeout:12000})};
 
