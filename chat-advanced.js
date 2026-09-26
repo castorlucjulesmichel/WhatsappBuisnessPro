@@ -64,6 +64,7 @@ $("#createGroupBtn")?.addEventListener("click",async()=>{
     });
     $("#groupName").value="";$("#groupMembers").value="";
     $("#newGroupBox").classList.add("hidden");
+    window.WBP_ACTIVITY?.("group_created","chat",{members:ids.length});
     toast("Gwoup kreye.");
   }catch(e){console.error(e);toast(e.message||"Gwoup la pa kreye.");}
 });
@@ -89,6 +90,7 @@ async function sendMedia(file){
       lastMessage:isImage?"📷 Foto":"📄 "+file.name.slice(0,60),
       updatedAt:serverTimestamp()
     });
+    window.WBP_ACTIVITY?.("chat_media_sent","chat",{type:isImage?"image":"document"});
     toast(isImage?"Foto voye.":"Dokiman voye.");
   }catch(e){console.error(e);toast("Fichye a pa t voye.");}
 }
@@ -112,6 +114,7 @@ async function uploadAudioFile(file){
       readBy:[user.uid],expiresAtMs:ephemeralExpiresAtMs(),createdAt:serverTimestamp()
     });
     await updateDoc(doc(db,"chats",currentChat),{lastMessage:"🎤 Mesaj vokal",updatedAt:serverTimestamp()});
+    window.WBP_ACTIVITY?.("voice_message_sent","chat",{source:"file"});
     toast("Mesaj vokal voye.");
   }catch(e){console.error(e);toast("Mesaj vokal la pa t voye.");}
 }
@@ -161,6 +164,7 @@ async function uploadVoice(){
       fileSize:blob.size,readBy:[user.uid],expiresAtMs:ephemeralExpiresAtMs(),createdAt:serverTimestamp()
     });
     await updateDoc(doc(db,"chats",currentChat),{lastMessage:"🎤 Mesaj vokal",updatedAt:serverTimestamp()});
+    window.WBP_ACTIVITY?.("voice_message_sent","chat",{source:"recorder",duration});
     toast("Mesaj vokal voye.");
   }catch(e){console.error(e);toast("Mesaj vokal la pa t voye.");}
 }
