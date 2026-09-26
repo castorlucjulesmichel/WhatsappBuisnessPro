@@ -577,6 +577,7 @@ function closeChatView(){
   document.documentElement.classList.remove("chatConversationOpen");
   $("#messageForm")?.classList.add("hidden");
   $("#chatMoreMenu")?.classList.add("hidden");
+  closeChatActionPanel();
   S.chatPresenceOff?.();S.chatPresenceOff=null;
   S.chatId=null;S.chatOtherUid=null;S.chatOtherName="";
   window.WBP_CURRENT_CHAT=null;
@@ -647,21 +648,37 @@ function chatPrefRef(){
   if(!S.user||!S.chatId)return null;
   return doc(db,"users",S.user.uid,"chatPrefs",S.chatId);
 }
+function chatPrefLocalKey(){
+  return S.user&&S.chatId?"wbp_chatprefs_"+S.user.uid+"_"+S.chatId:"";
+}
 async function loadChatPrefs(){
+  const key=chatPrefLocalKey();
+  let local={};
+  try{if(key)local=JSON.parse(localStorage.getItem(key)||"{}")}catch{}
+  S.chatPrefs=local;
   const r=chatPrefRef();
-  if(!r){S.chatPrefs={};return S.chatPrefs}
-  try{
-    const s=await getDoc(r);
-    S.chatPrefs=s.exists()?s.data():{};
-  }catch(e){console.warn("chat prefs",e?.code||e);S.chatPrefs={}}
+  if(r){
+    try{
+      const s=await getDoc(r);
+      if(s.exists()){
+        S.chatPrefs={...local,...s.data()};
+        if(key)localStorage.setItem(key,JSON.stringify(S.chatPrefs));
+      }
+    }catch(e){console.warn("chat prefs remote",e?.code||e)}
+  }
   applyChatTheme();
   return S.chatPrefs;
 }
 async function saveChatPrefs(patch){
-  const r=chatPrefRef();if(!r)return;
   S.chatPrefs={...S.chatPrefs,...patch};
-  await setDoc(r,{...patch,updatedAt:serverTimestamp()},{merge:true});
+  const key=chatPrefLocalKey();
+  if(key)localStorage.setItem(key,JSON.stringify(S.chatPrefs));
   applyChatTheme();
+  const r=chatPrefRef();
+  if(r){
+    try{await setDoc(r,{...patch,updatedAt:serverTimestamp()},{merge:true})}
+    catch(e){console.warn("chat prefs remote save",e?.code||e)}
+  }
 }
 function applyChatTheme(){
   const conv=$("#chatPage .conversation");
