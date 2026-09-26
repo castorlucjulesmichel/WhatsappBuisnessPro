@@ -16,7 +16,7 @@ if(configured()){
  function render(){
    if($("#buyerOrders")) $("#buyerOrders").innerHTML=buy.length?buy.map(o=>`<div class="orderCard"><b>${money(o.total,o.currency)}</b> • <span class="status ${esc(o.status||"pending")}">${esc(o.status||"pending")}</span><div class="orderItems">${esc(itemsText(o.items))}</div><small class="muted">Peman: ${esc(o.paymentStatus||"unpaid")}</small></div>`).join(""):'<p class="muted">Pa gen kòmand kòm achtè.</p>';
    if($("#sellerOrders")) $("#sellerOrders").innerHTML=sell.length?sell.map(o=>`<div class="orderCard"><b>${money(o.total,o.currency)}</b> • <span class="status ${esc(o.status||"pending")}">${esc(o.status||"pending")}</span><div class="orderItems">${esc(itemsText(o.items))}</div><div class="actions">${o.status==="approved"||o.status==="pending"?`<button data-order-status="${o.id}" data-next="processing">Ap prepare</button>`:""}${o.status==="processing"?`<button data-order-status="${o.id}" data-next="shipped">Voye</button>`:""}${o.status==="shipped"?`<button data-order-status="${o.id}" data-next="completed">Fini</button>`:""}</div></div>`).join(""):'<p class="muted">Pa gen vant ankò.</p>';
-   $("[data-order-status]").forEach(b=>b.onclick=async()=>{
+   $$("[data-order-status]").forEach(b=>b.onclick=async()=>{
      try{
        b.disabled=true;
        await updateDoc(doc(db,"orders",b.dataset.orderStatus),{status:b.dataset.next,updatedAt:serverTimestamp()});
