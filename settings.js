@@ -104,10 +104,14 @@ async function savePrefs(){
   localStorage.setItem("wbp_settings",JSON.stringify(prefs));
   applyVisualPrefs();
   if(!user||!db)return;
-  await setDoc(doc(db,"userSettings",user.uid),{
-    preferences:prefs,
-    updatedAt:serverTimestamp()
-  },{merge:true});
+  try{
+    await setDoc(doc(db,"userSettings",user.uid),{
+      preferences:prefs,
+      updatedAt:serverTimestamp()
+    },{merge:true});
+  }catch(e){
+    console.warn("settings remote save",e?.code||e);
+  }
 }
 function loadLocal(){
   try{prefs={...defaultPrefs,...JSON.parse(localStorage.getItem("wbp_settings")||"{}")}}catch{prefs={...defaultPrefs}}
@@ -222,9 +226,65 @@ $("#createListBtn")?.addEventListener("click",async()=>{
   if(!prefs.customerLists.includes(name))prefs.customerLists.push(name);
   input.value="";renderLists();await savePrefs();toast("Lis kreye.");
 });
-$("#openProfileFromSettings")?.addEventListener("click",()=>document.querySelector('[data-go="profile"]')?.click());
+$("#openProfileFromSettings")?.addEventListener("click",()=>window.WBP_ROUTE?.("profile"));
+$("#settingsPhoneBtn")?.addEventListener("click",()=>{
+  window.WBP_ROUTE?.("profile");
+  setTimeout(()=>document.querySelector("#mobilePhoneProfile")?.focus(),80);
+});
+$("#settingsAuthBtn")?.addEventListener("click",()=>window.WBP_ROUTE?.("profile"));
+$("#settingsGoogleAccountBtn")?.addEventListener("click",()=>window.open("https://myaccount.google.com/","_blank","noopener"));
+$("#settingsGoogleSecurityBtn")?.addEventListener("click",()=>window.open("https://myaccount.google.com/security","_blank","noopener"));
+$("#defaultChatThemeBtn")?.addEventListener("click",()=>{
+  document.querySelector("#themeSetting")?.focus();
+  toast("Chwazi Système, Clair oswa Sombre nan meni Thème.");
+});
+function playTone(freq=620,duration=0.16,repeat=1){
+  try{
+    const C=window.AudioContext||window.webkitAudioContext;if(!C)return false;
+    const ctx=new C(),start=ctx.currentTime;
+    for(let i=0;i<repeat;i++){
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.frequency.value=freq+(i*35);o.type="sine";
+      g.gain.setValueAtTime(0.0001,start+i*(duration+.08));
+      g.gain.exponentialRampToValueAtTime(0.08,start+i*(duration+.08)+.015);
+      g.gain.exponentialRampToValueAtTime(0.0001,start+i*(duration+.08)+duration);
+      o.connect(g);g.connect(ctx.destination);
+      o.start(start+i*(duration+.08));o.stop(start+i*(duration+.08)+duration+.02);
+    }
+    setTimeout(()=>ctx.close().catch(()=>{}),Math.ceil((duration+.08)*repeat*1000)+250);
+    return true;
+  }catch{return false}
+}
+$("#testNotifSoundBtn")?.addEventListener("click",()=>{if(!playTone(720,.12,1))toast("Son de test non disponible.");});
+$("#testRingtoneBtn")?.addEventListener("click",()=>{if(!playTone(520,.22,3))toast("Sonnerie de test non disponible.");});
+$("#testVibrationBtn")?.addEventListener("click",()=>{
+  if(navigator.vibrate){navigator.vibrate([120,70,120]);toast("Test vibration lancé.");}
+  else toast("Vibration non prise en charge sur ce navigateur.");
+});
+$("#exportAccountInfoBtn")?.addEventListener("click",async()=>{
+  if(!user)return toast("Konekte dabò.");
+  try{
+    const [u,p,b,s]=await Promise.all([
+      getDoc(doc(db,"users",user.uid)).catch(()=>null),
+      getDoc(doc(db,"publicProfiles",user.uid)).catch(()=>null),
+      getDoc(doc(db,"businesses",user.uid)).catch(()=>null),
+      getDoc(doc(db,"userSettings",user.uid)).catch(()=>null)
+    ]);
+    const data={
+      exportedAt:new Date().toISOString(),
+      auth:{uid:user.uid,email:user.email||"",displayName:user.displayName||""},
+      account:u?.exists?.()?u.data():{},
+      publicProfile:p?.exists?.()?p.data():{},
+      business:b?.exists?.()?b.data():{},
+      settings:s?.exists?.()?s.data():prefs
+    };
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+    const url=URL.createObjectURL(blob),a=document.createElement("a");
+    a.href=url;a.download="whatsapp-business-pro-account.json";document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);toast("Copie du compte téléchargée.");
+  }catch(e){console.error(e);toast("Export impossible.");}
+});
 $("#logoutFromSettings")?.addEventListener("click",()=>auth&&signOut(auth));
-$("#settingsSocialBtn")?.addEventListener("click",()=>toast("Facebook/Instagram ap aktive lè API Meta yo konekte."));
 $("#inviteContactBtn")?.addEventListener("click",async()=>{
   const url=location.origin+location.pathname;
   const data={title:"Whatssap Business Pro",text:"Vin jwenn mwen sou Whatssap Business Pro",url};
