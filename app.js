@@ -123,21 +123,12 @@ function clearChatFallback(){
 }
 function clearOffs(){S.unsubs.forEach(f=>{try{f()}catch{}});S.unsubs=[];clearChatFallback()}
 function go(name){
-  document.body.classList.toggle("waMainTab",name==="chat"||name==="calls");
-  $$(".page").forEach(x=>x.classList.remove("active"));
-  $$("nav button").forEach(x=>x.classList.remove("active"));
-  $("#"+name+"Page")?.classList.add("active");
-  const parent={
-    calls:"chat", contactPicker:"chat", newContact:"chat",
-    status:"clips",
-    orders:"create", stats:"create", business:"create", settings:"profile",
-    wallet:"create", invest:"create",
-    tools:"create"
-  }[name] || name;
-  document.querySelector('nav button[data-page="'+parent+'"]')?.classList.add("active");
+  if(typeof window.WBP_ROUTE==="function")return window.WBP_ROUTE(name);
+  const target=$("#"+name+"Page");if(!target)return false;
+  $(".page").forEach(x=>x.classList.remove("active"));
+  target.classList.add("active");
+  return true;
 }
-$$("nav button[data-page]").forEach(b=>b.onclick=()=>go(b.dataset.page));
-$$("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
 $$("[data-market-mode]").forEach(b=>b.addEventListener("click",()=>{
   const sell=$("#sellBox");
   if(!sell)return;
@@ -584,6 +575,7 @@ function closeChatView(){
   renderChatList();
   refreshChatsOnce();
 }
+window.WBP_CLOSE_CHAT=closeChatView;
 async function resolveChatPeer(id){
   let chat=S.chatRows.find(x=>x.id===id)||null;
   if(!chat){
