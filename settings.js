@@ -299,7 +299,6 @@ if(configured())onAuthStateChanged(auth,async u=>{
   user=u;
   if(!u)return;
   await loadRemote();
-  if($("#settingsPhone"))$("#settingsPhone").textContent=u.phoneNumber||"—";
   try{
     const p=await getDoc(doc(db,"publicProfiles",u.uid));
     if(p.exists()){
