@@ -227,11 +227,15 @@ async function prepareInviteCall(targetUid){
     const myName=meSnap.data()?.displayName||user.displayName||"User";
     const peerName=pSnap.data()?.displayName||pSnap.data()?.username||"Contact";
     const chatId=roomId(user.uid,targetUid);
-    await setDoc(doc(db,"chats",chatId),{
-      type:"direct",participants:[user.uid,targetUid].sort(),
-      participantNames:{[user.uid]:myName,[targetUid]:peerName},
-      lastMessage:"",updatedAt:serverTimestamp()
-    },{merge:true});
+    const chatRef=doc(db,"chats",chatId);
+    const existing=await getDoc(chatRef);
+    if(!existing.exists()){
+      await setDoc(chatRef,{
+        type:"direct",participants:[user.uid,targetUid].sort(),
+        participantNames:{[user.uid]:myName,[targetUid]:peerName},
+        lastMessage:"",updatedAt:serverTimestamp()
+      });
+    }
     watchChatSignals(chatId);
     if(confirm("Kòmanse yon apèl vokal ak "+peerName+" ?"))startOutgoing("voice",{chatId,uid:targetUid,name:peerName});
   }catch(e){console.error(e);toast("Lyen apèl la pa t ka louvri.");}
